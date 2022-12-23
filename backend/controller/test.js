@@ -1,0 +1,146 @@
+// 文章相关路由逻辑
+// const {Article, User} = require('../model')
+const MysqlMethods = require('../util/mysql')
+const moment = require('moment')
+const { DateSort, DateSortx, getTimeInfo } = require('../util/utils')
+let {redisDb,setValue,
+    getValue,
+    getHValue} = require('../util/redis');
+    // const ArtRedis =require("../util/getArticle")
+
+const { createClient } = require('redis');
+const db = require('../model/index')
+// const client = createClient();
+const User = require('../model/user.js');
+//获取用户关注的作者文章列表
+exports.test = async (req, res, next) => {
+    try {
+        //处理请求
+        //     const client = createClient({
+        //         port:6379,
+        //         host:'127.0.0.1',
+        //         password:'570818'
+        //     });
+        //     client.on('error', (err) => console.log('Redis Client Error', err));
+        //     await client.connect();
+        //     await client.set('name', '王浩33');
+        //     const value = await client.get('name');
+        //   console.log(value)
+        //   })();
+        let result =[]
+        // ---------------key----value存------------
+        // await redisDb.set('1', "student", {name:"小花",age:'36',study:{shuxue:'1122',yuwen:'666'}}).then((res)=>{
+        //     console.log(res)
+        //     result=res
+                
+        // });
+        // await redisDb.set('0', "student","嘿嘿").then(res=>{
+        //      result=res
+        // })
+        // ---------------------取
+        // await redisDb.get('0', "name").then((res)=>{
+        //     result = res;
+        // });
+        // let xx={
+        //     "id": 41,
+        //     "member_id": 3,
+        //     "title": "P789-5月火凤凰打赏系统/视频打赏/影视知识付费/全新升级版2.0版本/超级防封/服务器打包运营版",
+        //     "litpic": "/static/upload/2021/05/16/202105167324.png",
+        //     "description": "界面整洁，ui全新设计 一改以往底层概念，让运营者更安全、更稳定、更方便，带包天包月包年，代理，以及多种支付系统",
+        //     "keywords": "P789-5月火凤凰打赏系统/视频打赏/影视知识付费/全新升级版2.0版本/超级防封/服务器打包运营版",
+        //     "seo_title": "P789-5月火凤凰打赏系统/视频打赏/影视知识付费/全新升级版2.0版本/超级防封/服务器打包运营版",
+        //     "hits": 81,
+        //     "tid": 1,
+        //     "addtime": "2021-05-16"
+        //   }
+        // await redisDb.hSet('0', "allarts",41,JSON.stringify(xx)).then((res)=>{
+        //     result = res;
+        // });
+        // await redisDb.test('0', "artLists").then((res)=>{
+        //     console.log(res)
+        //     // for(let i in res){
+        //     //     result[i]=res[i]
+        //     // }
+        //     result=res
+                
+        // });
+        // await redisDb.rPush('0','k1','v1')
+        // await ArtRedis.isAllIdArts('0','allArtsList',0,1).then((res)=>{
+        //     result=res;
+        // })
+        // await ArtRedis.getArtsList('0','allarts',['53','5']).then((res)=>{
+        //     result=res;
+        // })
+        // ---------------------------
+        // let xx=[ '44', '42', '41' ]
+        // await redisDb.hMget('0','artLists',xx).then((res)=>{
+        //     result=res;
+        //     for(let i=0;i<result.length;i++){
+        //         console.log(result[i])
+        //         if(result[i]==null){
+        //             console.log(xx[i+2])
+        //         }
+        //     }
+        // })
+        // ------------------------
+        // await redisDb.hMset('0','members',{77:{"id":77},66:{"id":66}}).then((res)=>{
+        //     result=res;
+            
+        // })
+        // -----------------------
+        // await redisDb.exists('0','artLists').then((res)=>{
+        //         result=res;
+        //     })
+// -----------------------
+// await redisDb.llen('0', 'allIdArtsList').then(res => {//取出指定范围文章id列表
+//     result = res;
+// })
+// await redisDb.lRange('0', 'allIdArtsList', 0, 2).then(res => {//取出指定范围文章id列表
+//     result = res;
+// })
+// -------------------------
+// let xx=[ '233', '234' ]
+// await redisDb.hdel('0','artLists',xx).then((res)=>{
+//     result=res;
+// })
+// ---------------------
+let xx=[ '3','3'  ]
+// await redisDb.hexists('0','members',xx[0]).then((res)=>{
+//     result=res
+// })
+//  let resultv=await MysqlMethods.xx('INSERT INTO lz_member  (id,username) values (?,?)',['223','wang']).then(res=>{
+//     console.log(res);
+//     result =res
+// })
+// knex 查询
+let params={
+    fileld:"*",
+    options:{
+        "user_id":40
+    }
+}
+// {
+//     field:['id','username','sex','litpic','email','password'],
+//     options:{
+//         // id:'22',
+//         username:'wang'
+//     }
+// }
+// result=await User.select(params,{name:'user_regtime',order:'desc'})
+
+// const knex = require('../model/knex');
+// knex  新增
+// result= knex.select().from('lz_users')
+// knex.select().from("lz_users").where({user_id:"40"})
+const ppp=await User.insert({user_name:'ccc',user_pwd:'00000000'})
+console.log(ppp==null)
+// await MysqlMethods.select('*', 'lz_member', `where id ="22"`)
+// console.log(result)
+        res.status(200).json({
+            code:200,
+            status:result
+        })
+    } catch (err) {
+        next(err)
+    }
+}

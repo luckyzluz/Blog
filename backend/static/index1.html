@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>文件上传</title>
+    <script src="https://cdn.bootcss.com/axios/0.18.0/axios.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
+    <!-- https://cdnjs.cloudflare.com/ajax/libs/spark-md5/3.0.0/spark-md5.js -->
+    <script src="https://cdn.bootcdn.net/ajax/libs/spark-md5/3.0.0/spark-md5.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            font-size: 16px;
+            background: #f8f8f8;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6,
+        p {
+            margin: 0;
+        }
+
+        /* * {    outline: 1px solid pink;} */
+        .upload {
+            box-sizing: border-box;
+            margin: 30px auto;
+            padding: 15px 20px;
+            width: 500px;
+            height: auto;
+            border-radius: 15px;
+            background: #fff;
+        }
+
+        .upload h3 {
+            font-size: 20px;
+            line-height: 2;
+            text-align: center;
+        }
+
+        .upload .upload-file {
+            position: relative;
+            margin: 30px auto;
+        }
+
+        .upload .upload-file label {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 150px;
+            border: 1px dashed #ccc;
+        }
+
+        .upload .upload-file input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+        }
+
+        .upload-progress {
+            display: flex;
+            align-items: center;
+        }
+
+        .upload-progress p {
+            position: relative;
+            display: inline-block;
+            flex: 1;
+            height: 15px;
+            border-radius: 10px;
+            background: #ccc;
+            overflow: hidden;
+        }
+
+        .upload-progress p span {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(to right bottom, rgb(163, 76, 76), rgb(231, 73, 52));
+            transition: all .4s;
+        }
+
+        .upload-link {
+            margin: 30px auto;
+        }
+
+        .upload-link a {
+            text-decoration: none;
+            color: rgb(6, 102, 192);
+        }
+
+        @media all and (max-width: 768px) {
+            .upload {
+                width: 300px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- <h1>大文件上传测试</h1>
+    <div>
+        <h3>自定义上传文件</h3>
+        <input id="file" type="file" name="avatar" />
+        <div>
+            <input id="submitBtn" type="button" value="提交">
+        </div>
+    </div> -->
+    <div class="upload">
+        <h3>大文件上传</h3>
+        <form>
+            <!-- accept="application/*" -->
+            <div class="upload-file"> <label for="file">请选择文件</label> <input type="file" name="file" id="file"> </div>
+            <div class="upload-progress"> 当前进度： <p> <span style="width: 0;" id="big-current"></span> </p>
+            </div>
+            <div class="upload-link"> 文件地址：<a id="big-links" href="" target="_blank">文件链接</a> <input id="submitBtn"
+                    type="button" value="提交"></div>
+        </form>
+    </div>
+    <!-- <script type="text/javascript" src="../static/js/index.js"></script> -->
+</body>
+
+</html>
+<script>
+
+
+    const bigCurrent = document.querySelector("#big-current")
+    $(document).ready(() => {
+        const chunkSize = 2 * 1024 * 1024; // 每个chunk的大小，设置为2兆
+        // 使用Blob.slice方法来对文件进行分割。
+        // 同时该方法在不同的浏览器使用方式不同。
+        const blobSlice = File.prototype.slice || File.prototype.mozSlice || File.prototype.webkitSlice;
+        const hashFile = (file) => {
+            return new Promise((resolve, reject) => {
+                const chunks = Math.ceil(file.size / chunkSize);
+                let currentChunk = 0;
+                const spark = new SparkMD5.ArrayBuffer();
+                const fileReader = new FileReader();
+                function loadNext() {
+                    const start = currentChunk * chunkSize;
+                    const end = start + chunkSize >= file.size ? file.size : start + chunkSize;
+                    fileReader.readAsArrayBuffer(blobSlice.call(file, start, end));
+                }
+                fileReader.onload = e => {
+                    spark.append(e.target.result); // Append array buffer
+                    currentChunk += 1;
+                    if (currentChunk < chunks) {
+                        loadNext();
+                    } else {
+                        console.log('finished loading');
+                        const result = spark.end();
+                        // 如果单纯的使用result 作为hash值的时候, 如果文件内容相同，而名称不同的时候
+                        // 想保留两个文件无法保留。所以把文件名称加上。
+                        const sparkMd5 = new SparkMD5();
+                        sparkMd5.append(result);
+                        sparkMd5.append(file.name);
+                        const hexHash = sparkMd5.end();
+                        resolve(hexHash);
+                    }
+                };
+                fileReader.onerror = () => {
+                    console.warn('文件读取失败！');
+                };
+                loadNext();
+            }).catch(err => {
+                console.log(err);
+            });
+        }
+        const submitBtn = $('#submitBtn');
+        submitBtn.on('click', async () => {
+            const fileDom = $('#file')[0];
+            // 获取到的files为一个File对象数组，如果允许多选的时候，文件为多个
+            const files = fileDom.files;
+            const file = files[0];
+            if (!file) {
+                alert('没有获取文件');
+                return;
+            }
+            const blockCount = Math.ceil(file.size / chunkSize); // 分片总数
+            const axiosPromiseArray = []; // axiosPromise数组
+            const hash = await hashFile(file); //文件 hash 
+            // 获取文件hash之后，如果需要做断点续传，可以根据hash值去后台进行校验。
+            // 看看是否已经上传过该文件，并且是否已经传送完成以及已经上传的切片。
+            console.log(hash);
+            let i = 0
+            await axios.post('/api/upload/check_chunks', {hash:hash}).then(res=>{
+                console.log(res.data.filenum)
+                 i = res.data.filenum
+            })
+            for (i; i < blockCount; i++) {
+                const start = i * chunkSize;
+                const end = Math.min(file.size, start + chunkSize);
+                // 构建表单
+                const form = new FormData();
+                form.append('file', blobSlice.call(file, start, end));
+                form.append('name', file.name);
+                form.append('total', blockCount);
+                form.append('index', i);
+                form.append('size', file.size);
+                form.append('hash', hash);
+                // ajax提交 分片，此时 content-type 为 multipart/form-data
+                const axiosOptions = {
+                    onUploadProgress: e => {
+                        // 处理上传的进度
+                        console.log(blockCount, i, e, file);
+                    },
+                };
+                // 加入到 Promise 数组中/file/upload
+                // console.log('form',form)
+                axiosPromiseArray.push(axios.post('/api/upload/large', form, axiosOptions).then(res => {
+                    console.log(res.data.progress)
+                    bigCurrent.style.width = ((i + 1) * 100 / blockCount).toFixed(1) + '%'
+                }));
+            }
+            // ---------
+            // 所有分片上传后，请求合并分片文件
+            await axios.all(axiosPromiseArray).then(() => {
+                // 合并chunks
+                const data = {
+                    size: file.size,
+                    name: file.name,
+                    total: blockCount,
+                    hash
+                };
+                // /file/merge_chunks
+                axios.post('/api/upload/merge_chunks', data).then(res => {
+                    console.log('上传成功');
+                    console.log(res.data, file);
+                    // bigCurrent.style.width=res.data.progress
+                    // alert('上传成功');
+                }).catch(err => {
+                    console.log(err);
+                });
+            });
+        });
+    })
+</script>
