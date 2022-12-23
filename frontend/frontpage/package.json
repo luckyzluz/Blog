@@ -1,0 +1,30 @@
+{
+  "name": "zblog",
+  "version": "1.0.1",
+  "scripts": {
+    "dev": "vite --mode dev",
+    "test": "vite --mode test",
+    "pro": "vite --mode pro",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@element-plus/icons-vue": "^0.2.4",
+    "axios": "^0.24.0",
+    "element-plus": "^1.2.0-beta.6",
+    "vite": "^2.7.4",
+    "vue": "^3.2.25",
+    "vue-router": "^4.0.12",
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.0.0",
+    "sass": "^1.45.0",
+    "unplugin-auto-import": "^0.5.11",
+    "unplugin-vue-components": "^0.17.14"
+  },
+  "description": "博客",
+  "main": "index.js",
+  "author": "luckyzluz",
+  "license": "MIT"
+}

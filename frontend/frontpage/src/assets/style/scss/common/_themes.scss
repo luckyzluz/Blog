@@ -1,0 +1,49 @@
+$themes: (
+  light: (
+    main-bg-color:#fff,
+    main-color:#4e5358,
+    global-bg: #f3f8fb,//全局背景
+    font-color: #001737,//全局字体颜色
+    secondary-bg: #fff,
+    secondary-color:#828a92,
+    body-bg:#f5f6f7,
+    head-bg:#fff,
+    head-color:#4e5358,
+    nav-fix-bg:rgba(255,255,255,0.8),
+    nav-hover-color:#ff4e20,
+    img-brightness:100%,
+    blur-bg:rgba(255, 255, 255, 0.8),
+    muted-color:#777,
+    muted-2-color:#999,
+    muted-3-color:#b1b1b1,
+    input-shadow: 0 0 0 1000px #fff inset,
+    // a标签
+    // 右下角按钮配色#9266f9
+    fixed-btn-bg:rgba(200,200,200,.4),
+    fixed-btn-color:#999
+  ),
+  dark: (
+    main-bg-color:#323335,
+    main-color:#e5eef7,
+    global-bg: #292a2d,
+    font-color:#fff,
+    secondary-bg: #323335,
+    secondary-color:#a4a8b4,
+    body-bg:#292a2d,
+    head-bg:#16161a,
+    head-color:#e5eef7,
+    nav-fix-bg:rgba(18,18,18,0.8),
+    nav-hover-color:#ff4e20,
+    img-brightness:60%,
+    blur-bg:rgba(55, 56, 58, 0.8),
+    muted-color:#b4b6bb,
+    muted-2-color:#888a8f,
+    muted-3-color:#636469,
+    input-shadow: 0 0 0 1000px #323335 inset,
+    // a标签
+    // 右下角按钮配色#9266f9
+    fixed-btn-bg:rgba(70,70,70,.4),
+    fixed-btn-color:#888a8f
+  )
+);
+// main-border-color
