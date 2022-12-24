@@ -17,7 +17,7 @@ module.exports = async (req, res, next) =>{
     try{
         const decodedToken = await verify(token,jwtSecret)
         // req.user = await User.findById(decodedToken.zuserId)
-        req.user = await MysqlMethods.select('*','lz_member',`where id="${decodedToken.Id}"`)
+        req.user = await MysqlMethods.select('*','lz_users',`where id="${decodedToken.Id}"`)
         // delete req.user[0].zuser_id
         delete req.user[0].password
         next()

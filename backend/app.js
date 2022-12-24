@@ -9,30 +9,38 @@ const cors = require('cors')
 // 将 cors 注册为全局中间件
 app.use(cors())
 
-//导入日志输出模块(后续可统计异常请求数)
-const morgan = require('morgan')
-var fs = require('fs');
-var path = require('path');
-var logDirectory = path.join(__dirname, './log')
+
+const handleLog = require('./middleware/handleLog');
+// 记录Http请求日志
+app.use(handleLog);
+
+const handleError =require("./middleware/handleError")
+// 错误捕捉
+app.use(handleError)
+
+// const morgan = require('morgan')
+// var fs = require('fs');
+// var path = require('path');
+// var logDirectory = path.join(__dirname, './log')
 // 确保日志目录存在
-fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory)
-const {getTimeInfo}=require("./util/utils")
+// fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory)
+// const {getTimeInfo}=require("./util/utils")
 // 一天一个日志
 function logdaysplit(){
-  let time =
-  console.log(fs.existsSync(`./log/${getTimeInfo(Date.now()/1000)}.log`))
+  let time ;
+  // console.log(fs.existsSync(`./log/${getTimeInfo(Date.now()/1000)}.log`))
   if(fs.existsSync(`./log/${getTimeInfo(Date.now()/1000)}.log`)){
 console.log(1111);
   }
   return 111
   // getTimeInfo(Date.now()/1000)
 }
-logdaysplit()
-var accessLogStream = fs.createWriteStream(path.join(__dirname, `./log/${logdaysplit()}.log`), {flags: 'a'});
+// logdaysplit()
+// var accessLogStream = fs.createWriteStream(path.join(__dirname, `./log/${logdaysplit()}.log`), {flags: 'a'});
 
-morgan.format('joke', ':remote-addr - :method - :url - :status - :response-time ms - :res[content-length] - :date[iso] - :user-agent');
-app.use(morgan('dev'))
-app.use(morgan('joke', {stream: accessLogStream}))
+// morgan.format('joke', ':remote-addr - :method - :url - :status - :response-time ms - :res[content-length] - :date[iso] - :user-agent');
+// app.use(morgan('dev'))
+// app.use(morgan('joke', {stream: accessLogStream}))
 // 将日志写入数据库，带write方法的对象
 // var dbStream = {
 //   write: function(line){
