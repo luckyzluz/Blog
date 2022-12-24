@@ -90,36 +90,42 @@ exports.register = validate([
 
 exports.login = [
     validate([
-        body('user.username').notEmpty().withMessage('账户不能为空'),
+        // body('user.username').notEmpty().withMessage('账户不能为空'),
+        body('user.email').notEmpty().withMessage('邮箱不能为空'),
         body('user.password').notEmpty().withMessage('密码不能为空')
     ]),
     validate([
-        body('user.username').custom(async (username,{req}) => {
-            // 判断 是否存在该用户
-            let params={
-                // field:['id','username','sex','litpic','email','password'],
-                options:{
-                    // id:'22',
-                    user_name:username
-                }
+        body('user.email').custom(async (email,{req}) => {
+            let isGo =true; // 是否继续mysql查询
+            let emailResult = false; // 邮箱查询结果
+
+            if(redisConfig.isRedis){ // 是否开启了redis缓存
+            await redisDb.hGet(0,'Email.to.id',email).then(res=>{
+            res==null?isGo=true:isGo=false;
+            res==null?emailResult=false:emailResult=true;
+            })
+        }
+
+            if(isGo){
+                const isEmail = await Knex.select('user_id').where({user_email:email}).from("lz_users");
+                // await MysqlMethod.select('*','lz_users',`where user_email="${email}"`);
+                isEmail.length>0?emailResult=true:emailResult=false;
             }
-            // console.log(await User.select(params))
-            const user = await User.select(params)
+            if(!emailResult){
+                return Promise.reject('邮箱不存在')
+            }
+            const queryResult = await Knex.select().where({user_email:email}).from("lz_users");
+// console.log(queryResult)
             // await MysqlMethod.select('id,username,sex,litpic,email,password','lz_member',`where username="${username}"`)
             // const user = await User.findOne({email}).select(['email','username','bio','image','password'])
-            if(user.length<=0){
-                return Promise.reject('用户不存在')
-            }
             // //将数据挂载到请求对象中，保证后续中间件的使用
-            req.user = user
+            req.user = queryResult
         })
     ]),
     validate([
         body('user.password').custom(async (password,{req}) => {
-            // console.log(md5(password))
-            // console.log(req.user.password)
-            // console.log(req.user[0].zuser_pwd,md5(password))
-            if(md5(password) != req.user[0].password){
+            // console.log(req.user[0].user_pwd,md5(password))
+            if(md5(password) !== req.user[0].user_pwd){
                 return Promise.reject('密码错误')
             }
             

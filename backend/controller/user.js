@@ -9,7 +9,7 @@ const nodemail =require('../util/nodemailer');
 
 const {redisDb} = require('../util/redis');
 const { redisConfig } = require('../config/config.default');
-
+const logger =require("../util/logger")
 const User = require('../model/user.js');
 let isEmailcode=1;
 // ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}"
@@ -78,66 +78,34 @@ exports.register = async (req, res, next) => {
                 // })
             }
             // affectedRows
-            // console.log(Status)
-            if(Status==0){
+            // console.log(Status,CodeStatus)
+            if(Status==1&&CodeStatus==1){
                 res.status(200).json({
-                    codex:40000,
-                    message:"用户注册失败"
-                })
-            }else if(Status==1){
-                res.status(200).json({
-                    codex:20000,
+                    code:20000,
                     message:"用户注册成功"
                 })
-                
-            }else if(Status==2){
-                res.status(200).json({
-                    codex:40000,
+            }else if(CodeStatus==2 || Status==3){
+                res.send({
+                    code:40000,
+                    message:"请先发送验证码"
+                })
+            }else if(CodeStatus==0){
+                res.send({
+                    code:40000,
                     message:"验证码错误"
                 })
+            }else{
+                res.send({
+                    code:40000,
+                    message:"用户注册失败"
+                })
             }
-        // }
-        
-        // if(codeuuuu){ // 是否使用邮箱验证码
-        //     if(status==2&&statusCode==1){
-        //         res.send({
-        //             codex:200,
-        //             message:"用户注册成功"
-        //         })
-        //     }else if(statusCode==0){
-        //         res.send({
-        //             codex:200,
-        //             message:"验证码错误"
-        //         })
-        //     }else if(statusCode==2){
-        //         res.send({
-        //             codex:200,
-        //             message:"请先发送验证码"
-        //         })
-        //     }else{
-        //         res.send({
-        //             codex:200,
-        //             message:"用户注册失败"
-        //         })
-        //     }
-        // }else{
-        //     if(status==2){
-        //         res.send({
-        //             codex:200,
-        //             message:"用户注册成功"
-        //         })
-        //     }else{
-        //         console.log(status)
-        //         res.send({
-        //             codex:200,
-        //             message:"用户注册失败"
-        //         })
-        //     }
-        // }
         
         
     }catch (err){
-        next(err)
+        logger.error(err.message)
+        next(new Error(`账号注册失败`))
+        // next(err)
     }
 }
 
@@ -149,27 +117,29 @@ exports.login = async (req, res, next) => {
         // console.log(req)
         //2.生成token
         const token= await jwt.sign({
-            Id:user[0].id // userId
+            Id:user[0].user_id // userId
         },jwtSecret,{
             expiresIn: 60 * 60 * 24//设置jwt过期时间
         })
-        // delete user.password
-        delete user[0].password
-        // delete user[0].id
-        await redisDb.hSet(0,'members',user[0].id,JSON.stringify(user))
+        console.log(token)
+        delete user[0].user_pwd
+
+        // redis缓存用户信息
+        if(redisConfig.isRedis){
+            await redisDb.hSet(0,'UsersInfo',user[0].user_id,JSON.stringify(user[0]));
+        }
         user[0].refresh_token=token
         user[0].access_token=token
-        // //3.发送成功响应(包含token的用户信息)
+        // //3.发送成功响应(包含token的用户信息)UsersToken
         res.status(200).json({
             code:200,
             message:'用户登录成功',
             token:user[0]
-            // ,
-            // token
         })
-        // res.send('用户登录')
     }catch (err){
-        next(err)
+        logger.error(err.message)
+        next(new Error(`账号登录失败`))
+        // next(err)
     }
 }
 
@@ -177,7 +147,6 @@ exports.login = async (req, res, next) => {
 exports.getCurrentUser = async (req, res, next) => {
     try{
         //处理请求
-        // console.log(req.headers)
         res.status(200).json({
             user:req.user
         })

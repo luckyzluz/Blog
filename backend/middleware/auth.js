@@ -1,6 +1,7 @@
 const {verify} = require('../util/jwt')
 const {jwtSecret} = require('../config/config.default')
 const MysqlMethods = require('../util/mysql')
+const Knex = require('../model/knex');
 // const {User} = require('../model')
 
 module.exports = async (req, res, next) =>{
@@ -11,15 +12,18 @@ module.exports = async (req, res, next) =>{
     if(!token){
         return res.status(401).json({
             code:401,
-            msg:"请登录"
+            msg:"请登录账号"
         })
     }
     try{
         const decodedToken = await verify(token,jwtSecret)
         // req.user = await User.findById(decodedToken.zuserId)
-        req.user = await MysqlMethods.select('*','lz_users',`where id="${decodedToken.Id}"`)
+        console.log(decodedToken)
+        req.user = await Knex.select().where({user_id:decodedToken.Id}).from("lz_users");
+        // await MysqlMethods.select('*','lz_users',`where user_id="${decodedToken.Id}"`);
+        // console.log(req.user)
         // delete req.user[0].zuser_id
-        delete req.user[0].password
+        delete req.user[0].user_pwd
         next()
     }catch(err){
         return res.status(401).json({
