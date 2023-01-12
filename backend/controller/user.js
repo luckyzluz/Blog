@@ -114,31 +114,46 @@ exports.login = async (req, res, next) => {
     try{
         const user = req.user
         //1.数据验证,在数据检验中已经顺带判断
-        // console.log(req)
-        //2.生成token
-        const token= await jwt.sign({
-            Id:user[0].user_id // userId
+        // console.log(user)
+        // //2.生成token
+        const refresh_token= await jwt.sign({
+            Id:user.user_id, // userId
+            deviceAgent:req.headers["user-agent"],
+            Ip:req.ip
         },jwtSecret,{
-            expiresIn: 60 * 60 * 24//设置jwt过期时间
+            expiresIn: 60 * 60 * 24*30//设置jwt过期时间(一天 :60 * 60 * 24)
         })
-        console.log(token)
-        delete user[0].user_pwd
+        const access_token = await jwt.sign({
+            Id:user.user_id, // userId
+            deviceAgent:req.headers["user-agent"],
+            Ip:req.ip
+        },jwtSecret,{
+            expiresIn: 6//设置jwt过期时间(一天 :60 * 60 * 24)
+        })
+        // console.log("access_token1 "+access_token)
+    // console.log("refresh_token1 "+refresh_token)
+
+        // // delete user[0].user_pwd
 
         // redis缓存用户信息
-        if(redisConfig.isRedis){
-            await redisDb.hSet(0,'UsersInfo',user[0].user_id,JSON.stringify(user[0]));
-        }
-        user[0].refresh_token=token
-        user[0].access_token=token
+        // if(redisConfig.isRedis){
+        //     await redisDb.hSet(0,'UsersInfo',user.user_id,JSON.stringify(user));
+        // }
         // //3.发送成功响应(包含token的用户信息)UsersToken
-        res.status(200).json({
-            code:200,
-            message:'用户登录成功',
-            token:user[0]
-        })
+        // res.status(200).json({
+        //     code:200,
+        //     message:'用户登录成功',
+        //     refresh_token,
+        //     access_token
+        // })
+        llbbb()
     }catch (err){
-        logger.error(err.message)
-        next(new Error(`账号登录失败`))
+        // console.log(`\u001b`+`[`+`31merror\u001b`+`[`+`39m`)
+        logger.error({
+            ip:req.ip,
+            message:"Account login failed ("+err.message+")"
+        })
+        next(new Error(`账号登录失败 - `+err))
         // next(err)
     }
 }

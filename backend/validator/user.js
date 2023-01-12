@@ -95,39 +95,47 @@ exports.login = [
         body('user.password').notEmpty().withMessage('密码不能为空')
     ]),
     validate([
-        body('user.email').custom(async (email,{req}) => {
+        body('user.email').custom(async (email,{req,res}) => {
             let isGo =true; // 是否继续mysql查询
             let emailResult = false; // 邮箱查询结果
 
             if(redisConfig.isRedis){ // 是否开启了redis缓存
             await redisDb.hGet(0,'Email.to.id',email).then(res=>{
+                // res==null意味着redis缓存数据不存在
+                // console.log(res)
             res==null?isGo=true:isGo=false;
             res==null?emailResult=false:emailResult=true;
+            res==null?"":req.user ={user_id:res};
             })
+
         }
 
             if(isGo){
-                const isEmail = await Knex.select('user_id').where({user_email:email}).from("lz_users");
+                const isEmail = await Knex.select().where({user_email:email}).from("lz_users");
                 // await MysqlMethod.select('*','lz_users',`where user_email="${email}"`);
                 isEmail.length>0?emailResult=true:emailResult=false;
+                isEmail.length>0?req.user = isEmail:'';
+                // console.log(isEmail)
+                isEmail.length>0?req.user =isEmail[0]:"";
             }
             if(!emailResult){
                 return Promise.reject('邮箱不存在')
-            }
-            const queryResult = await Knex.select().where({user_email:email}).from("lz_users");
-// console.log(queryResult)
-            // await MysqlMethod.select('id,username,sex,litpic,email,password','lz_member',`where username="${username}"`)
-            // const user = await User.findOne({email}).select(['email','username','bio','image','password'])
-            // //将数据挂载到请求对象中，保证后续中间件的使用
-            req.user = queryResult
+            }  
         })
     ]),
     validate([
-        body('user.password').custom(async (password,{req}) => {
-            // console.log(req.user[0].user_pwd,md5(password))
-            if(md5(password) !== req.user[0].user_pwd){
-                return Promise.reject('密码错误')
+        body('user.password').custom(async (password,{req,res}) => {
+            let pwdMysql =""; // 是否继续mysql查询
+            if(req.user&&req.user.user_pwd){ //确保数据存在
+                pwdMysql=req.user.user_pwd;
+            }else{ //密码数据不存在
+                let queryPwd=await Knex.select('user_pwd').where({user_id:req.user.user_id}).from("lz_users");
+                pwdMysql=queryPwd[0].user_pwd;
             }
+            // console.log(pwdMysql,md5(password))
+            if(md5(password) !== pwdMysql){
+                return Promise.reject('密码错误')
+                }
             
         })
     ])

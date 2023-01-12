@@ -2,7 +2,8 @@
  * 默认配置
  */
 module.exports = {
-    port: 8082, // express 服务启动端口
+    PORT: 3000, // express 服务启动端口(默认3000)
+    ENV:"development", // development production test
     /* Mysql数据库相关配置 */
     dbMysqlConfig: {
       host: 'localhost', // 主机名 默认： localhost

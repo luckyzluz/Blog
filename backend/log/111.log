@@ -1,2 +1,0 @@
-127.0.0.1 - GET - /api/articles?limit=10&offset=1&sort=desc - 200 - 20.551 ms - 96125 - 2022-12-23T07:21:50.576Z - apifox/1.0.0 (https://www.apifox.cn)
-127.0.0.1 - GET - /api/articles?limit=10&offset=1&sort=desc - 200 - 18.895 ms - 96125 - 2022-12-24T05:28:51.916Z - apifox/1.0.0 (https://www.apifox.cn)

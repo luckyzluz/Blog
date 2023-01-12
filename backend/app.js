@@ -4,6 +4,9 @@ const express = require('express')
 const app =express()
 app.use(express.json())
 
+const { PORT, ENV } = require("./config/config.default");
+process.env.NODE_ENV = ENV;
+
 //导入 cors 中间件
 const cors = require('cors')
 // 将 cors 注册为全局中间件
@@ -18,23 +21,6 @@ const handleError =require("./middleware/handleError")
 // 错误捕捉
 app.use(handleError)
 
-// const morgan = require('morgan')
-// var fs = require('fs');
-// var path = require('path');
-// var logDirectory = path.join(__dirname, './log')
-// 确保日志目录存在
-// fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory)
-// const {getTimeInfo}=require("./util/utils")
-// 一天一个日志
-function logdaysplit(){
-  let time ;
-  // console.log(fs.existsSync(`./log/${getTimeInfo(Date.now()/1000)}.log`))
-  if(fs.existsSync(`./log/${getTimeInfo(Date.now()/1000)}.log`)){
-console.log(1111);
-  }
-  return 111
-  // getTimeInfo(Date.now()/1000)
-}
 // logdaysplit()
 // var accessLogStream = fs.createWriteStream(path.join(__dirname, `./log/${logdaysplit()}.log`), {flags: 'a'});
 
@@ -51,8 +37,7 @@ console.log(1111);
 // 将 dbStream 作为 stream 配置项的值
 // app.use(morgan('short', {stream: dbStream}));
 
-
-const PORT = process.env.PORT || 3000
+// const PORT = process.env.PORT || 3000
 
 // 配置解析表单数据的中间件，注意：这个中间件只能解析 application/x-www-form-urlencodeed 格式的表单数据
 app.use(express.urlencoded({ extended: false }))
@@ -78,6 +63,7 @@ app.get('/static/upload/*', function (req, res) {
   res.sendFile( __dirname + "/" + req.url );
   // console.log("Request for " + req.url + " received.");
 })
+
 // express静态html页面
 app.get("/large",(req,res)=>{
     res.sendFile(__dirname+"/static/"+"index1.html")        //设置/tow下访问文件位置

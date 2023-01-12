@@ -7,7 +7,7 @@ let {redisDb,setValue,
     getValue,
     getHValue} = require('../util/redis');
     // const ArtRedis =require("../util/getArticle")
-
+const fs =require('fs')
 const { createClient } = require('redis');
 const db = require('../model/index')
 // const client = createClient();
@@ -27,7 +27,7 @@ exports.test = async (req, res, next) => {
         //     const value = await client.get('name');
         //   console.log(value)
         //   })();
-        let result =[]
+        let result =[11]
         // ---------------key----value存------------
         // await redisDb.set('1', "student", {name:"小花",age:'36',study:{shuxue:'1122',yuwen:'666'}}).then((res)=>{
         //     console.log(res)
@@ -132,10 +132,24 @@ let params={
 // knex  新增
 // result= knex.select().from('lz_users')
 // knex.select().from("lz_users").where({user_id:"40"})
-const ppp=await User.insert({user_name:'ccc',user_pwd:'00000000'})
-console.log(ppp==null)
+// const ppp=await User.insert({user_name:'ccc',user_pwd:'00000000'})
+// console.log(ppp==null)
 // await MysqlMethods.select('*', 'lz_member', `where id ="22"`)
 // console.log(result)
+// result=req.headers["user-agent"]
+// fs.readFile('./logs/2023/01/2023-01-09.log.1.gz','utf8',function(err,dataStr){
+// 	// console.log(err);//打印失败的结果
+// 	console.log('-------222----');
+// 	console.log(dataStr);//打印成功的结果
+// })
+// const {aaaa} = require("../util/utiltest")
+// aaaa()
+// result=formatNowDate("yyyy")
+// const logger=require("../util/logger")
+// logger.clear();
+// console.log(process.env.NODE_ENV)
+// 删除文件夹、文件
+// fs.rmdirSync("./logs/2023/01", { recursive: true })
         res.status(200).json({
             code:200,
             status:result
