@@ -148,11 +148,7 @@ exports.login = async (req, res, next) => {
         // })
         llbbb()
     }catch (err){
-        // console.log(`\u001b`+`[`+`31merror\u001b`+`[`+`39m`)
-        logger.error({
-            ip:req.ip,
-            message:"Account login failed ("+err.message+")"
-        })
+        logger.reprocess_error("Account login failed ("+err.message+")",res,req)
         next(new Error(`账号登录失败 - `+err))
         // next(err)
     }

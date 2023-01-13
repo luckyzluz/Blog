@@ -22,20 +22,12 @@ const handleError =require("./middleware/handleError")
 app.use(handleError)
 
 // logdaysplit()
-// var accessLogStream = fs.createWriteStream(path.join(__dirname, `./log/${logdaysplit()}.log`), {flags: 'a'});
 
-// morgan.format('joke', ':remote-addr - :method - :url - :status - :response-time ms - :res[content-length] - :date[iso] - :user-agent');
-// app.use(morgan('dev'))
-// app.use(morgan('joke', {stream: accessLogStream}))
-// 将日志写入数据库，带write方法的对象
-// var dbStream = {
-//   write: function(line){
-//     saveToDatabase(line);  // 伪代码，保存到数据库
-//   }
-// };
+if(process.env.NODE_ENV == 'development'){
+  const morgan = require("morgan")
+  app.use(morgan('dev'))
+}
 
-// 将 dbStream 作为 stream 配置项的值
-// app.use(morgan('short', {stream: dbStream}));
 
 // const PORT = process.env.PORT || 3000
 

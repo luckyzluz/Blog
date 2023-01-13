@@ -12,6 +12,7 @@ const { createClient } = require('redis');
 const db = require('../model/index')
 // const client = createClient();
 const User = require('../model/user.js');
+const logger = require('../util/logger');
 //获取用户关注的作者文章列表
 exports.test = async (req, res, next) => {
     try {
@@ -150,6 +151,9 @@ let params={
 // console.log(process.env.NODE_ENV)
 // 删除文件夹、文件
 // fs.rmdirSync("./logs/2023/01", { recursive: true })
+// const logger = require("../util/logger")
+// logger.errorxx("xxxxxxxxx",res,req)
+console.log(res.statusCode)
         res.status(200).json({
             code:200,
             status:result
