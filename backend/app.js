@@ -12,24 +12,23 @@ const cors = require('cors')
 // 将 cors 注册为全局中间件
 app.use(cors())
 
+const { logConfig } = require('./config/config.log');
 
-const handleLog = require('./middleware/handleLog');
-// 记录Http请求日志
-app.use(handleLog);
+if(logConfig.isAllLog){ // 是否进行所有请求日志记录
+  const handleLog = require('./middleware/handleLog');
+  // 记录Http请求日志
+  app.use(handleLog);
+}
 
 const handleError =require("./middleware/handleError")
 // 错误捕捉
 app.use(handleError)
 
-// logdaysplit()
 
 if(process.env.NODE_ENV == 'development'){
   const morgan = require("morgan")
   app.use(morgan('dev'))
 }
-
-
-// const PORT = process.env.PORT || 3000
 
 // 配置解析表单数据的中间件，注意：这个中间件只能解析 application/x-www-form-urlencodeed 格式的表单数据
 app.use(express.urlencoded({ extended: false }))

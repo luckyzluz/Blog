@@ -153,7 +153,6 @@ let params={
 // fs.rmdirSync("./logs/2023/01", { recursive: true })
 // const logger = require("../util/logger")
 // logger.errorxx("xxxxxxxxx",res,req)
-console.log(res.statusCode)
         res.status(200).json({
             code:200,
             status:result

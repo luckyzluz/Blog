@@ -66,3 +66,5 @@
 {"level":"http","message":{"IP":"127.0.0.1","Method":"GET","Referrer":"","Response-Time":"3.776 ms","Status":200,"Url":"/api/test","User-Agent":"apifox/1.0.0 (https://www.apifox.cn)"},"timestamp":"2023-01-13 18:19:46"}
 {"level":"error","message":{"Msg":"Account login failed (llbbb is not defined)","Url":"/api/users/login"},"timestamp":"2023-01-13 18:19:56"}
 {"level":"http","message":{"IP":"127.0.0.1","Method":"POST","Referrer":"https://www.baidu.com","Response-Time":"20.025 ms","Status":500,"Url":"/api/users/login","User-Agent":"apifox/1.0.0 (https://www.apifox.cn)"},"timestamp":"2023-01-13 18:19:56"}
+{"level":"error","message":{"Msg":"Account login failed (llbbb is not defined)","Url":"/api/users/login"},"timestamp":"2023-01-13 18:23:31"}
+{"level":"http","message":{"IP":"127.0.0.1","Method":"POST","Referrer":"https://www.baidu.com","Response-Time":"28.631 ms","Status":500,"Url":"/api/users/login","User-Agent":"apifox/1.0.0 (https://www.apifox.cn)"},"timestamp":"2023-01-13 18:23:31"}
