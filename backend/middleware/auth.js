@@ -1,5 +1,5 @@
 const {verify} = require('../util/jwt')
-const {jwtSecret} = require('../config/config.default')
+const {jwtAccessSecret,jwtRefreshSecret} = require('../config/config.default')
 const MysqlMethods = require('../util/mysql')
 const Knex = require('../model/knex');
 // const {User} = require('../model')
@@ -14,21 +14,23 @@ module.exports = async (req, res, next) =>{
 
     let access_token = req.headers.access_token
     access_token = access_token ? access_token.split('Bearer ')[1] : null;
-    // console.log("access_token "+access_token)
-    // console.log("refresh_token "+refresh_token)
+    console.log("access_token "+access_token)
+    console.log("refresh_token "+refresh_token)
     // console.log(req.headers)
-    if(!refresh_token){
-        return res.status(401).json({
-            code:401,
-            msg:"请登录账号"
-        })
-    }
+    // if(!refresh_token){
+    //     return res.status(401).json({
+    //         code:401,
+    //         msg:"请登录账号"
+    //     })
+    // }
+    // 判断access_token是否过期
 
-
-
-    // const accessDecodedToken = await jwt.verify(access_token,jwtSecret,(err,decoded)=>{
+    // const accessDecodedToken = await jwt.verify(access_token,jwtAccessSecret).then((xx)=>{
+    //     console.log(xx)
+    // }).catch(err=>{
     //     console.log(err.name)
-    // });
+    // })
+
     // console.log(accessDecodedToken)
     // next()
     try{
@@ -37,8 +39,8 @@ module.exports = async (req, res, next) =>{
         // }).catch(err=>{
         //     console.log(err.name)
         //     next()
-        // })
-        // const refreshDecodedToken =await  verify(refresh_token,jwtSecret).then((xx)=>{
+        // })refresh_token
+        // const refreshDecodedToken =await  verify('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjkwIiwiZGV2aWNlQWdlbnQiOiJQb3N0bWFuUnVudGltZS83LjI5LjAiLCJJcCI6IjEyNy4wLjAuMSIsImlhdCI6MTY3Mzg0NDY4NywiZXhwIjoxNjc2NDM2Njg3fQ.wKpuqdblSQMJq1CQrbf9isACl0ExHi7DgKaunwmCma4',jwtRefreshSecret).then((xx)=>{
         //     console.log(xx)
         // }).catch(err=>{
         //     console.log(err.name)
@@ -67,3 +69,41 @@ module.exports = async (req, res, next) =>{
     //有效->把用户的信息读取出来挂载到 req 请求对象上，继续往后执行
 
 }
+
+
+/**
+ * 校验token是否过期
+ * */
+// function verson(req){
+//     var token=req.headers.token;
+//     let con = jwt.verify(token, 'x-token', (err, decoded) => {
+//         if (err) {
+//             console.log(err);
+//             if(err.name == 'TokenExpiredError'){//token过期
+//                 let str = {
+//                     iat:1,
+//                     exp:0,
+//                     msg: 'token过期'
+//                 }
+//                 return str;
+//             }else if(err.name == 'JsonWebTokenError'){//无效的token
+//                 let str = {
+//                     iat:1,
+//                     exp:0,
+//                     msg: '无效的token'
+//                 }
+//                 return str;
+//             }
+//         }else{
+//             return decoded;
+//         }
+//     })
+ 
+ 
+//     console.log(con);
+//     if(con.iat<con.exp){
+//         return true //开始时间小于结束时间，代表token还有效
+//     }else{
+//         return false
+//     }
+// }

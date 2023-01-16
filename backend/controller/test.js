@@ -153,6 +153,20 @@ let params={
 // fs.rmdirSync("./logs/2023/01", { recursive: true })
 // const logger = require("../util/logger")
 // logger.errorxx("xxxxxxxxx",res,req)
+const { jwtAccessSecret, jwtRefreshSecret } = require('../config/config.default');
+const {verify} = require('../util/jwt')
+const {generateReToken,existsReToken} = require('../util/generateRoken')
+// result= await generateReToken("xxx",req)
+
+// const refreshDecodedToken =await  verify(result,jwtRefreshSecret).then((xx)=>{
+//         console.log(xx)
+//     }).catch(err=>{
+//         console.log(err.name)
+//     })
+await existsReToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjkwIiwiZGV2aWNlQWdlbnQiOiJQb3N0bWFuUnVudGltZS83LjI5LjAiLCJJcCI6IjEyNy4wLjAuMSIsImlhdCI6MTY3Mzg0NDY4NywiZXhwIjoxNjc2NDM2Njg3fQ.wKpuqdblSQMJq1CQrbf9isACl0ExHi7DgKaunwmCma4').then(res=>{
+    result= res
+})
+
         res.status(200).json({
             code:200,
             status:result

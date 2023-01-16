@@ -14,8 +14,9 @@ module.exports = {
       timezone: "local",
       connectTimeout:30000,//初始连接的超时时间。单位是毫秒(默认:无超时限制)
       multipleStatements:true // 支持执行多条 sql 语句
-    },
-    jwtSecret:'9faea7c8-67aa-11ec-90d6-0242ac120003',
+    }, // 9faea7c8-67aa-11ec-90d6-0242ac120003
+    jwtAccessSecret:'FbfkO40bLH20Iko4YNPdLCdzlOUpFgfXtoObT2ey',
+    jwtRefreshSecret:'YC0l7GPEVpSVPCJfkEHjlVCndP4tp62xIkMBMbeX',
     yuqueConfig:{
       AccessToken:"x9VOFtj9D4VFNceGrD9nKKdSOCPurCWh9Nkurpjc",
       user:"luckyzluz",

@@ -23,7 +23,8 @@ const router = express.Router()
 //用户登录
 router.post('/users/login',userValidator.login,userCtrl.login)
 // 
-
+router.post('/users/refresh',userCtrl.refresh)
+// userValidator.retoken,
 //用户注册
 router.post('/users',userValidator.register,userCtrl.register)//3.通过验证，执行具体的控制器处理
 

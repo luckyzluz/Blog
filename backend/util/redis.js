@@ -1,3 +1,4 @@
+const { reject } = require('async');
 var { redis, createClient } = require('redis');
 var { redisConfig } = require('../config/config.default')
 let _user = redisConfig.database._user
@@ -241,14 +242,15 @@ redisDb.exists = async (dbNum,key)=>{
     })
 }
 // HEXISTS 
-redisDb.hexists = async (dbNum,hash_key,sub_key)=>{
-    return new Promise((resolve,reject)=>{
+redisDb.hexists = async (dbNum, hash_key, sub_key) => {
+    return new Promise((resolve, reject) => {
         client.select(dbNum)
         let res;
         res=client.HEXISTS(hash_key,sub_key);
         resolve(res);
     })
 }
+
 // 导出
 module.exports = {
     redisDb

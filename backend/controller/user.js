@@ -1,6 +1,6 @@
 // const {User} = require('../model')
 const jwt = require('../util/jwt');
-const { jwtSecret } = require('../config/config.default');
+const { jwtAccessSecret, jwtRefreshSecret } = require('../config/config.default');
 const MysqlMethods = require('../util/mysql');
 const md5 = require('../util/md5');
 const moment = require('moment');
@@ -103,7 +103,7 @@ exports.register = async (req, res, next) => {
         
         
     }catch (err){
-        logger.error(err.message)
+        logger.reprocess_error("Account registration failed ("+err.message+")",res,req)
         next(new Error(`账号注册失败`))
         // next(err)
     }
@@ -118,16 +118,16 @@ exports.login = async (req, res, next) => {
         // //2.生成token
         const refresh_token= await jwt.sign({
             Id:user.user_id, // userId
-            deviceAgent:req.headers["user-agent"],
+            UserAgent:req.headers["user-agent"],
             Ip:req.ip
-        },jwtSecret,{
+        },jwtRefreshSecret,{
             expiresIn: 60 * 60 * 24*30//设置jwt过期时间(一天 :60 * 60 * 24)
         })
         const access_token = await jwt.sign({
             Id:user.user_id, // userId
-            deviceAgent:req.headers["user-agent"],
+            UserAgent:req.headers["user-agent"],
             Ip:req.ip
-        },jwtSecret,{
+        },jwtAccessSecret,{
             expiresIn: 6//设置jwt过期时间(一天 :60 * 60 * 24)
         })
         // console.log("access_token1 "+access_token)
@@ -135,22 +135,40 @@ exports.login = async (req, res, next) => {
 
         // // delete user[0].user_pwd
 
-        // redis缓存用户信息
-        // if(redisConfig.isRedis){
-        //     await redisDb.hSet(0,'UsersInfo',user.user_id,JSON.stringify(user));
-        // }
+        // redis缓存用户信息JSON.stringify(user)
+        await redisDb.hSet(1,'UsersRefreshToken',refresh_token,user.user_id);
+
         // //3.发送成功响应(包含token的用户信息)UsersToken
-        // res.status(200).json({
-        //     code:200,
-        //     message:'用户登录成功',
-        //     refresh_token,
-        //     access_token
-        // })
-        llbbb()
+        res.status(200).json({
+            code:200,
+            message:'用户登录成功',
+            refresh_token,
+            access_token
+        })
     }catch (err){
         logger.reprocess_error("Account login failed ("+err.message+")",res,req)
         next(new Error(`账号登录失败 - `+err))
         // next(err)
+    }
+}
+
+exports.refresh = async (req, res, next) => {
+    try{
+        //处理请求
+        console.log(req.headers.refresh_token)
+        const access_token = await jwt.sign({
+            Id:req.user.user_id, // userId
+            UserAgent:req.headers["user-agent"],
+            Ip:req.ip
+        },jwtAccessSecret,{
+            expiresIn: 6//设置jwt过期时间(一天 :60 * 60 * 24)
+        })
+        res.status(200).json({
+            access_token:access_token,
+            refresh_token:''
+        })
+    }catch (err){
+        next(err)
     }
 }
 
