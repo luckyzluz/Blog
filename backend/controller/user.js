@@ -1,6 +1,6 @@
 // const {User} = require('../model')
-const jwt = require('../util/jwt');
-const { jwtAccessSecret, jwtRefreshSecret } = require('../config/config.default');
+// const jwt = require('../util/jwt');
+// const { jwtAccessSecret, jwtRefreshSecret } = require('../config/config.default');
 const MysqlMethods = require('../util/mysql');
 const md5 = require('../util/md5');
 const moment = require('moment');
@@ -15,7 +15,7 @@ let isEmailcode=1;
 // ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}"
 const {EmailVerifyConfig} = require('../config/config.default');
 // let isEmailVerify=false;// 是否启用邮箱验证码
-
+const {generateReToken, generateAcToken} = require('../util/generateRoken')
 
 /**
  * 用户注册
@@ -112,47 +112,66 @@ exports.register = async (req, res, next) => {
 //用户登录
 exports.login = async (req, res, next) => {
     try{
-        const user = req.user
-        //1.数据验证,在数据检验中已经顺带判断
-        // console.log(user)
-        // //2.生成token
-        const refresh_token= await jwt.sign({
-            Id:user.user_id, // userId
+        let status = 0; // 0失败 1成功 2服务器未知错误
+        let access_token;
+        let refresh_token;
+        // 在数据验证时已判断核对信息，这里直接继续往下
+        let SourceInfoJson = {
+            Uuid: req.user.user_id, 
+            UserType: 'General',
             UserAgent:req.headers["user-agent"],
-            Ip:req.ip
-        },jwtRefreshSecret,{
-            expiresIn: 60 * 60 * 24*30//设置jwt过期时间(一天 :60 * 60 * 24)
-        })
-        const access_token = await jwt.sign({
-            Id:user.user_id, // userId
-            UserAgent:req.headers["user-agent"],
-            Ip:req.ip
-        },jwtAccessSecret,{
-            expiresIn: 6//设置jwt过期时间(一天 :60 * 60 * 24)
-        })
+            Ip: req.ip
+        }
+
+        // 生成token
+        await generateReToken(SourceInfoJson).then(res=>{
+            refresh_token = res;
+            status = 1;
+        }).catch(err=>{
+            status = 2;
+        });
+        await generateAcToken(SourceInfoJson).then(res=>{
+            access_token = res;
+            status = 1;
+        }).catch(err=>{
+            status = 2;
+        });
         // console.log("access_token1 "+access_token)
-    // console.log("refresh_token1 "+refresh_token)
-
-        // // delete user[0].user_pwd
-
-        // redis缓存用户信息JSON.stringify(user)
-        await redisDb.hSet(1,'UsersRefreshToken',refresh_token,user.user_id);
-
-        // //3.发送成功响应(包含token的用户信息)UsersToken
-        res.status(200).json({
-            code:200,
-            message:'用户登录成功',
-            refresh_token,
-            access_token
-        })
+        // console.log("refresh_token1 "+refresh_token)
+        
+        // redis缓存用户信息(refresh_token)JSON.stringify()
+        await redisDb.hMset(1,refresh_token,SourceInfoJson,60*60*24*30).then(res=>{
+            if(res == 'OK' && status !== 2){
+                status = 1;
+            }else{
+                status = 0;
+            }
+            
+        });
+        // 发送响应(包含token的用户信息)UsersToken
+        if(status == 1){
+            res.status(200).json({
+                code: 20000,
+                success: true,
+                message: '用户登录成功',
+                refresh_token,
+                access_token
+            })
+        }else{
+            res.status(200).json({
+                code:40000,
+                success: false,
+                message:'用户登录失败'
+            })
+        }
     }catch (err){
         logger.reprocess_error("Account login failed ("+err.message+")",res,req)
         next(new Error(`账号登录失败 - `+err))
         // next(err)
     }
 }
-
-exports.refresh = async (req, res, next) => {
+// 刷新token
+exports.token = async (req, res, next) => {
     try{
         //处理请求
         console.log(req.headers.refresh_token)

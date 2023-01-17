@@ -163,6 +163,7 @@ const {generateReToken,existsReToken} = require('../util/generateRoken')
 //     }).catch(err=>{
 //         console.log(err.name)
 //     })
+// console.log(req.headers.authorization)
 await existsReToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjkwIiwiZGV2aWNlQWdlbnQiOiJQb3N0bWFuUnVudGltZS83LjI5LjAiLCJJcCI6IjEyNy4wLjAuMSIsImlhdCI6MTY3Mzg0NDY4NywiZXhwIjoxNjc2NDM2Njg3fQ.wKpuqdblSQMJq1CQrbf9isACl0ExHi7DgKaunwmCma4').then(res=>{
     result= res
 })

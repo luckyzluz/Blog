@@ -66,7 +66,7 @@ redisDb.hSet =async (dbNum,hash_key,sub_key,value,expire) => {
         let res;
         res=client.hSet(hash_key,sub_key,value);
         if(expire){
-            client.expire(hash_key,sub_key,expire);
+            client.expire(hash_key,expire);
         }
         resolve(res);
     })
@@ -116,7 +116,7 @@ redisDb.hGetAll = async (dbNum,key) => {
        resolve(res);
     })
 }
-redisDb.hMset=async(dbNum,hash_key,obj)=>{
+redisDb.hMset=async(dbNum,hash_key,obj,expire)=>{
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
         let emmm=[];
@@ -129,6 +129,9 @@ redisDb.hMset=async(dbNum,hash_key,obj)=>{
         // emmm.push.apply(emmm,cmd);
         // console.log(cmd)
         let res=client.sendCommand(emmm);
+        if(expire){
+            client.expire(hash_key,expire);
+        }
         resolve(res);
      })
 }

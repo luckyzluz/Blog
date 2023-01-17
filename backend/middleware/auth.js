@@ -7,15 +7,25 @@ const jwt = require('jsonwebtoken')
 const logger =require('../util/logger')
 
 module.exports = async (req, res, next) =>{
-    //从请求头获取  token 数据，验证是否有效req.headers['authorization']
-    
-    let refresh_token = req.headers.refresh_token
-    refresh_token = refresh_token ? refresh_token.split('Bearer ')[1] : null;
-
-    let access_token = req.headers.access_token
+    // 获取访问令牌(access_token)
+    let access_token = req.headers.authorization
     access_token = access_token ? access_token.split('Bearer ')[1] : null;
     console.log("access_token "+access_token)
-    console.log("refresh_token "+refresh_token)
+
+    // 判断访问令牌(access_token)是否过期
+    // const accessDecodedToken = await jwt.verify(access_token,jwtAccessSecret).then((xx)=>{
+    //     console.log(xx)
+    // }).catch(err=>{
+    //     console.log(err.name)
+    // })
+    //从请求头获取  token 数据，验证是否有效req.headers['authorization']
+    
+    // let refresh_token = req.headers.refresh_token
+    // refresh_token = refresh_token ? refresh_token.split('Bearer ')[1] : null;
+
+    
+    
+    // console.log("refresh_token "+refresh_token)
     // console.log(req.headers)
     // if(!refresh_token){
     //     return res.status(401).json({
@@ -25,11 +35,7 @@ module.exports = async (req, res, next) =>{
     // }
     // 判断access_token是否过期
 
-    // const accessDecodedToken = await jwt.verify(access_token,jwtAccessSecret).then((xx)=>{
-    //     console.log(xx)
-    // }).catch(err=>{
-    //     console.log(err.name)
-    // })
+    
 
     // console.log(accessDecodedToken)
     // next()

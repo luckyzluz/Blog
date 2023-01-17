@@ -5,28 +5,18 @@ const { jwtAccessSecret, jwtRefreshSecret } = require('../config/config.default'
 const {redisDb} = require('./redis')
 module.exports = {
     // 生成refresh_token
-    generateReToken: async(uuid,usertype,req) => {
+    generateReToken: async(info) => {
         return new Promise((resolve, reject) => {
-            const refresh_token= jwt.sign({
-                Uuid:uuid, 
-                UserType:usertype,
-                UserAgent:req.headers["user-agent"],
-                Ip:req.ip
-            },jwtRefreshSecret,{
+            const refresh_token= jwt.sign(info,jwtRefreshSecret,{
                 expiresIn: ReTokenExpiresIn
             })
             resolve(refresh_token);
         })
     },
     // 生成access_token
-    generateAcToken: async(uuid,usertype,req) => {
+    generateAcToken: async(info) => {
         return new Promise((resolve, reject) => {
-            const access_token = jwt.sign({
-                Uuid:uuid, // userId
-                UserType:usertype,
-                UserAgent:req.headers["user-agent"],
-                Ip:req.ip
-            },jwtAccessSecret,{
+            const access_token = jwt.sign(info,jwtAccessSecret,{
                 expiresIn: AcTokenExpiresIn
             })
             resolve(access_token);
