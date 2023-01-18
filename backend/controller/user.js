@@ -15,7 +15,7 @@ let isEmailcode=1;
 // ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}"
 const {EmailVerifyConfig} = require('../config/config.default');
 // let isEmailVerify=false;// 是否启用邮箱验证码
-const {generateReToken, generateAcToken} = require('../util/generateRoken')
+const {generateReToken, generateAcToken, existsReToken} = require('../util/generateRoken')
 
 /**
  * 用户注册
@@ -124,7 +124,7 @@ exports.login = async (req, res, next) => {
         }
 
         // 生成token
-        await generateReToken(SourceInfoJson).then(res=>{
+        await generateReToken(SourceInfoJson,200000000).then(res=>{
             refresh_token = res;
             status = 1;
         }).catch(err=>{
@@ -171,21 +171,76 @@ exports.login = async (req, res, next) => {
     }
 }
 // 刷新token
+const {verify} = require('../util/jwt')
+const {jwtAccessSecret,jwtRefreshSecret} = require('../config/config.default')
 exports.token = async (req, res, next) => {
     try{
         //处理请求
-        console.log(req.headers.refresh_token)
-        const access_token = await jwt.sign({
-            Id:req.user.user_id, // userId
-            UserAgent:req.headers["user-agent"],
-            Ip:req.ip
-        },jwtAccessSecret,{
-            expiresIn: 6//设置jwt过期时间(一天 :60 * 60 * 24)
-        })
-        res.status(200).json({
-            access_token:access_token,
-            refresh_token:''
-        })
+        let refreshStatus = 0; // refresh_token状态: 0失效  1有效
+        let status = 0; // 0失败 1成功 2服务器未知错误
+        let access_token;
+        let refresh_token;
+        await verify(req.body.refresh_token,jwtRefreshSecret).then((xx)=>{
+              // token未过期
+                // console.log(xx)
+                refreshStatus = 1;
+            }).catch(err=>{ // token 过期
+                console.log(err.name)
+                refreshStatus = 0;
+            })
+        refreshStatus == 1 ? await existsReToken(req.body.refresh_token).then(res => {
+                res ? refreshStatus = 1 : refreshStatus = 0;
+        }) : ''
+        console.log(req.user)
+        if(refreshStatus == 1){
+            let SourceInfoJson = {
+                Uuid: '333', 
+                UserType: 'General',
+                UserAgent:req.headers["user-agent"],
+                Ip: req.ip
+            }
+            await redisDb.del(1,req.body.refresh_token);
+            
+            // 生成token
+            await generateReToken(SourceInfoJson,200000000).then(res=>{
+                refresh_token = res;
+                status = 1;
+            }).catch(err=>{
+                status = 2;
+            });
+            await generateAcToken(SourceInfoJson).then(res=>{
+                access_token = res;
+                status = 1;
+            }).catch(err=>{
+                status = 2;
+            });
+            // redis缓存用户信息(refresh_token)JSON.stringify()
+        await redisDb.hMset(1,refresh_token,SourceInfoJson,60*60*24*30).then(res=>{
+            if(res == 'OK' && status !== 2){
+                status = 1;
+            }else{
+                status = 0;
+            }
+            
+        });
+        }
+        if(status == 1){
+            res.status(200).json({
+                code:20000,
+                success: true,
+                message:'token刷新成功',
+                access_token: access_token,
+                refresh_token: refresh_token
+            })
+        }else{
+            res.status(200).json({
+                code:40000,
+                success: false,
+                message:'token刷新失败，请重新登录!!!'
+            })
+        }
+
+        
     }catch (err){
         next(err)
     }

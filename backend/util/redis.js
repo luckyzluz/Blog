@@ -253,7 +253,14 @@ redisDb.hexists = async (dbNum, hash_key, sub_key) => {
         resolve(res);
     })
 }
-
+redisDb.del = async (dbNum, key) => {
+    return new Promise((resolve, reject) => {
+        client.select(dbNum)
+        let res;
+        res=client.DEL(key,);
+        resolve(res);
+    })
+}
 // 导出
 module.exports = {
     redisDb
