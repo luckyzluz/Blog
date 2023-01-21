@@ -31,7 +31,7 @@ class Base{
 
   // 更改
   update (id, params){
-    return knex(this.table).where('id', '=', id).update(params);
+    return knex(this.table).where('user_id', '=', id).update(params);
   }
 
   // 删除
