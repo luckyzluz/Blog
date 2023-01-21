@@ -253,11 +253,25 @@ redisDb.hexists = async (dbNum, hash_key, sub_key) => {
         resolve(res);
     })
 }
+/**
+ * 
+ * @param {*} dbNum 数据库db
+ * @param {*} key 字符串或者数组（多个）
+ * @returns 数组
+ */
 redisDb.del = async (dbNum, key) => {
     return new Promise((resolve, reject) => {
         client.select(dbNum)
         let res;
-        res=client.DEL(key,);
+        res=client.DEL(key);
+        resolve(res);
+    })
+}
+redisDb.keys = async (dbNum, key) => {
+    return new Promise((resolve, reject) => {
+        client.select(dbNum)
+        let res;
+        res=client.keys(key);
         resolve(res);
     })
 }
