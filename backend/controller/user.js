@@ -116,7 +116,7 @@ exports.login = async (req, res, next) => {
         let status = 0; // 0失败 1成功 2服务器未知错误
         let access_token;
         let refresh_token;
-        // 在数据验证时已判断核对信息，这里直接继续往下
+        // 在数据验证模块(validator)已核对信息，这里直接继续往下
         let SourceInfoJson = {
             Uuid: req.user.user_id, 
             UserType: 'General',
@@ -156,6 +156,7 @@ exports.login = async (req, res, next) => {
         });
         // 发送响应(包含token的用户信息)UsersToken
         if(status == 1){
+
             res.status(200).json({
                 code: 20000,
                 success: true,
@@ -210,13 +211,13 @@ exports.token = async (req, res, next) => {
             await redisDb.del(1,req.body.refresh_token);
             
             // 生成token
-            await generateReToken(SourceInfoJson,200000000).then(res=>{
+            await generateReToken(SourceInfoJson,60 * 60 * 24 * 7).then(res=>{
                 refresh_token = res;
                 status = 1;
             }).catch(err=>{
                 status = 2;
             });
-            await generateAcToken(SourceInfoJson).then(res=>{
+            await generateAcToken(SourceInfoJson,60 * 30).then(res=>{
                 access_token = res;
                 status = 1;
             }).catch(err=>{
@@ -263,9 +264,7 @@ exports.getCurrentUser = async (req, res, next) => {
         let userInfo = {};
         // console.log(req.user)
         redisDb.hGet(0,'UsersInfo',req.user.user_id).then(userInfos=>{
-            // console.log(userInfos)
-        }).catch(err => {
-            // console.log(err)
+            userInfos !== null ? userInfo = userInfos : '';
         })
 
         await User.select({fileld:"*",options:{"user_id":req.user.user_id}},{name:'user_regtime',order:'desc'}).then(res=>{
@@ -288,16 +287,27 @@ exports.updateCurrentUser = async (req, res, next) => {
         //处理请求
         // console.log(req.user[0].id)
         let msg="更新失败";
-        let results=await User.update(req.user[0].id,req.body.user)
-        if(results==1){
-            await redisDb.hdel(0,'members',req.user[0].id);
-            const user = await User.select({options:{id:req.user[0].id}})
-            await redisDb.hSet(0,'members',req.user[0].id,JSON.stringify(user))
-            msg='更新成功'
+        let user;
+        let results;
+        await User.update(req.user.user_id,req.body.user).then(updateResult => {
+            results = updateResult;
+        })
+        console.log(results);
+        if(results==1){ // 数据库更新数据成功
+            await redisDb.hdel(0,'UsersInfo',req.user.user_id);
+            await User.select({fileld:"*", options:{user_id:req.user.id}}).then(userInfos => {
+                // delete userInfos.user_pwd;
+                user = userInfos;
+            })
+            // 写入redis
+            await redisDb.hSet(0,'UsersInfo',req.user.id,JSON.stringify(user)).then(writeResult =>{
+                console.log(writeResult)
+                // msg='更新成功';
+            })
         }
         // res.send('updateCurrentUser')
         res.status(200).json({
-            code:200,
+            code:20000,
             msg
         })
     }catch (err){
