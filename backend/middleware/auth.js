@@ -23,7 +23,7 @@ module.exports = async (req, res, next) =>{
         //     req.user= xx;
         // })
         // console.log(accessDecodedToken)
-        req.user = accessDecodedToken;
+        req.user = await {'user_id': accessDecodedToken.Uuid};
         // .catch(err=>{
         //     console.log(err.name)
         // })

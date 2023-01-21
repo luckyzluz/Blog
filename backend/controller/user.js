@@ -1,6 +1,7 @@
 // const {User} = require('../model')
 // const jwt = require('../util/jwt');
-// const { jwtAccessSecret, jwtRefreshSecret } = require('../config/config.default');
+const {verify} = require('../util/jwt')
+const {jwtAccessSecret,jwtRefreshSecret} = require('../config/config.default')
 const MysqlMethods = require('../util/mysql');
 const md5 = require('../util/md5');
 const moment = require('moment');
@@ -109,7 +110,7 @@ exports.register = async (req, res, next) => {
     }
 }
 
-//用户登录(再次登录 如何删除已发放的token)
+//用户登录
 exports.login = async (req, res, next) => {
     try{
         let status = 0; // 0失败 1成功 2服务器未知错误
@@ -138,9 +139,14 @@ exports.login = async (req, res, next) => {
         });
         // console.log("access_token1 "+access_token)
         // console.log("refresh_token1 "+refresh_token)
-        
+
+        // 确保只发放一条有效 refresh_token
+        redisDb.keys(1,`${req.user.user_id}#*`).then(answerKeys=>{
+            // 判断是否存在有效 refresh_token
+            answerKeys.length !== 0 ? redisDb.del(1, answerKeys) : ''
+        })
         // redis缓存用户信息(refresh_token)JSON.stringify()
-        await redisDb.hMset(1,refresh_token,{...SourceInfoJson,access_token},60*60*24*30).then(res=>{
+        await redisDb.hMset(1,`${req.user.user_id}#${refresh_token}`,{...SourceInfoJson,access_token},60*60*24*30).then(res=>{
             if(res == 'OK' && status !== 2){
                 status = 1;
             }else{
@@ -172,8 +178,6 @@ exports.login = async (req, res, next) => {
 }
 
 // 刷新token
-const {verify} = require('../util/jwt')
-const {jwtAccessSecret,jwtRefreshSecret} = require('../config/config.default')
 exports.token = async (req, res, next) => {
     try{
         //处理请求
@@ -182,15 +186,16 @@ exports.token = async (req, res, next) => {
         let access_token;
         let refresh_token;
         let Uuid;
+
         await verify(req.body.refresh_token,jwtRefreshSecret).then((xx)=>{
               // token未过期
                 Uuid = xx.Uuid
                 refreshStatus = 1;
             }).catch(err=>{ // token 过期
-                console.log(err)
+                // console.log(err)
                 refreshStatus = 0;
             })
-        refreshStatus == 1 ? await existsReToken(req.body.refresh_token).then(res => {
+        refreshStatus == 1 ? await existsReToken(`${Uuid}#${req.body.refresh_token}`).then(res => {
                 res ? refreshStatus = 1 : refreshStatus = 0;
         }) : ''
 
@@ -255,8 +260,22 @@ exports.token = async (req, res, next) => {
 exports.getCurrentUser = async (req, res, next) => {
     try{
         //处理请求
+        let userInfo = {};
+        // console.log(req.user)
+        redisDb.hGet(0,'UsersInfo',req.user.user_id).then(userInfos=>{
+            // console.log(userInfos)
+        }).catch(err => {
+            // console.log(err)
+        })
+
+        await User.select({fileld:"*",options:{"user_id":req.user.user_id}},{name:'user_regtime',order:'desc'}).then(res=>{
+            res.length !== 0 ? userInfo = res[0] : '';
+        })
+        delete userInfo.user_pwd;
+        JSON.stringify(userInfo) !== "{}" ? redisDb.hSet(0,'UsersInfo',userInfo.user_id,JSON.stringify(userInfo)) : '';
+
         res.status(200).json({
-            user:req.user
+            ...userInfo
         })
     }catch (err){
         next(err)
