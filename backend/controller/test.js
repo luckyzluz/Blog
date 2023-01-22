@@ -172,11 +172,13 @@ const {generateReToken,existsReToken} = require('../util/generateRoken')
 //     redisDb.del(1, res)
 // })
 // console.log(req.user)
+
         res.status(200).json({
             code:200,
             status:result
         })
     } catch (err) {
-        next(err)
+        console.log(err.name)
+        next()
     }
 }
