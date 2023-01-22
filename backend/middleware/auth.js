@@ -6,6 +6,7 @@ const Knex = require('../model/knex');
 const jwt = require('jsonwebtoken')
 const logger =require('../util/logger');
 const { resolveContent } = require('nodemailer/lib/shared');
+const {redisDb} = require('../util/redis');
 
 module.exports = async (req, res, next) =>{
     try{
@@ -18,41 +19,97 @@ module.exports = async (req, res, next) =>{
         // console.log("access_token "+access_token)
 
         // 判断访问令牌(access_token)是否过期
-        const accessDecodedToken = await verify(access_token,jwtAccessSecret)
+        const accessDecodedToken = jwt.verify(access_token,jwtAccessSecret)
         // .then((xx)=>{
         //     req.user= xx;
         // })
         // console.log(accessDecodedToken)
-        req.user = await {'user_id': accessDecodedToken.Uuid};
+        req.user = {'user_id': accessDecodedToken.Uuid};
         // .catch(err=>{
         //     console.log(err.name)
         // })
+        // 这里再做判断，当更新密码（或者刷新token后）后，及时作废access_token
+        if(accessDecodedToken.Uuid !== undefined){ // access_token未过期
+            let tokenKey; // refresh_token在redis中的key值
+            let accessTokenValid; // redis有效accessToken
 
-        // refresh_token
-        // req.user = await User.findById(decodedToken.zuserId)
-        
-    //     // req.user = await Knex.select().where({user_id:decodedToken.Id}).from("lz_users");
-    //     // await MysqlMethods.select('*','lz_users',`where user_id="${decodedToken.Id}"`);
-    //     // console.log(req.user)
-    //     // delete req.user[0].zuser_id
-    //     // delete req.user[0].user_pwd
-    // logger.clear()
+            await redisDb.keys(1,`${accessDecodedToken.Uuid}#*`).then(answerKeys=>{
+                // 判断是否存在有效 refresh_token
+                answerKeys.length !== 0 ? tokenKey = answerKeys[0] : '';
+
+            })   
+
+            if(tokenKey !== undefined){ // 确定refresh_tokenKey存在
+                // 查询redis中有效access_token
+                await redisDb.hGet(1, tokenKey,'access_token').then(res => {
+                    accessTokenValid = res;
+                })
+            }
+
+            // 判断 有效期内的access_token和refresh_token发放的是否相同
+            if(accessTokenValid !== `"${access_token}"`){ // 不一致（已作废）
+                // 抛出错误TokenVoidedError
+                // throw new Error('TokenVoidedError');
+                throw {name:"TokenVoidedError",message:"accessToken has been voided"};
+            }
+        }
         next()
     }catch(err){
         // console.log("err"+err)
-        if(err.name == 'TokenExpiredError'){//token过期
-            return res.status(401).json({
-                code:40001,
-                success: false,
-                message:"token已失效"
-            })
-        }else if(err.name == 'JsonWebTokenError'){//无效的token
-            return res.status(401).json({
-                code:40001,
-                success: false,
-                message:"无效token"
-            })
-        }
+        
+        switch (err.name) {
+            case 'TokenExpiredError': // token过期
+            // logger.reprocess_error("Current user password update failed ("+err.message+")",res,req);
+                return res.status(401).json({
+                    code:40001,
+                    success: false,
+                    message:"token已失效"
+                })
+            case 'JsonWebTokenError': // 无效的token
+                return res.status(401).json({
+                    code:40001,
+                    success: false,
+                    message:"无效token"
+                })
+            case 'TokenVoidedError': // token已作废
+                return res.status(401).json({
+                    code:40001,
+                    success: false,
+                    message:"token已作废"
+                })
+            default: // 未知错误
+                logger.reprocess_error("Unknown error.Token validation failed ("+err.message+")",res,req);
+                return res.status(401).json({
+                    code:40001,
+                    success: false,
+                    message:"未知错误，token身份验证失败"
+                })
+        } 
+        // if(err.name == 'TokenExpiredError'){ // token过期
+        //     return res.status(401).json({
+        //         code:40001,
+        //         success: false,
+        //         message:"token已失效"
+        //     })
+        // }else if(err.name == 'JsonWebTokenError'){ // 无效的token
+        //     return res.status(401).json({
+        //         code:40001,
+        //         success: false,
+        //         message:"无效token"
+        //     })
+        // }else if(err.name == 'TokenVoidedError'){ // token已作废
+        //     return res.status(401).json({
+        //         code:40001,
+        //         success: false,
+        //         message:"token已作废"
+        //     })
+        // }else{ // 未知错误
+        //     return res.status(401).json({
+        //         code:40001,
+        //         success: false,
+        //         message:"未知错误，token身份验证失败"
+        //     })
+        // }
         
     }
     //无效->响应401状态码

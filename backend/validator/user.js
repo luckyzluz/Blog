@@ -10,6 +10,7 @@ const {redisDb} = require('../util/redis');
 const { redisConfig } = require('../config/config.default')
 const md5 = require('../util/md5')
 
+// 用户注册前参数验证
 exports.register = validate([
     body('user.username')
     .notEmpty().withMessage('用户名不能为空')
@@ -88,6 +89,7 @@ exports.register = validate([
     })
 ])
 
+// 用户登录前参数验证
 exports.login = [
     validate([
         // body('user.username').notEmpty().withMessage('账户不能为空'),
@@ -140,3 +142,26 @@ exports.login = [
         })
     ])
 ]
+
+// 用户更新前参数验证
+exports.put = validate([
+    // body('user.username')
+    // .notEmpty().withMessage('用户名不能为空')
+    // .bail()
+    // .custom(async username => {
+    //         // return Promise.reject('用户名已存在')
+    // }),
+])
+
+// 用户更新密码参数验证
+exports.cipher = validate([
+    body('password')
+    .notEmpty().withMessage('密码不能为空')
+    .bail()
+    .custom(async password => {
+            // return Promise.reject('用户名已存在')
+            if(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^\w\s]).{8,}$/.test(password)==false){
+                return Promise.reject('密码格式错误，请重新编辑')
+            }
+    }),
+])
