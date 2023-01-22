@@ -33,11 +33,11 @@ router.post('/users',userValidator.register,userCtrl.register)//3.通过验证�
 router.get('/user',auth,userCtrl.getCurrentUser)
 
 
-//更新当前登录用户
+//更新当前登录用户userValidator.put
 router.put('/user',auth,userCtrl.updateCurrentUser)
 
-//更新当前登录用户密码
-router.post('/cipher',auth,userCtrl.updatepasswordUser)
+//更新当前登录用户密码 
+router.post('/cipher',auth,userValidator.cipher,userCtrl.updatepasswordUser)
 
 module.exports = router
 

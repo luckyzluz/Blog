@@ -60,7 +60,7 @@ exports.register = async (req, res, next) => {
             // redis缓存(这里只要mysql写入成功即可，redis失败无所谓(读时redis不存在则取mysql，进行缓存))
             if(redisConfig.isRedis && results.length>0&&CodeStatus==1){ // mysql插入成功,且缓存开启
                 // 查询新增用户id
-                user =await User.select({fileld:"*",options:{"user_id":results[0]}},{name:'user_regtime',order:'desc'})
+                user =await User.select({field:"*",options:{"user_id":results[0]}},{name:'user_regtime',order:'desc'})
                 delete user[0].user_pwd;
 
                 // 开始redis写入
@@ -83,21 +83,25 @@ exports.register = async (req, res, next) => {
             if(Status==1&&CodeStatus==1){
                 res.status(200).json({
                     code:20000,
+                    success: true,
                     message:"用户注册成功"
                 })
             }else if(CodeStatus==2 || Status==3){
                 res.send({
                     code:40000,
+                    success: false,
                     message:"请先发送验证码"
                 })
             }else if(CodeStatus==0){
                 res.send({
                     code:40000,
+                    success: false,
                     message:"验证码错误"
                 })
             }else{
                 res.send({
                     code:40000,
+                    success: false,
                     message:"用户注册失败"
                 })
             }
@@ -193,7 +197,7 @@ exports.token = async (req, res, next) => {
                 Uuid = xx.Uuid
                 refreshStatus = 1;
             }).catch(err=>{ // token 过期
-                // console.log(err)
+                console.log(err)
                 refreshStatus = 0;
             })
         refreshStatus == 1 ? await existsReToken(`${Uuid}#${req.body.refresh_token}`).then(res => {
@@ -208,10 +212,14 @@ exports.token = async (req, res, next) => {
                 Ip: req.ip
             }
             // 删除旧refresh_token  （有效）
-            await redisDb.del(1,req.body.refresh_token);
-            
+            // await redisDb.del(1,`${Uuid}#${req.body.refresh_token}`);
+            // 确保只发放一条有效 refresh_token
+            redisDb.keys(1,`${Uuid}#*`).then(answerKeys=>{
+                // 判断是否存在有效 refresh_token
+                answerKeys.length !== 0 ? redisDb.del(1, answerKeys) : ''
+            })
             // 生成token
-            await generateReToken(SourceInfoJson,60 * 60 * 24 * 7).then(res=>{
+            await generateReToken(SourceInfoJson, 60 * 60 * 24 * 7).then(res=>{
                 refresh_token = res;
                 status = 1;
             }).catch(err=>{
@@ -224,13 +232,12 @@ exports.token = async (req, res, next) => {
                 status = 2;
             });
             // redis缓存用户信息(refresh_token)JSON.stringify()
-            await redisDb.hMset(1,refresh_token,{...SourceInfoJson,access_token},60*60*24*30).then(res=>{
+            await redisDb.hMset(1,`${Uuid}#${refresh_token}`,{...SourceInfoJson,access_token},60*60*24*30).then(res=>{
                 if(res == 'OK' && status !== 2){
                     status = 1;
                 }else{
                     status = 0;
                 }
-                
             });
         }
         if(status == 1){
@@ -263,21 +270,40 @@ exports.getCurrentUser = async (req, res, next) => {
         //处理请求
         let userInfo = {};
         // console.log(req.user)
-        redisDb.hGet(0,'UsersInfo',req.user.user_id).then(userInfos=>{
-            userInfos !== null ? userInfo = userInfos : '';
+
+        // 查询redis
+        await redisDb.hGet(0,'UsersInfo',req.user.user_id).then(userInfos=>{
+            userInfos !== null ? userInfo = JSON.parse(userInfos) : '';
         })
 
-        await User.select({fileld:"*",options:{"user_id":req.user.user_id}},{name:'user_regtime',order:'desc'}).then(res=>{
+        // redis数据不存在
+        JSON.stringify(userInfo) == "{}" ? await User.select({field:"*",options:{"user_id":req.user.user_id}}).then(res=>{
             res.length !== 0 ? userInfo = res[0] : '';
-        })
+        }) : '';
         delete userInfo.user_pwd;
-        JSON.stringify(userInfo) !== "{}" ? redisDb.hSet(0,'UsersInfo',userInfo.user_id,JSON.stringify(userInfo)) : '';
 
-        res.status(200).json({
-            ...userInfo
-        })
+        // mysql查询数据成功
+        JSON.stringify(userInfo) !== "{}" ?  redisDb.hSet(0,'UsersInfo',userInfo.user_id,JSON.stringify(userInfo)) : '';
+
+        // 判断用户信息是否获取成功
+        if(JSON.stringify(userInfo) !== "{}"){ // 用户信息获取成功
+            res.status(200).json({
+                code: 20000,
+                success: true,
+                message: '查询成功',
+                data: { ...userInfo }
+            })
+        }else{
+            res.status(200).json({
+                code: 41000,
+                success: false,
+                message: '查询失败'
+            })
+        } 
     }catch (err){
-        next(err)
+        logger.reprocess_error("Failed to get the current user information ("+err.message+")",res,req);
+        next(new Error(`获取当前用户信息失败 - `+err));
+        // next(err)
     }
 }
 
@@ -286,46 +312,77 @@ exports.updateCurrentUser = async (req, res, next) => {
     try{
         //处理请求
         // console.log(req.user[0].id)
-        let msg="更新失败";
+        let message="更新失败";
         let user;
-        let results;
+        let results; //mysql数据库更新状态 0 不成功 1成功
         await User.update(req.user.user_id,req.body.user).then(updateResult => {
             results = updateResult;
         })
-        console.log(results);
+
         if(results==1){ // 数据库更新数据成功
             await redisDb.hdel(0,'UsersInfo',req.user.user_id);
-            await User.select({fileld:"*", options:{user_id:req.user.id}}).then(userInfos => {
-                // delete userInfos.user_pwd;
-                user = userInfos;
+            await User.select({'field':"*", options:{user_id:90}}).then(userInfos => {                
+                user = userInfos[0];
             })
+            delete user.user_pwd;
             // 写入redis
-            await redisDb.hSet(0,'UsersInfo',req.user.id,JSON.stringify(user)).then(writeResult =>{
-                console.log(writeResult)
-                // msg='更新成功';
+            await redisDb.hSet(0,'UsersInfo', req.user.user_id, JSON.stringify(user)).then(writeResult =>{
+                writeResult==1? message='更新成功' : '';
             })
         }
         // res.send('updateCurrentUser')
-        res.status(200).json({
-            code:20000,
-            msg
-        })
+        if(message == '更新成功'){
+            res.status(200).json({
+                code: 20000,
+                success: true,
+                message,
+                data: user
+            })
+        }else{
+            res.status(200).json({
+                code: 50000,
+                success: false,
+                message
+            })
+        }
     }catch (err){
-        next(err)
+        logger.reprocess_error("Current user information update failed ("+err.message+")",res,req);
+        next(new Error(`当前用户信息更新失败 - `+err));
+        // next(err)
     }
 }
 
 // 修改密码
 exports.updatepasswordUser =async (req, res, next) =>{
     try{
-        let password ={
-            password:md5(req.body.user.password)
+        // console.log(req.body.password)
+        let updateStatus = 0; // 更新状态 0失败  1成功
+
+        await User.update(req.user.user_id,{user_pwd:md5(req.body.password)}).then(updateResult => {
+            updateResult == 1 ? updateStatus = 1 : '';
+        })
+
+        if(updateStatus == 1){
+            // 确保只发放一条有效 refresh_token
+            redisDb.keys(1,`${req.user.user_id}#*`).then(answerKeys=>{
+                // 判断是否存在有效 refresh_token
+                answerKeys.length !== 0 ? redisDb.del(1, answerKeys) : ''
+            })
+            res.status(200).json({
+                code: 20000,
+                success: true,
+                message: '用户密码更新成功'
+            })
+        }else{
+            res.status(200).json({
+                code: 50000,
+                success: false,
+                message: '用户密码更新失败'
+            })
         }
-        let results=await User.update(req.user[0].id,password)
-res.status(200).json({
-    res:req.user
-})
     }catch(err){
-        next(err)
+        logger.reprocess_error("Current user password update failed ("+err.message+")",res,req);
+        next(new Error(`当前用户密码更新失败 - `+err));
+        // next(err)
     }
 }
