@@ -9,6 +9,13 @@ class Base{
   all (){
     return knex(this.table).select();
   }
+
+  /**
+   * 
+   * @param {*} params {fileld:,options:}
+   * @param {*} orders 顺序
+   * @returns 
+   */
   select (params,orders){
     // let result;
     let orderx=orders?orders:{
