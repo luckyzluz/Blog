@@ -155,7 +155,7 @@ let params={
 // logger.errorxx("xxxxxxxxx",res,req)
 const { jwtAccessSecret, jwtRefreshSecret } = require('../config/config.default');
 const {verify} = require('../util/jwt')
-const {generateReToken,existsReToken} = require('../util/generateRoken')
+const {generateReToken,existsReToken} = require('../util/token')
 // result= await generateReToken("xxx",req)
 
 // const refreshDecodedToken =await  verify('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVdWlkIjoiOTAiLCJVc2VyVHlwZSI6IkdlbmVyYWwiLCJVc2VyQWdlbnQiOiJQb3N0bWFuUnVudGltZS83LjI5LjAiLCJJcCI6IjEyNy4wLjAuMSIsImlhdCI6MTY3NDI4Mzc1OSwiZXhwIjoxNjc0ODg4NTU5fQ.RbrTlDAm8rIb69tyIe-nOu4xyaVlXE-UjfdWZmS9BjU',jwtRefreshSecret).then((xx)=>{
@@ -172,13 +172,21 @@ const {generateReToken,existsReToken} = require('../util/generateRoken')
 //     redisDb.del(1, res)
 // })
 // console.log(req.user)
-
+let knexParams = {
+    field: "*",
+    options: {}
+}
+let mysqlUserKey ={
+    id:"user_id"
+}
+knexParams.options[mysqlUserKey.id] = result[0];
+console.log(knexParams)
         res.status(200).json({
             code:200,
             status:result
         })
     } catch (err) {
-        console.log(err.name)
+        console.log(err)
         next()
     }
 }
