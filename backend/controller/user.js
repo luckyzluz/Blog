@@ -2,21 +2,22 @@
 // const jwt = require('../util/jwt');
 const {verify} = require('../util/jwt')
 const {jwtAccessSecret,jwtRefreshSecret} = require('../config/config.default')
-const MysqlMethods = require('../util/mysql');
+// const MysqlMethods = require('../util/mysql');
 const md5 = require('../util/md5');
-const moment = require('moment');
-const {createSixNum} = require('../util/utils');
-const nodemail =require('../util/nodemailer');
+// const moment = require('moment');
+// const {createSixNum} = require('../util/utils');
+// const nodemail =require('../util/nodemailer');
 
 const {redisDb} = require('../util/redis');
 const { redisConfig } = require('../config/config.default');
 const logger =require("../util/logger")
 const User = require('../model/user.js');
-let isEmailcode=1;
+// let isEmailcode=1;
 // ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}"
 const {EmailVerifyConfig} = require('../config/config.default');
 // let isEmailVerify=false;// 是否启用邮箱验证码
-const {generateReToken, generateAcToken, existsReToken} = require('../util/generateRoken')
+const {generateReToken, generateAcToken, existsReToken} = require('../util/token')
+const { REDIS_CONFIG, mysqlUserKey } = require("../config/config.db")
 
 /**
  * 用户注册
@@ -28,88 +29,90 @@ const {generateReToken, generateAcToken, existsReToken} = require('../util/gener
 exports.register = async (req, res, next) => {
     try{
         let user = {};  // 前端数据
-        let Status=0; // 注册状态 0：注册失败 1：注册成功  2：验证码失败 3:未发送验证码
-        let CodeStatus=0; // 验证码验证状态 0:验证失败  1：验证成功  2：未发送验证码
-        let results=[]; //数据库操作返回值
-            // let results = await MysqlMethods.insert('lz_users',['username','password','email','regtime'],[`"${user.username}"`,`"${md5(user.password)}"`,`"${user.email}"`,`"${new Date()}"`])
-            // delete user.code
-            // 前端数据处理
-            user.user_name = req.body.user.username;
-            user.user_email = req.body.user.email;
-            user.user_pwd = md5(req.body.user.password);
-            user.user_regtime=new Date().getTime(); // 当前时间
-            user.user_ip=req.ip;
+        let Status = 0; // 注册状态 0：注册失败 1：注册成功  2：验证码验证失败 3:未发送验证码 4：验证成功
+        let CodeStatus = 0; // 验证码验证状态 0:验证失败  1：验证成功  2：未发送验证码
+        let results = []; //数据库操作返回值
+        // delete user.code
+        // 前端数据处理
+        user[mysqlUserKey.name] = req.body.user.username;
+        user[mysqlUserKey.email] = req.body.user.email;
+        user[mysqlUserKey.password] = md5(req.body.user.password);
+        user[mysqlUserKey.regtime] = new Date().getTime(); // 当前时间
+        user[mysqlUserKey.ip] = req.ip;
 
         if(EmailVerifyConfig.isEmailVerify){ // 是否启用邮箱验证
-            await redisDb.get("0",req.body.user.email).then(res => {
-                res==null?Status=3:res==req.body.user.code?CodeStatus=1:Status=2;
+            await redisDb.get(REDIS_CONFIG.database._user, req.body.user.email).then(res => {
+                // res == null ? Status = 3 : res == req.body.user.code ? CodeStatus = 1 : Status = 2;
+                res == null ? Status = 3 : res == req.body.user.code ? Status = 4 : Status = 2;
             })
             // console.log(CodeStatus)
-            if(CodeStatus==1){ // 验证成功
+            // CodeStatus == 1
+            if(Status == 4){ // 验证成功
                 results = await User.insert(user);
-                results.length>0?Status=1:Status=0;
+                results.length > 0 ? Status = 1 : Status = 0;
             }
         }else{
             results = await User.insert(user);
-            results.length>0?Status=1:Status=0;
-
-            // 这里虽然没有开启邮箱验证，但为了下面判断是否进行缓存
-            CodeStatus=1;
+            results.length > 0 ? Status = 1 : Status = 0;
+            // 这里虽然没有开启邮箱验证，但为了下面判断是否进行缓存，判定验证码验证成功
+            // CodeStatus = 1;
         }
-        // console.log(results)
-            // redis缓存(这里只要mysql写入成功即可，redis失败无所谓(读时redis不存在则取mysql，进行缓存))
-            if(redisConfig.isRedis && results.length>0&&CodeStatus==1){ // mysql插入成功,且缓存开启
-                // 查询新增用户id
-                user =await User.select({field:"*",options:{"user_id":results[0]}},{name:'user_regtime',order:'desc'})
-                delete user[0].user_pwd;
+        // redis缓存(这里只要mysql写入成功即可，redis失败无所谓(读时redis不存在则取mysql，进行缓存))
+        // results.length > 0 && CodeStatus == 1
+        if(Status == 1){ // mysql插入成功，且验证码验证成功（没开启不要紧）
+            // 查询新增用户id
+            let knexSelectParams = {
+                field: "*",
+                options: {}
+            }
+            knexSelectParams.options[mysqlUserKey.id] = results[0];
+            
+            user = await User.select(knexSelectParams);
+            delete user[0].user_pwd;
 
-                // 开始redis写入
-                let redisResult = 0;
-                await redisDb.hSet(0,'Users',results[0],JSON.stringify(user))
-                // .then(res=>{
-                //     redisResult=res+redisResult
-                // })
-                await redisDb.hSet(0,'Username.to.id',user[0].user_name,user[0].user_id)
-                // .then(res=>{
-                //     redisResult=res+redisResult
-                // })
-                await redisDb.hSet(0,'Email.to.id',user[0].user_email,user[0].user_id)
-                // .then(res=>{
-                //     redisResult=res+redisResult
-                // })
-            }
-            // affectedRows
-            // console.log(Status,CodeStatus)
-            if(Status==1&&CodeStatus==1){
-                res.status(200).json({
-                    code:20000,
-                    success: true,
-                    message:"用户注册成功"
-                })
-            }else if(CodeStatus==2 || Status==3){
-                res.send({
-                    code:40000,
-                    success: false,
-                    message:"请先发送验证码"
-                })
-            }else if(CodeStatus==0){
-                res.send({
-                    code:40000,
-                    success: false,
-                    message:"验证码错误"
-                })
-            }else{
-                res.send({
-                    code:40000,
-                    success: false,
-                    message:"用户注册失败"
-                })
-            }
+            // 开始redis写入
+            await redisDb.hSet(REDIS_CONFIG.database._user, 'UsersInfo', results[0], JSON.stringify(user));
+
+            await redisDb.hSet(REDIS_CONFIG.database._user, 'Username.to.id', user[0].user_name, user[0].user_id);
+
+            await redisDb.hSet(REDIS_CONFIG.database._user, 'Email.to.id', user[0].user_email, user[0].user_id);
+
+            // 如果开启了验证码，注册成功后删除验证码
+            await redisDb.del(REDIS_CONFIG.database._user, user[0].user_email);
+        }
+        // affectedRows
+        // console.log(Status,CodeStatus)
+        // && CodeStatus == 1
+        if(Status == 1){
+            res.status(200).json({
+                code: 20000,
+                success: true,
+                message: "用户注册成功"
+            })
+        }else if(Status == 3){ // CodeStatus == 2 || Status == 3
+            res.send({
+                code: 40000,
+                success: false,
+                message: "请先发送验证码"
+            })
+        }else if(Status == 2){ // CodeStatus == 0
+            res.send({
+                code: 40000,
+                success: false,
+                message: "验证码错误"
+            })
+        }else{
+            res.send({
+                code: 40000,
+                success: false,
+                message: "用户注册失败"
+            })
+        }
         
         
     }catch (err){
-        logger.reprocess_error("Account registration failed ("+err.message+")",res,req)
-        next(new Error(`账号注册失败`))
+        logger.reprocess_error("Account registration failed ("+err.message+")", res, req);
+        next(new Error(`账号注册失败`));
         // next(err)
     }
 }
@@ -197,7 +200,7 @@ exports.token = async (req, res, next) => {
                 Uuid = xx.Uuid
                 refreshStatus = 1;
             }).catch(err=>{ // token 过期
-                console.log(err)
+                // console.log(err)
                 refreshStatus = 0;
             })
         refreshStatus == 1 ? await existsReToken(`${Uuid}#${req.body.refresh_token}`).then(res => {
@@ -315,9 +318,11 @@ exports.updateCurrentUser = async (req, res, next) => {
         let message="更新失败";
         let user;
         let results; //mysql数据库更新状态 0 不成功 1成功
-        await User.update(req.user.user_id,req.body.user).then(updateResult => {
-            results = updateResult;
-        })
+        delete req.body.user.id; // 禁止修改用户唯一标识
+        console.log(req.body.user)
+        // await User.update(req.user.user_id,req.body.user).then(updateResult => {
+        //     results = updateResult;
+        // })
 
         if(results==1){ // 数据库更新数据成功
             await redisDb.hdel(0,'UsersInfo',req.user.user_id);
