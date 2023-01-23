@@ -23,10 +23,9 @@ exports = module.exports = validations => {
     })
     
     res.status(200).json({ 
-      code:40000,
-      data:{
-        error:err_result
-      }
+      code: 40000,
+      success: false,
+      errors: err_result
      });
   };
 };
