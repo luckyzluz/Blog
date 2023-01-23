@@ -72,7 +72,7 @@ module.exports = {
     ]
     },
     EmailVerifyConfig:{
-      isEmailVerify:false,
+      isEmailVerify: true,
       smtpConfig:{
         host: 'smtp.qq.com',
         port: 465,
