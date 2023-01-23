@@ -105,9 +105,11 @@ redisDb.hGetAll = async (dbNum,key) => {
      })
 }
 /**
- *
- * @param dbNum 库号
- * @param key 键
+ * 
+ * @param {*} dbNum 库号
+ * @param {*} hash_key 
+ * @param {*} sub_key 
+ * @returns null 不存在 
  */
  redisDb.hGet = async (dbNum,hash_key,sub_key) => {
     return new Promise((resolve,reject)=>{

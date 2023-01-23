@@ -1,4 +1,5 @@
 const knex = require('../model/knex');
+const {mysqlUserKey} = require("../config/config.db")
 
 class Base{
   constructor(props){
@@ -31,7 +32,11 @@ class Base{
     // return result;
     // knex.column('id').select().from('lz_member')
   }
-  // 新增
+  /**
+   * 新增
+   * @param {*} params 
+   * @returns 数组  数据id
+   */
   insert (params){
     return knex(this.table).insert(params);
   }
