@@ -46,9 +46,13 @@ class Base{
     return knex(this.table).where('user_id', '=', id).update(params);
   }
 
-  // 删除
+  /**
+   * 删除
+   * @param {*} id 
+   * @returns Number 0: 不存在该条数据  1以及以上代表删除条数
+   */
   delete (id){
-    return knex(this.table).where('id', '=', id).del();
+    return knex(this.table).where('user_id', '=', id).del();
   }
 
 }

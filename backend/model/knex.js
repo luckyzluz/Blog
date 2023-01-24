@@ -1,14 +1,14 @@
 // 引用配置文件
-const {dbMysqlConfig} = require('../config/config.default');
+const { MYSQL_CONFIG } = require('../config/config.db');
 // 把配置文件中的信息，设置在初始化配置中
 module.exports = require('knex')({
   client: 'mysql',
   connection: {
-    host: dbMysqlConfig.host,
-    port: dbMysqlConfig.port,
-    user: dbMysqlConfig.user,
-    password: dbMysqlConfig.password,
-    database: dbMysqlConfig.database
+    host: MYSQL_CONFIG.host,
+    port: MYSQL_CONFIG.port,
+    user: MYSQL_CONFIG.user,
+    password: MYSQL_CONFIG.password,
+    database: MYSQL_CONFIG.database
   },
   asyncStackTraces:false,
   acquireConnectionTimeout: 10000, // 获取连接超时

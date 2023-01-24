@@ -3,8 +3,9 @@
  */
 const mysql = require("mysql");
 const {dbMysqlConfig} = require('../config/config.default')
+const { MYSQL_CONFIG } = require('../config/config.db');
 
-var pool = mysql.createPool(dbMysqlConfig);
+var pool = mysql.createPool(MYSQL_CONFIG);
 module.exports = {
     /**
      * 
