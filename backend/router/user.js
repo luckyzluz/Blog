@@ -21,23 +21,26 @@ const {body, validationResult } = require('express-validator')
 const router = express.Router()
 
 //用户登录
-router.post('/users/login',userValidator.login,userCtrl.login)
+router.post('/users/login',userValidator.login,userCtrl.login);
 // 
-router.post('/users/token',userCtrl.token)
+router.post('/users/token',userCtrl.token);
 // userValidator.retoken,
 //用户注册
-router.post('/users',userValidator.register,userCtrl.register)//3.通过验证，执行具体的控制器处理
+router.post('/users',userValidator.register,userCtrl.register); // 3.通过验证，执行具体的控制器处理
 
 
 //获取当前登录用户
-router.get('/user',auth,userCtrl.getCurrentUser)
+router.get('/user',auth,userCtrl.getCurrentUser);
 
 
 //更新当前登录用户userValidator.put
-router.put('/user',auth,userCtrl.updateCurrentUser)
+router.put('/users/user',auth,userCtrl.updateCurrentUser);
 
 //更新当前登录用户密码 
-router.post('/cipher',auth,userValidator.cipher,userCtrl.updatepasswordUser)
+router.post('/users/cipher',auth,userValidator.cipher,userCtrl.updatepasswordUser);
 
-module.exports = router
+// 注销当前用户
+router.delete('/users/del', auth, userCtrl.delCurrentUser);
+
+module.exports = router;
 

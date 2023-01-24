@@ -1,7 +1,7 @@
 // const {User} = require('../model')
 // const jwt = require('../util/jwt');
-const {verify} = require('../util/jwt')
-const {jwtAccessSecret,jwtRefreshSecret} = require('../config/config.default')
+const {verify} = require('../util/jwt');
+const {jwtAccessSecret,jwtRefreshSecret} = require('../config/config.default');
 // const MysqlMethods = require('../util/mysql');
 const md5 = require('../util/md5');
 // const moment = require('moment');
@@ -9,15 +9,12 @@ const md5 = require('../util/md5');
 // const nodemail =require('../util/nodemailer');
 
 const {redisDb} = require('../util/redis');
-const { redisConfig } = require('../config/config.default');
-const logger =require("../util/logger")
+const logger =require("../util/logger");
 const User = require('../model/user.js');
-// let isEmailcode=1;
 // ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}"
 const {EmailVerifyConfig} = require('../config/config.default');
-// let isEmailVerify=false;// 是否启用邮箱验证码
-const {generateReToken, generateAcToken, existsReToken} = require('../util/token')
-const { REDIS_CONFIG, mysqlUserKey } = require("../config/config.db")
+const {generateReToken, generateAcToken, existsReToken} = require('../util/token');
+const { REDIS_CONFIG, mysqlUserKey } = require("../config/config.db");
 
 /**
  * 用户注册
@@ -132,13 +129,13 @@ exports.login = async (req, res, next) => {
         }
 
         // 生成token
-        await generateReToken(SourceInfoJson, 60 * 60 * 24 * 7).then(res=>{
+        await generateReToken(SourceInfoJson).then(res=>{
             refresh_token = res;
             status = 1;
         }).catch(err=>{
             status = 2;
         });
-        await generateAcToken(SourceInfoJson, 60 * 30).then(res=>{
+        await generateAcToken(SourceInfoJson).then(res=>{
             access_token = res;
             status = 1;
         }).catch(err=>{
@@ -148,12 +145,12 @@ exports.login = async (req, res, next) => {
         // console.log("refresh_token1 "+refresh_token)
 
         // 确保只发放一条有效 refresh_token
-        redisDb.keys(1,`${req.user.user_id}#*`).then(answerKeys=>{
+        redisDb.keys(REDIS_CONFIG.database._user,`Token-${req.user.user_id}#*`).then(answerKeys=>{
             // 判断是否存在有效 refresh_token
             answerKeys.length !== 0 ? redisDb.del(1, answerKeys) : ''
         })
         // redis缓存用户信息(refresh_token)JSON.stringify()
-        await redisDb.hMset(1,`${req.user.user_id}#${refresh_token}`,{...SourceInfoJson,access_token},60*60*24*30).then(res=>{
+        await redisDb.hMset(REDIS_CONFIG.database._user,`Token-${req.user.user_id}#${refresh_token}`,{...SourceInfoJson,access_token},60*60*24*30).then(res=>{
             if(res == 'OK' && status !== 2){
                 status = 1;
             }else{
@@ -203,7 +200,7 @@ exports.token = async (req, res, next) => {
                 // console.log(err)
                 refreshStatus = 0;
             })
-        refreshStatus == 1 ? await existsReToken(`${Uuid}#${req.body.refresh_token}`).then(res => {
+        refreshStatus == 1 ? await existsReToken(`Token-${Uuid}#${req.body.refresh_token}`).then(res => {
                 res ? refreshStatus = 1 : refreshStatus = 0;
         }) : ''
 
@@ -217,25 +214,25 @@ exports.token = async (req, res, next) => {
             // 删除旧refresh_token  （有效）
             // await redisDb.del(1,`${Uuid}#${req.body.refresh_token}`);
             // 确保只发放一条有效 refresh_token
-            redisDb.keys(1,`${Uuid}#*`).then(answerKeys=>{
+            redisDb.keys(REDIS_CONFIG.database._user, `Token-${Uuid}#*`).then(answerKeys => {
                 // 判断是否存在有效 refresh_token
-                answerKeys.length !== 0 ? redisDb.del(1, answerKeys) : ''
+                answerKeys.length !== 0 ? redisDb.del(REDIS_CONFIG.database._user, answerKeys) : ''
             })
             // 生成token
-            await generateReToken(SourceInfoJson, 60 * 60 * 24 * 7).then(res=>{
+            await generateReToken(SourceInfoJson).then(res=>{
                 refresh_token = res;
                 status = 1;
             }).catch(err=>{
                 status = 2;
             });
-            await generateAcToken(SourceInfoJson,60 * 30).then(res=>{
+            await generateAcToken(SourceInfoJson).then(res=>{
                 access_token = res;
                 status = 1;
             }).catch(err=>{
                 status = 2;
             });
             // redis缓存用户信息(refresh_token)JSON.stringify()
-            await redisDb.hMset(1,`${Uuid}#${refresh_token}`,{...SourceInfoJson,access_token},60*60*24*30).then(res=>{
+            await redisDb.hMset(REDIS_CONFIG.database._user, `Token-${Uuid}#${refresh_token}`, {...SourceInfoJson,access_token}, 60*60*24*30).then(res => {
                 if(res == 'OK' && status !== 2){
                     status = 1;
                 }else{
@@ -275,21 +272,22 @@ exports.getCurrentUser = async (req, res, next) => {
         // console.log(req.user)
 
         // 查询redis
-        await redisDb.hGet(0,'UsersInfo',req.user.user_id).then(userInfos=>{
+        await redisDb.hGet(REDIS_CONFIG.database._user, 'UsersInfo', req.user.user_id).then(userInfos => {
             userInfos !== null ? userInfo = JSON.parse(userInfos) : '';
         })
 
         // redis数据不存在
-        JSON.stringify(userInfo) == "{}" ? await User.select({field:"*",options:{"user_id":req.user.user_id}}).then(res=>{
+        JSON.stringify(userInfo) == "{}" ? await User.select({field:"*", options: {"user_id": req.user.user_id}}).then(res => {
             res.length !== 0 ? userInfo = res[0] : '';
         }) : '';
         delete userInfo.user_pwd;
 
-        // mysql查询数据成功
-        JSON.stringify(userInfo) !== "{}" ?  redisDb.hSet(0,'UsersInfo',userInfo.user_id,JSON.stringify(userInfo)) : '';
-
         // 判断用户信息是否获取成功
-        if(JSON.stringify(userInfo) !== "{}"){ // 用户信息获取成功
+        if(JSON.stringify(userInfo) !== "{}"){ // 用户信息获取成功(mysql查询数据成功)
+            await redisDb.hSet(REDIS_CONFIG.database._user, 'UsersInfo', userInfo.user_id, JSON.stringify(userInfo));
+            await redisDb.hSet(REDIS_CONFIG.database._user, 'Username.to.id', userInfo.user_name, userInfo.user_id);
+            await redisDb.hSet(REDIS_CONFIG.database._user, 'Email.to.id', userInfo.user_email, userInfo.user_id);
+
             res.status(200).json({
                 code: 20000,
                 success: true,
@@ -313,30 +311,47 @@ exports.getCurrentUser = async (req, res, next) => {
 //更新当前登录用户
 exports.updateCurrentUser = async (req, res, next) => {
     try{
+        // 有哪些参数要被修改，如何确保username  email  id  删除
+        
         //处理请求
-        // console.log(req.user[0].id)
+        // console.log(req.user)
         let message="更新失败";
         let user;
-        let results; //mysql数据库更新状态 0 不成功 1成功
+        let updateUserInfo = {}; // 需要更新的用户信息
+        let results = 0; //mysql数据库更新状态 0 不成功 1成功
         delete req.body.user.id; // 禁止修改用户唯一标识
-        console.log(req.body.user)
-        // await User.update(req.user.user_id,req.body.user).then(updateResult => {
-        //     results = updateResult;
-        // })
+        req.body.user.username !== undefined ? updateUserInfo[mysqlUserKey.name] = req.body.user.username : '';
+        req.body.user.email !== undefined ? updateUserInfo[mysqlUserKey.email] = req.body.user.email : '';
+        
+        JSON.stringify(updateUserInfo) !== "{}" ? await User.update(req.user.user_id, updateUserInfo).then(updateResult => {
+            results = updateResult;
+        }) : '';
+// console.log(results)
+        if(results == 1){ // 数据库更新数据成功
+            await redisDb.hdel(REDIS_CONFIG.database._user, 'UsersInfo', req.user[mysqlUserKey.id]);
+            await redisDb.hdel(REDIS_CONFIG.database._user, 'Username.to.id', req.user[mysqlUserKey.name]);
+            await redisDb.hdel(REDIS_CONFIG.database._user, 'Email.to.id', req.user[mysqlUserKey.email]);
 
-        if(results==1){ // 数据库更新数据成功
-            await redisDb.hdel(0,'UsersInfo',req.user.user_id);
-            await User.select({'field':"*", options:{user_id:90}}).then(userInfos => {                
+            let mysqlSelectParams = {
+                field: "*", 
+                options: {}
+            }
+            mysqlSelectParams.options[mysqlUserKey.id] = req.user.user_id;
+            await User.select(mysqlSelectParams).then(userInfos => {                
                 user = userInfos[0];
             })
             delete user.user_pwd;
+            req.user = user;
+            // console.log(req.user)
             // 写入redis
-            await redisDb.hSet(0,'UsersInfo', req.user.user_id, JSON.stringify(user)).then(writeResult =>{
+            await redisDb.hSet(REDIS_CONFIG.database._user,'UsersInfo', req.user.user_id, JSON.stringify(user)).then(writeResult => {
                 writeResult==1? message='更新成功' : '';
             })
+            await redisDb.hSet(REDIS_CONFIG.database._user, 'Username.to.id', user.user_name, user.user_id);
+            await redisDb.hSet(REDIS_CONFIG.database._user, 'Email.to.id', user.user_email, user.user_id);
         }
         // res.send('updateCurrentUser')
-        if(message == '更新成功'){
+        if(results == 1 && message == '更新成功'){
             res.status(200).json({
                 code: 20000,
                 success: true,
@@ -358,7 +373,7 @@ exports.updateCurrentUser = async (req, res, next) => {
 }
 
 // 修改密码
-exports.updatepasswordUser =async (req, res, next) =>{
+exports.updatepasswordUser =async (req, res, next) => {
     try{
         // console.log(req.body.password)
         let updateStatus = 0; // 更新状态 0失败  1成功
@@ -369,9 +384,9 @@ exports.updatepasswordUser =async (req, res, next) =>{
 
         if(updateStatus == 1){
             // 确保只发放一条有效 refresh_token
-            redisDb.keys(1,`${req.user.user_id}#*`).then(answerKeys=>{
+            redisDb.keys(REDIS_CONFIG.database._user, `${req.user.user_id}#*`).then(answerKeys=>{
                 // 判断是否存在有效 refresh_token
-                answerKeys.length !== 0 ? redisDb.del(1, answerKeys) : ''
+                answerKeys.length !== 0 ? redisDb.del(REDIS_CONFIG.database._user, answerKeys) : ''
             })
             res.status(200).json({
                 code: 20000,
@@ -388,6 +403,55 @@ exports.updatepasswordUser =async (req, res, next) =>{
     }catch(err){
         logger.reprocess_error("Current user password update failed ("+err.message+")",res,req);
         next(new Error(`当前用户密码更新失败 - `+err));
+        // next(err)
+    }
+}
+
+// 注销账号
+exports.delCurrentUser = async (req, res, next) =>{
+    try{
+        // console.log(req.user.user_id);
+        let delStatus = 0; // 删除状态  0： 不成功  1： 成功
+        // 先删除redis
+        await redisDb.hdel(REDIS_CONFIG.database._user, 'UsersInfo', req.user[mysqlUserKey.id]);
+        await redisDb.hdel(REDIS_CONFIG.database._user, 'Username.to.id', req.user[mysqlUserKey.name]);
+        await redisDb.hdel(REDIS_CONFIG.database._user, 'Email.to.id', req.user[mysqlUserKey.email]);
+
+        // 删除发放的token
+        await redisDb.keys(REDIS_CONFIG.database._user, `Token-${req.user.user_id}#*`).then(answerKeys => {
+            answerKeys.length !== 0 ? redisDb.del(REDIS_CONFIG.database._user, answerKeys) : '';
+        })
+        
+        // 删除mysql数据
+        await User.delete(req.user.user_id).then(res =>{
+            res > 0 ? delStatus = 1 : delStatus = 0;
+        })
+        switch(delStatus){
+            case 1:
+                res.status(200).json({
+                    code:20000,
+                    success: true,
+                    message: "账号注销成功"
+                })
+                break;
+            case 0:
+                res.status(200).json({
+                    code:40000,
+                    success: false,
+                    message: "账号注销失败"
+                })
+                break;
+            default:
+                res.status(200).json({
+                    code:40000,
+                    success: false,
+                    message: "账号注销失败"
+                })
+        }
+        
+    }catch(err){
+        logger.reprocess_error("Current user logout failed ("+err.message+")",res,req);
+        next(new Error(`当前用户注销失败 - `+err));
         // next(err)
     }
 }
