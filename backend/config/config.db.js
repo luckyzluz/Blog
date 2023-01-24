@@ -36,7 +36,7 @@ if (env === 'development') {
 }
 
 if (env === 'production') {
-    // mysql
+    /* Mysql数据库相关配置 */
     MYSQL_CONFIG = {
         host: 'localhost', // 主机名 默认： localhost
         port: 3306,        // MySQL 默认端口为 3306
@@ -48,7 +48,7 @@ if (env === 'production') {
         multipleStatements:true // 支持执行多条 sql 语句
     }
 
-    // redis
+    /* redis数据库相关配置 */
     REDIS_CONFIG = {
         isRedis: true, // 是否开启redis缓存
         port: 6379, // 端口
