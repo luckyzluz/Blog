@@ -172,15 +172,15 @@ const {generateReToken,existsReToken} = require('../util/token')
 //     redisDb.del(1, res)
 // })
 // console.log(req.user)
-let knexParams = {
-    field: "*",
-    options: {}
-}
-let mysqlUserKey ={
-    id:"user_id"
-}
-knexParams.options[mysqlUserKey.id] = result[0];
-console.log(knexParams)
+// let knexParams = {
+//     field: "*",
+//     options: {}
+// }
+// let mysqlUserKey ={
+//     id:"user_id"
+// }
+// knexParams.options[mysqlUserKey.id] = result[0];
+// console.log(knexParams)
         res.status(200).json({
             code:200,
             status:result
