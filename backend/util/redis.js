@@ -1,14 +1,14 @@
 const { reject } = require('async');
 var { redis, createClient } = require('redis');
-var { redisConfig } = require('../config/config.default')
-let _user = redisConfig.database._user
-let _article = redisConfig.database._article
+var { REDIS_CONFIG } = require('../config/config.db')
+let _user = REDIS_CONFIG.database._user
+let _article = REDIS_CONFIG.database._article
 var redisDb = {};
 const options = {
-    host: redisConfig.host,
-    port: redisConfig.port,
-    password: redisConfig.password,
-    detect_buffers: redisConfig.detect_buffers, // 传入buffer 返回也是buffer 否则会转换成String
+    host: REDIS_CONFIG.host,
+    port: REDIS_CONFIG.port,
+    password: REDIS_CONFIG.password,
+    detect_buffers: REDIS_CONFIG.detect_buffers, // 传入buffer 返回也是buffer 否则会转换成String
     retry_strategy: function (options) {
     // 重连机制
     console.log(options.error.code)
