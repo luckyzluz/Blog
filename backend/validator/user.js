@@ -128,6 +128,7 @@ exports.login = [
 
                 if(user.length !== 0){  // mysql查询数据成功
                     delete user[0].user_pwd;
+                    req.user = user[0];
                     // 开始redis写入
                     await redisDb.hSet(REDIS_CONFIG.database._user, 'UsersInfo', user[0].user_id, JSON.stringify(user[0]));
 
@@ -151,6 +152,7 @@ exports.login = [
                     field: 'user_pwd',
                     options: {}
                 }
+
                 mysqlSelectParams.options[mysqlUserKey.id] = req.user.user_id;
                 
                 let queryPwd = await User.select(mysqlSelectParams);
