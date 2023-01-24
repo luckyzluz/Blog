@@ -7,16 +7,19 @@ const jwt = require('jsonwebtoken')
 const logger =require('../util/logger');
 const { resolveContent } = require('nodemailer/lib/shared');
 const {redisDb} = require('../util/redis');
+const { REDIS_CONFIG, mysqlUserKey } = require("../config/config.db");
+const { User } = require("../model");
 
 module.exports = async (req, res, next) =>{
     try{
+        // 有没有过期，未过期再进行相应操作，判断是否属于未登录
         // let refresh_token = req.headers.refresh_token
         // refresh_token = refresh_token ? refresh_token.split('Bearer ')[1] : null;
         // console.log("refresh_token "+refresh_token)
         // 获取访问令牌(access_token)
         let access_token = req.headers.authorization
         access_token = access_token ? access_token.split('Bearer ')[1] : null;
-        // console.log("access_token "+access_token)
+        console.log("access_token "+access_token)
 
         // 判断访问令牌(access_token)是否过期
         const accessDecodedToken = jwt.verify(access_token,jwtAccessSecret)
@@ -24,7 +27,22 @@ module.exports = async (req, res, next) =>{
         //     req.user= xx;
         // })
         // console.log(accessDecodedToken)
-        req.user = {'user_id': accessDecodedToken.Uuid};
+        let user = await redisDb.hGet(REDIS_CONFIG.database._user, 'UsersInfo', accessDecodedToken.Uuid);
+
+        if(user !== null){
+            req.user = JSON.parse(user);
+        }else if(req.user.user_id == undefined){
+            let mysqlSelectParams = {
+                field: '*',
+                options: {}
+            }
+            mysqlSelectParams.options[mysqlUserKey.table] = accessDecodedToken.Uuid;
+            user = await User.select(mysqlSelectParams);
+            delete user[0][mysqlUserKey.password];
+            req.user = user[0];
+        }
+        
+        // {'user_id': accessDecodedToken.Uuid};
         // .catch(err=>{
         //     console.log(err.name)
         // })
@@ -33,7 +51,7 @@ module.exports = async (req, res, next) =>{
             let tokenKey; // refresh_token在redis中的key值
             let accessTokenValid; // redis有效accessToken
 
-            await redisDb.keys(1,`${accessDecodedToken.Uuid}#*`).then(answerKeys=>{
+            await redisDb.keys(REDIS_CONFIG.database._user, `Token-${accessDecodedToken.Uuid}#*`).then(answerKeys => {
                 // 判断是否存在有效 refresh_token
                 answerKeys.length !== 0 ? tokenKey = answerKeys[0] : '';
 
@@ -41,7 +59,7 @@ module.exports = async (req, res, next) =>{
 
             if(tokenKey !== undefined){ // 确定refresh_tokenKey存在
                 // 查询redis中有效access_token
-                await redisDb.hGet(1, tokenKey,'access_token').then(res => {
+                await redisDb.hGet(REDIS_CONFIG.database._user, tokenKey,'access_token').then(res => {
                     accessTokenValid = res;
                 })
             }
@@ -50,9 +68,10 @@ module.exports = async (req, res, next) =>{
             if(accessTokenValid !== `"${access_token}"`){ // 不一致（已作废）
                 // 抛出错误TokenVoidedError
                 // throw new Error('TokenVoidedError');
-                throw {name:"TokenVoidedError",message:"accessToken has been voided"};
+                throw { name: "TokenVoidedError", message: "accessToken has been voided" };
             }
         }
+        // console.log(req.user)
         next()
     }catch(err){
         // console.log("err"+err)
@@ -63,19 +82,19 @@ module.exports = async (req, res, next) =>{
                 return res.status(401).json({
                     code:40001,
                     success: false,
-                    message:"token已失效"
+                    message:"token已失效,请刷新"
                 })
             case 'JsonWebTokenError': // 无效的token
                 return res.status(401).json({
                     code:40001,
                     success: false,
-                    message:"无效token"
+                    message:"无效token,请规范使用"
                 })
             case 'TokenVoidedError': // token已作废
                 return res.status(401).json({
                     code:40001,
                     success: false,
-                    message:"token已作废"
+                    message:"token已作废,请使用有效值"
                 })
             default: // 未知错误
                 logger.reprocess_error("Unknown error.Token validation failed ("+err.message+")",res,req);
