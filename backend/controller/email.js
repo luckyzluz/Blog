@@ -3,7 +3,7 @@ const moment = require('moment')
 const { DateSort, DateSortx, getTimeInfo } = require('../util/utils')
 const nodemail = require('../util/nodemailer')
 const { redisDb } = require('../util/redis');
-const { EmailVerifyConfig } = require('../config/config.default');
+const { EmailVerifyConfig } = require('../config/config.email');
 const { REDIS_CONFIG } = require("../config/config.db")
 // let isEmailVerify=false;// 是否启用邮箱验证码
 
@@ -94,6 +94,8 @@ exports.email = async (req, res, next) => {
         
         
     } catch (err) {
-        next(err)
+        logger.reprocess_error("Failed to send mailbox verification code ("+err.message+")", res, req);
+        next(new Error(`邮箱验证码发送失败`));
+        // next(err)
     }
 }

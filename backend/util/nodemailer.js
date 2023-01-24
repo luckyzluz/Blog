@@ -1,7 +1,7 @@
 //nodemailer.js
 const nodemailer = require('nodemailer');
 const smtpTransport = require('nodemailer-smtp-transport');
-const {EmailVerifyConfig} =require('../config/config.default');
+const {EmailVerifyConfig} =require('../config/config.email');
 //创建一个smtp服务器EmailVerifyConfig.smtpConfig
 // const config = {
 //     host: 'smtp.qq.com',
@@ -45,7 +45,7 @@ module.exports =async function (addressee,code,template){
                        <div style="width:801px;height:auto; margin:0px auto;">
                            <div style="width:778px;height:auto;margin:0px 11px;background:#fff;box-shadow: 6px 3px 5px rgba(0,0,0,0.05);-webkit-box-shadow: 6px 3px 5px rgba(0,0,0,0.05);-moz-box-shadow: 6px 3px 5px rgba(0,0,0,0.05);-ms-box-shadow: 6px 3px 5px rgba(0,0,0,0.05);-o-box-shadow: 6px 3px 5px rgba(0,0,0,0.05);">
                                <div style="width:781px; background:#fff;padding-top: 30px;">
-                                   <div style="width:200px;height:100px;background:url(https://img30.360buyimg.com/pop/jfs/t1/149566/34/23125/22225/620c7d32Ec4e152c8/7e9aeb8c952d0c9d.png) center no-repeat; margin:auto;background-size: contain;"></div>
+                                   <div style="width:200px;height:100px;background:url(http://img.cdeledu.com/ADVC/2023/0124/0d6bee381455df8c-0.png) center no-repeat; margin:auto;background-size: contain;"></div>
                                </div>
                                <div style="width:627px;margin:0 auto; padding-left:77px; background:#fff;font-size:14px;color:#55798d;padding-right:77px;"><br>
                                    <div style="overflow-wrap:break-word;line-height:20px;">
@@ -60,7 +60,7 @@ module.exports =async function (addressee,code,template){
                            </div>
                            <div style="position:relative;top:-15px;width:800px;height: 360px;background:url(https://www.nesxc.com/wp-content/themes/zibll/img/mail-bg.png) 0px 0px no-repeat;">
                                <div style="height:200px;color:#507383;font-size:14px;line-height: 1.4;padding: 20px 92px;">
-                                   <div style="font-size: 22px;font-weight: bold;">Mxone</div>
+                                   <div style="font-size: 22px;font-weight: bold;">Lost Blog</div>
                                    <div style="margin:20px 0;color: #6a8895;min-height:4.2em;white-space: pre-wrap;">此为系统邮件，请不要直接回复。</div>
                                    <div style=""><a href="#" rel="noopener" target="_blank">访问网站</a> |
                                        <a>联系站长</a></div>
@@ -151,7 +151,7 @@ module.exports =async function (addressee,code,template){
         // 收件人
         to: addressee,//前台传过来的邮箱
         // 邮件内容，HTML格式
-        html: template?template:html.letter
+        html: template ? template : html[EmailVerifyConfig.Template]
     };
     return new Promise((resolve, reject)=>{
         transporter.sendMail(mail, function(error, info){
