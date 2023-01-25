@@ -12,26 +12,58 @@ const { User } = require("../model");
 
 module.exports = async (req, res, next) =>{
     try{
-        // 有没有过期，未过期再进行相应操作，判断是否属于未登录
-        // let refresh_token = req.headers.refresh_token
-        // refresh_token = refresh_token ? refresh_token.split('Bearer ')[1] : null;
-        // console.log("refresh_token "+refresh_token)
-        // 获取访问令牌(access_token)
-        let access_token = req.headers.authorization
-        access_token = access_token ? access_token.split('Bearer ')[1] : null;
-        console.log("access_token "+access_token)
+        // 先判断access_token是否过期。未过期，解密得到id，
+        // 再判断是否已经登录（refresh_token是否存在），
+        // 已登录（refresh_token存在），则未过期再判断是否有效access_token
+        // 未登录，则没了
 
-        // 判断访问令牌(access_token)是否过期
-        const accessDecodedToken = jwt.verify(access_token,jwtAccessSecret)
-        // .then((xx)=>{
-        //     req.user= xx;
-        // })
+        // 获取访问令牌(access_token)
+        // 首先得得到用户id（解密access_token，顺带可以知道是否过期）
+        let access_token = req.headers.authorization;
+        access_token = access_token ? access_token.split('Bearer ')[1] : null;
+        if(access_token == null){
+            throw { name: "UserNotLoggedIn", message: "User is not logged in" }
+        }
+
+        // console.log("access_token "+access_token)
+        let UserLoginStatus = false; // true：  已登录  false： 未登录
+        let refreshTokenKey; // 存在的有效refresh_token
+        // 判断访问令牌(access_token)是否过期（未过期获取用户id）
+        const accessDecodedToken = jwt.verify(access_token,jwtAccessSecret);
         // console.log(accessDecodedToken)
+        if(accessDecodedToken.Uuid !== undefined){ // access_token未过期，查询该用户id是否已登录（refresh_token是否存在redis）
+            await redisDb.keys(REDIS_CONFIG.database._user, `Token-${accessDecodedToken.Uuid}#*`).then(answerKeys => {
+                // 判断是否存在有效 refresh_token
+                answerKeys.length !== 0 ? UserLoginStatus = true : '';
+                answerKeys.length !== 0 ? refreshTokenKey = answerKeys[0] : '';
+            })
+        }
+
+        if(UserLoginStatus){ // 已登录（refresh_token存在redis）
+            if(accessDecodedToken.Uuid !== undefined){ // 未过期，继续查询redis中有效access_token
+                await redisDb.hGet(REDIS_CONFIG.database._user, refreshTokenKey,'access_token').then(res => {
+                    // 判断 有效期内的access_token和refresh_token发放的是否相同
+                    if(res !== `"${access_token}"`){ // 不一致（已作废）
+                        // 抛出错误TokenVoidedError
+                        // throw new Error('TokenVoidedError');
+                        throw { name: "TokenVoidedError", message: "accessToken has been voided" };
+                    }
+                })
+            }else{
+                // 这里应为  在校验时会抛出过期accesstoken错误，这里不做处理
+            }
+
+        }else{ // 未登录，抛出错误
+            throw { name: "UserNotLoggedIn", message: "User is not logged in" };
+            // throw { name: "TokenVoidedError", message: "accessToken has been voided" };
+        }
+        
+        // 这里获取用户信息，挂载到req.user
         let user = await redisDb.hGet(REDIS_CONFIG.database._user, 'UsersInfo', accessDecodedToken.Uuid);
 
-        if(user !== null){
+        if(user !== null){ // redis存在用户信息
             req.user = JSON.parse(user);
-        }else if(req.user.user_id == undefined){
+        }else{ // 不存在，且
             let mysqlSelectParams = {
                 field: '*',
                 options: {}
@@ -41,42 +73,18 @@ module.exports = async (req, res, next) =>{
             delete user[0][mysqlUserKey.password];
             req.user = user[0];
         }
-        
-        // {'user_id': accessDecodedToken.Uuid};
-        // .catch(err=>{
-        //     console.log(err.name)
-        // })
-        // 这里再做判断，当更新密码（或者刷新token后）后，及时作废access_token
-        if(accessDecodedToken.Uuid !== undefined){ // access_token未过期
-            let tokenKey; // refresh_token在redis中的key值
-            let accessTokenValid; // redis有效accessToken
-
-            await redisDb.keys(REDIS_CONFIG.database._user, `Token-${accessDecodedToken.Uuid}#*`).then(answerKeys => {
-                // 判断是否存在有效 refresh_token
-                answerKeys.length !== 0 ? tokenKey = answerKeys[0] : '';
-
-            })   
-
-            if(tokenKey !== undefined){ // 确定refresh_tokenKey存在
-                // 查询redis中有效access_token
-                await redisDb.hGet(REDIS_CONFIG.database._user, tokenKey,'access_token').then(res => {
-                    accessTokenValid = res;
-                })
-            }
-
-            // 判断 有效期内的access_token和refresh_token发放的是否相同
-            if(accessTokenValid !== `"${access_token}"`){ // 不一致（已作废）
-                // 抛出错误TokenVoidedError
-                // throw new Error('TokenVoidedError');
-                throw { name: "TokenVoidedError", message: "accessToken has been voided" };
-            }
-        }
         // console.log(req.user)
         next()
     }catch(err){
         // console.log("err"+err)
         
         switch (err.name) {
+            case 'UserNotLoggedIn':
+                return res.status(401).json({
+                    code:40001,
+                    success: false,
+                    message:"请先登录账号"
+                })
             case 'TokenExpiredError': // token过期
             // logger.reprocess_error("Current user password update failed ("+err.message+")",res,req);
                 return res.status(401).json({
@@ -94,7 +102,7 @@ module.exports = async (req, res, next) =>{
                 return res.status(401).json({
                     code:40001,
                     success: false,
-                    message:"token已作废,请使用有效值"
+                    message:"token已作废,请重新登录!!!"
                 })
             default: // 未知错误
                 logger.reprocess_error("Unknown error.Token validation failed ("+err.message+")",res,req);
