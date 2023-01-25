@@ -1,5 +1,5 @@
 const {verify} = require('../util/jwt')
-const {jwtAccessSecret,jwtRefreshSecret} = require('../config/config.default')
+const { jwtConfig } = require('../config/config.jwt')
 const MysqlMethods = require('../util/mysql')
 const Knex = require('../model/knex');
 // const {User} = require('../model')
@@ -29,7 +29,7 @@ module.exports = async (req, res, next) =>{
         let UserLoginStatus = false; // true：  已登录  false： 未登录
         let refreshTokenKey; // 存在的有效refresh_token
         // 判断访问令牌(access_token)是否过期（未过期获取用户id）
-        const accessDecodedToken = jwt.verify(access_token,jwtAccessSecret);
+        const accessDecodedToken = jwt.verify(access_token,jwtConfig.jwtAccessSecret);
         // console.log(accessDecodedToken)
         if(accessDecodedToken.Uuid !== undefined){ // access_token未过期，查询该用户id是否已登录（refresh_token是否存在redis）
             await redisDb.keys(REDIS_CONFIG.database._user, `Token-${accessDecodedToken.Uuid}#*`).then(answerKeys => {
