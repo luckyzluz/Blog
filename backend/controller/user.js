@@ -12,7 +12,7 @@ const {redisDb} = require('../util/redis');
 const logger =require("../util/logger");
 const User = require('../model/user.js');
 // ${moment(new Date()).format('YYYY-MM-DD HH:mm:ss')}"
-const {EmailVerifyConfig} = require('../config/config.default');
+const {EmailVerifyConfig} = require('../config/config.email');
 const {generateReToken, generateAcToken, existsReToken} = require('../util/token');
 const { REDIS_CONFIG, mysqlUserKey } = require("../config/config.db");
 
@@ -68,7 +68,8 @@ exports.register = async (req, res, next) => {
             delete user[0].user_pwd;
 
             // 开始redis写入
-            await redisDb.hSet(REDIS_CONFIG.database._user, 'UsersInfo', results[0], JSON.stringify(user));
+
+            await redisDb.hSet(REDIS_CONFIG.database._user, 'UsersInfo', results[0], JSON.stringify(user[0]));
 
             await redisDb.hSet(REDIS_CONFIG.database._user, 'Username.to.id', user[0].user_name, user[0].user_id);
 
@@ -109,7 +110,7 @@ exports.register = async (req, res, next) => {
         
     }catch (err){
         logger.reprocess_error("Account registration failed ("+err.message+")", res, req);
-        next(new Error(`账号注册失败`));
+        next(new Error(`账号注册失败`+err));
         // next(err)
     }
 }
@@ -147,7 +148,7 @@ exports.login = async (req, res, next) => {
         // 确保只发放一条有效 refresh_token
         redisDb.keys(REDIS_CONFIG.database._user,`Token-${req.user.user_id}#*`).then(answerKeys=>{
             // 判断是否存在有效 refresh_token
-            answerKeys.length !== 0 ? redisDb.del(1, answerKeys) : ''
+            answerKeys.length !== 0 ? redisDb.del(REDIS_CONFIG.database._user, answerKeys) : '';
         })
         // redis缓存用户信息(refresh_token)JSON.stringify()
         await redisDb.hMset(REDIS_CONFIG.database._user,`Token-${req.user.user_id}#${refresh_token}`,{...SourceInfoJson,access_token},60*60*24*30).then(res=>{
@@ -186,11 +187,11 @@ exports.login = async (req, res, next) => {
 exports.token = async (req, res, next) => {
     try{
         //处理请求
-        let refreshStatus = 0; // refresh_token状态: 0失效  1有效
+        let refreshStatus = 0; // 已发放refresh_token状态: 0失效  1有效
         let status = 0; // 0失败 1成功 2服务器未知错误
         let access_token;
         let refresh_token;
-        let Uuid;
+        let Uuid; // 用户标识id
 
         await verify(req.body.refresh_token,jwtRefreshSecret).then((xx)=>{
               // token未过期
@@ -200,11 +201,11 @@ exports.token = async (req, res, next) => {
                 // console.log(err)
                 refreshStatus = 0;
             })
-        refreshStatus == 1 ? await existsReToken(`Token-${Uuid}#${req.body.refresh_token}`).then(res => {
+        refreshStatus == 1 ? await existsReToken(`Token-${Uuid}#${req.body.refresh_token}`).then(res => { // 判断是否已作废（是否存在）
                 res ? refreshStatus = 1 : refreshStatus = 0;
         }) : ''
 
-        if(refreshStatus == 1){
+        if(refreshStatus == 1){ // 存在redis
             let SourceInfoJson = {
                 Uuid: Uuid, 
                 UserType: 'General',
@@ -214,10 +215,11 @@ exports.token = async (req, res, next) => {
             // 删除旧refresh_token  （有效）
             // await redisDb.del(1,`${Uuid}#${req.body.refresh_token}`);
             // 确保只发放一条有效 refresh_token
-            redisDb.keys(REDIS_CONFIG.database._user, `Token-${Uuid}#*`).then(answerKeys => {
-                // 判断是否存在有效 refresh_token
-                answerKeys.length !== 0 ? redisDb.del(REDIS_CONFIG.database._user, answerKeys) : ''
-            })
+            await redisDb.del(REDIS_CONFIG.database._user, `Token-${Uuid}#${req.body.refresh_token}`);
+            // redisDb.keys(REDIS_CONFIG.database._user, `Token-${Uuid}#*`).then(answerKeys => {
+            //     // 判断是否存在有效 refresh_token
+            //     answerKeys.length !== 0 ? redisDb.del(REDIS_CONFIG.database._user, answerKeys) : ''
+            // })
             // 生成token
             await generateReToken(SourceInfoJson).then(res=>{
                 refresh_token = res;
@@ -423,7 +425,8 @@ exports.delCurrentUser = async (req, res, next) =>{
         })
         
         // 删除mysql数据
-        await User.delete(req.user.user_id).then(res =>{
+        // console.log(req.user);
+        await User.delete(req.user[mysqlUserKey.id]).then(res => {
             res > 0 ? delStatus = 1 : delStatus = 0;
         })
         switch(delStatus){
