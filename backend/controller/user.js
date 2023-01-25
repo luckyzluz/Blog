@@ -1,7 +1,7 @@
 // const {User} = require('../model')
 // const jwt = require('../util/jwt');
 const {verify} = require('../util/jwt');
-const {jwtAccessSecret,jwtRefreshSecret} = require('../config/config.default');
+const { jwtConfig } = require('../config/config.jwt');
 // const MysqlMethods = require('../util/mysql');
 const md5 = require('../util/md5');
 // const moment = require('moment');
@@ -193,7 +193,7 @@ exports.token = async (req, res, next) => {
         let refresh_token;
         let Uuid; // 用户标识id
 
-        await verify(req.body.refresh_token,jwtRefreshSecret).then((xx)=>{
+        await verify(req.body.refresh_token,jwtConfig.jwtRefreshSecret).then((xx)=>{
               // token未过期
                 Uuid = xx.Uuid
                 refreshStatus = 1;
