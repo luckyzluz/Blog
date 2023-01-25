@@ -269,6 +269,13 @@ redisDb.del = async (dbNum, key) => {
         resolve(res);
     })
 }
+
+/**
+ * 
+ * @param {*} dbNum 
+ * @param {*} key 
+ * @returns 数组
+ */
 redisDb.keys = async (dbNum, key) => {
     return new Promise((resolve, reject) => {
         client.select(dbNum)
