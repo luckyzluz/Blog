@@ -153,34 +153,32 @@ let params={
 // fs.rmdirSync("./logs/2023/01", { recursive: true })
 // const logger = require("../util/logger")
 // logger.errorxx("xxxxxxxxx",res,req)
-const { jwtAccessSecret, jwtRefreshSecret } = require('../config/config.default');
-const {verify} = require('../util/jwt')
-const {generateReToken,existsReToken} = require('../util/token')
-// result= await generateReToken("xxx",req)
+// const jwt =require('jsonwebtoken')
+// const {jwtConfig} =require('../config/config.jwt')
+// const {verify} = require('../util/jwt');
 
-// const refreshDecodedToken =await  verify('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVdWlkIjoiOTAiLCJVc2VyVHlwZSI6IkdlbmVyYWwiLCJVc2VyQWdlbnQiOiJQb3N0bWFuUnVudGltZS83LjI5LjAiLCJJcCI6IjEyNy4wLjAuMSIsImlhdCI6MTY3NDI4Mzc1OSwiZXhwIjoxNjc0ODg4NTU5fQ.RbrTlDAm8rIb69tyIe-nOu4xyaVlXE-UjfdWZmS9BjU',jwtRefreshSecret).then((xx)=>{
-//         console.log(xx)
-//     }).catch(err=>{
-//         console.log(err.name)
+// await verify('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVdWlkIjoiMTQwIiwiVXNlclR5cGUiOiJHZW5lcmFsIiwiVXNlckFnZW50IjoiUG9zdG1hblJ1bnRpbWUvNy4yOS4wIiwiSXAiOiIxMjcuMC4wLjEiLCJpYXQiOjE2NzQ2MjY2ODksImV4cCI6MTY3NDYyODQ4OX0.g5ANTF06cR4FZ-kvb3kZ70GuDwAKByRZKpeFHNFoG4s',jwtConfig.jwtAccessSecret).then((xx)=>{
+//     // token未过期
+//     console.log(xx)
+//   }).catch(err=>{ // token 过期
+//       console.log(err)
+//   })
+const  Article  = require('../model/article.js')
+// const User = require('../model/user.js');
+// await User.all().then(res=>{
+//         console.log(res)
+//         result =res
 //     })
-// console.log(req.headers.authorization)
-// await existsReToken('*90#*').then(res=>{
-//     result= res
-// })
-// await redisDb.key(1,'90#*').then(res=>{
-//     result=res
-//     redisDb.del(1, res)
-// })
-// console.log(req.user)
-// let knexParams = {
-//     field: "*",
-//     options: {}
+// let rr = {
+//     fileld:'*',
+//     options:{
+//         art_id:'98'
+//     }
 // }
-// let mysqlUserKey ={
-//     id:"user_id"
-// }
-// knexParams.options[mysqlUserKey.id] = result[0];
-// console.log(knexParams)
+// await Article.all('desc').then(res=>{
+//     console.log(res)
+//     result =res
+// })
         res.status(200).json({
             code:200,
             status:result
