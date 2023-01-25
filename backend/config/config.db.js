@@ -81,11 +81,11 @@ let mysqlArtKey = { // 文章
     table:'lz_article',
     id: 'art_id',
     title: 'art_title',
-    password: 'user_pwd',
-    email: 'user_email',
+    password: 'art_pwd',
+    email: 'art_tags',
     avatar: 'user_avatar',
     ip: 'user_ip',
-    regtime: 'user_regtime',
+    regtime: 'art_ctime',
     nickname: 'user_nickname',
     level: 'user_level'
 }
