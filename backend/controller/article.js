@@ -5,7 +5,8 @@ const moment = require('moment')
 const { DateSort, DateSortx, getTimeInfo } = require('../util/utils')
 const { redisDb } = require('../util/redis')
 const ArtRedis =require("../util/getArticle")
-const { redisConfig } = require('../config/config.default')
+const { REDIS_CONFIG } = require('../config/config.db');
+const Article = require('../model/article.js');
 let artMysqlConfig={
     table:'lz_article',
     id:'art_id',//文章id表头名
@@ -17,87 +18,32 @@ let artMysqlConfig={
 //获取首页文章列表
 exports.getArticles = async (req, res, next) => {
     try {
-        //处理请求
+        //处理前端请求参数
         const {
-            limit = 10,
-            offset = 1,
-            tag,
-            author,
-            sort='desc'
+            limit = 10, //每页条数
+            offset = 1, // 页数
+            tag,  // 标签
+            author, // 作者
+            sort='desc' // 排序  desc降序  asc升序  heat  热度
         } = req.query
-        
-        // console.log(start, end)
-        // 筛选条件start
-        let filter = '';
-        if (tag) {
-            filter += `where tags like "%${tag}%"`
-        }
-        if (author) {
-            const user = await MysqlMethods.select('*', 'lz_member', `where username ="${author}"`)
-            if (user.length == 0) {
-                filter += filter == "" ? `where member_id =""` : `AND member_id =""`
-            } else {
-                filter += filter == "" ? `where member_id ="${user[0].id}"` : `AND member_id ="${user[0].id}"`
+        let result;
+        // 计算起始和结束下标
+        let mysqlSelectParams = {
+            field: '*',
+            options: {
+
             }
         }
-
-        // 筛选条件end
-        let result
-
-        if(redisConfig.isRedis){ // 是否开启了redis缓存
-           // 获取符合条件的文章id数组
-           let Idarts=[]
-            await ArtRedis.isAllIdArts('0','allIdArtsList',offset,limit,sort).then((res)=>{
-                Idarts=res;
-            })
-            // console.log(Idarts);
-        // 根据上面的id数组获取文章详情。
-        await ArtRedis.getArtsList('0','allArtsList',Idarts).then((res)=>{
-            result=res;
+        await Article.all(sort, offset, limit).then(res => {
+            result= res
         })
-        }else{
-            let art_result=await MysqlMethods.select(artMysqlConfig.string, 'lz_article', `order by ${artMysqlConfig.time} ${sort} limit ${(Number.parseInt(offset) - 1) * Number.parseInt(limit)},${Number.parseInt(limit)}`);
-            result=art_result
-        }
-        // xx=await getartlist('0',start,end)
-        //不走redis，直接从 mysql查
-        // filter += ` order by addtime desc limit ${(Number.parseInt(offset) - 1) * Number.parseInt(limit)},${Number.parseInt(limit)}`
-        // let filterx = ""
-        // filterx += ` `
-        // let art_result = await MysqlMethods.select('sql_calc_found_rows id,member_id,title,litpic,description,keywords,seo_title,hits,tid,FROM_UNIXTIME(addtime, "%Y-%m-%d") as addtime', 'lz_article', `${filter};select found_rows();select count(*) from lz_article`)
 
-        // console.log(allartsid)
-        // const count = art_result[1][0]["found_rows()"];
-        // let articles = art_result[0];
-        // 后期改删除
-        // for (let i = 0; i < articles.length; i++) {
-        //     let user_result = await MysqlMethods.select('id,username,litpic', 'lz_member', `where id=${articles[i].member_id}`);
-        //     let tid_result = await MysqlMethods.select('classname', 'lz_classtype', `where id=${articles[i].tid}`);
-        //     delete articles[i].member_id;
-        //     articles[i].author = user_result[0];
-        //     articles[i].tid = tid_result[0].classname;
-        //     articles[i].litpic = "http://localhost:3000" + articles[i].litpic
-        // }
-        // for (let i = 0; i < articles.length; i++) {
-        //     // await redisDb.hSetx('0','artLists',articles[i].id,JSON.stringify(articles[i])).then(res=>{
-        //     //     // console.log(res)
-        //     // })
-        //     let listkey = `art:${articles[i].id}`
-
-        //     // console.log(+new Date(articles[i].addtime) / 1000)
-        // }
-
-        // const total = art_result[2][0]["count(*)"];
         res.status(200).json({
             'code': 20000,
-            // "flag": true,
-            // "message": "操作成功",
+            "success": true,
+            "message": "操作成功",
             data: result,
-            // count,result
-            // total,
-            // getartlist,
-            // xx,
-            // xxy
+
         })
     } catch (err) {
         next(err)
@@ -140,7 +86,7 @@ exports.createArticle = async (req, res, next) => {
         let results = await MysqlMethods.insert('lz_article', ['title', 'tags', 'member_id', 'body', 'description', 'tid', 'litpic', 'addtime'], [`"${article.title}"`, `"${article.tagList.toString()}"`, `"${article.member_id}"`, `"${article.body}"`, `"${article.tabloid}"`, `"${article.type}"`, `"${article.litpic}"`, `"${Math.floor(Date.now() / 1000)}"`]);
         let status=0;//是否成功
         let msg;
-        if(results.affectedRows==1 && redisConfig.isRedis){
+        if(results.affectedRows==1 && REDIS_CONFIG.isRedis){
             await redisDb.lPush('0', 'allIdArtsList', results.insertId).then(async res => {
                 if(res>0){
                     status=1;
