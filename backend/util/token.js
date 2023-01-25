@@ -1,15 +1,15 @@
-let ReTokenExpiresIn = 60 * 60 * 24 * 7; // //设置jwt过期时间(一天 :60 * 60 * 24)
-let AcTokenExpiresIn = 60 * 30;
+// let ReTokenExpiresIn = 60 * 60 * 24 * 7; // //设置jwt过期时间(一天 :60 * 60 * 24)
+// let AcTokenExpiresIn = 60 * 30;
 const jwt = require('./jwt');
-const { jwtAccessSecret, jwtRefreshSecret } = require('../config/config.default');
 const {redisDb} = require('./redis');
 const { REDIS_CONFIG } = require("../config/config.db");
+const { jwtConfig } = require('../config/config.jwt');
 module.exports = {
     // 生成refresh_token
     generateReToken: async(info, expiresIn) => {
         return new Promise((resolve, reject) => {
-            const refresh_token= jwt.sign(info,jwtRefreshSecret,{
-                expiresIn: expiresIn ? expiresIn : ReTokenExpiresIn
+            const refresh_token= jwt.sign(info,jwtConfig.jwtRefreshSecret,{
+                expiresIn: expiresIn ? expiresIn : jwtConfig.ReTokenExpiresIn
             })
             resolve(refresh_token);
         })
@@ -17,8 +17,8 @@ module.exports = {
     // 生成access_token
     generateAcToken: async(info, expiresIn) => {
         return new Promise((resolve, reject) => {
-            const access_token = jwt.sign(info,jwtAccessSecret,{
-                expiresIn: expiresIn ? expiresIn : AcTokenExpiresIn
+            const access_token = jwt.sign(info,jwtConfig.jwtAccessSecret,{
+                expiresIn: expiresIn ? expiresIn : jwtConfig.AcTokenExpiresIn
             })
             resolve(access_token);
         })
