@@ -5,44 +5,62 @@ const moment = require('moment')
 const { DateSort, DateSortx, getTimeInfo } = require('../util/utils')
 const { redisDb } = require('../util/redis')
 const ArtRedis =require("../util/getArticle")
-const { REDIS_CONFIG } = require('../config/config.db');
+const { REDIS_CONFIG, mysqlArtKey } = require('../config/config.db');
 const Article = require('../model/article.js');
-let artMysqlConfig={
-    table:'lz_article',
-    id:'art_id',//文章id表头名
-    time:'art_ctime',
-    string:'*'
-   //  art_id,art_title,user_id,keywords,comment_count,istop,ishot,art_tags,art_cover,art_brief,art_content,art_ctime
-}
+const knex = require('../model/knex');
+
+const { from } = require('form-data')
 
 //获取首页文章列表
 exports.getArticles = async (req, res, next) => {
     try {
-        //处理前端请求参数
-        const {
-            limit = 10, //每页条数
+        //处理前端请求参数comment_count,like,modified,views
+        const {https://www.imcharon.com/?orderby=
+            // limit = 10, //每页条数
             offset = 1, // 页数
-            tag,  // 标签
-            author, // 作者
-            sort='desc' // 排序  desc降序  asc升序  heat  热度
+            orderby, //按照排序
+            // tag,  // 标签
+            // author, // 作者
+            // sort='desc' // 排序  desc降序  asc升序  heat  热度
         } = req.query
-        let result;
-        // 计算起始和结束下标
-        let mysqlSelectParams = {
-            field: '*',
-            options: {
-
-            }
-        }
-        await Article.all(sort, offset, limit).then(res => {
-            result= res
+        let artResult;
+        let isRedisArtsInfo = false; // 是否存在文章信息
+        let AllArtInfo = [];
+        // 查询redis是否存在
+        await redisDb.exists(REDIS_CONFIG.database._article, 'ArtsInfo').then(res => {
+            res !== 0 ? isRedisArtsInfo = true : '';
         })
+        // 不存在则获取mysql文章全部数据
+        isRedisArtsInfo ? '' : AllArtInfo =await knex('lz_article').select().orderBy(mysqlArtKey.createtime, 'desc');
+        // 这里对获取的数据处理，进行redis缓存
+        let RedisArtsInfo ={}
+        AllArtInfo.forEach((value, key, iterable) => {
+            RedisArtsInfo[value[mysqlArtKey.id]] = value;
+        })
+        // console.log(RedisArtsInfo)
+        // 确定文章数剧mysql查询成功，进行文章全部信息缓存
+        AllArtInfo.length !== 0 ? await redisDb.hMset(REDIS_CONFIG.database._article, 'ArtsInfo', RedisArtsInfo) : '';
+
+        await redisDb.hGet(REDIS_CONFIG.database._article, )
+
+        // let mysqlSelectParams = {
+        //     field: '*',
+        //     options: {
+        //         offset: 1,
+        //         limit: 10,
+        //         order: 'desc',
+        //         // remove: {'art_id', [110,105]}
+        //     }
+        // }
+        // await Article.all(mysqlSelectParams).then(res => {
+        //     artResult= res
+        // })
 
         res.status(200).json({
             'code': 20000,
             "success": true,
             "message": "操作成功",
-            data: result,
+            data: AllArtInfo,
 
         })
     } catch (err) {

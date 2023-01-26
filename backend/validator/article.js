@@ -12,10 +12,10 @@ const ArtRedis =require("../util/getArticle")
 exports.getArticles = validate([
     // async (res,req,next)=>{
         query('offset').custom(async value=>{
-            if(value<=0){
+            if(value<0){
                 // return Promise.reject('只允许是正整数并且要大于于等于 1')
             //     //同步:失败
-                // throw new Error('只允许是正整数并且要大于于等于 1')
+                throw new Error('只允许是正整数并且要大于于等于 0')
             }
         })
     // }
