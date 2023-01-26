@@ -8,17 +8,24 @@ class Base{
       this.ordername = mysqlUserKey.regtime;
       this.id = mysqlUserKey.id;
     }else if(props == 'lz_article'){
-      this.ordername = mysqlArtKey.regtime;
+      this.ordername = mysqlArtKey.createtime;
       this.id = mysqlArtKey.id;
     }
   }
 
   // 查找
-  all (order, offset, limit){
-    let orders= order ? order : 'desc';
-    let pages= offset ? offset - 1 : 0;
-    let pieces= limit ? limit : 10;
-    return knex(this.table).select().orderBy(this.ordername, orders).limit(pieces).offset(pages);
+
+  /**
+   * 
+   * @param {*} params 
+   * @returns 
+   */
+  all (params){
+    let options = params.options;
+    let order= options.order ? options.order : 'desc';
+    let offset= options.offset ? options.offset - 1 : 0;
+    let limit= options.limit ? options.limit : 10;
+    return knex(this.table).select().orderBy(this.ordername, order).limit(limit).offset(offset).whereNot(options.remove);
   }
 
   /**
