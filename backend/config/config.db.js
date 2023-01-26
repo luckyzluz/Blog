@@ -82,12 +82,20 @@ let mysqlArtKey = { // 文章
     id: 'art_id',
     title: 'art_title',
     password: 'art_pwd',
-    email: 'art_tags',
-    avatar: 'user_avatar',
-    ip: 'user_ip',
-    regtime: 'art_ctime',
+    tag: 'art_tags',
+    type: 'art_type',
+    avatar: 'art_author',
+    digg: 'digg_count',
+    view: 'view_count',
+    comment_count: 'comment_count',
+    status: 'art_status',
+    createtime: 'art_createtime',
+    revisetime: 'art_revisetime',
+    brief: 'art_brief',
     nickname: 'user_nickname',
-    level: 'user_level'
+    content: 'art_content',
+    level: 'user_level',
+    comment_count: 'comment_count'
 }
 module.exports = {
     MYSQL_CONFIG,
