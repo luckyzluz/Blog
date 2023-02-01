@@ -243,5 +243,14 @@ module.exports = {
                 ("00" + o[k]).substr(("" + o[k]).length));
         }
         return format;
+    },
+    sleep: function (time) {
+        return new Promise((resolve) => {
+            setTimeout(function() {
+                resolve();
+            }, time || 1000);
+        });
     }
+
+
 }
