@@ -1,9 +1,14 @@
 const { reject } = require('async');
-var { redis, createClient } = require('redis');
+var { redis,defineScript, createClient } = require('redis');
 var { REDIS_CONFIG } = require('../config/config.db')
 let _user = REDIS_CONFIG.database._user
 let _article = REDIS_CONFIG.database._article
 var redisDb = {};
+var fs = require('fs');
+const {sleep} = require('../util/utils');
+const { resolve } = require('path');
+const Redlock = require("redlock");
+// const Redis = require("ioredis");
 const options = {
     host: REDIS_CONFIG.host,
     port: REDIS_CONFIG.port,
@@ -28,14 +33,63 @@ const options = {
     }
     // 之后重新连接
     // return Math.min(options.attempt * 100, 3000);
-    }
+    },
+    scripts: {
+        unLock: defineScript({
+          NUMBER_OF_KEYS: 1,
+          SCRIPT:
+            'if redis.call("get",KEYS[1]) == ARGV[1] then return redis.call("del",KEYS[1]) else return 0  end',
+          transformArguments(key,value) {
+            return [key,value];       
+          },
+          transformReply(reply) {
+            return reply;
+          }
+        })
+      }
 }
-
+const Redis = require("ioredis");
 // 生成redis的client
-const client = createClient(options);
-client.on('error', (err) => console.log('Redis Client Error', err));
-client.on('ready', () => console.log('Redis Client Ready(连接成功)'));
-client.connect();
+// const client = createClient(options);
+
+  const client = new Redis({
+    port: REDIS_CONFIG.port, // Redis port
+    host: REDIS_CONFIG.host, // Redis host
+    // username: "default", // needs Redis >= 6
+    password: REDIS_CONFIG.password,
+    db: 0, // Defaults to 0
+  });;
+const redlock = new Redlock(
+    // 每个独立的redis节点应该有一个客户端或集群。
+    [client], {
+    // 预期时钟漂移；有关详细信息，请参阅：
+    // http://redis.io/topics/distlock
+    driftFactor: 0.01, // 乘以锁定ttl以确定漂移时间
+    retryCount: 5, // Redlock尝试锁定资源的最大次数在出错之前。
+
+    // 两次尝试之间的时间（毫秒）
+    retryDelay: 200, // 时间（毫秒）
+
+    // 随机添加到重试的最大时间（毫秒）提高高争用情况下的性能
+    // see https://www.awsarchitectureblog.com/2015/03/backoff.html
+    retryJitter: 200, // 时间（毫秒）
+
+    // 自动延长前锁上的最短剩余时间尝试使用“using”API。
+    automaticExtensionThreshold: 500, // 时间（毫秒）
+});
+redlock.on("error", (error) => {
+    // Ignore cases where a resource is explicitly marked as locked on a client.
+    if (error) {
+      return;
+    }
+  
+    // Log all other errors.
+    // console.error(error);
+  });
+// client.on('error', (err) => console.log('Redis Client Error', err));
+// client.on('ready', () => console.log('Redis Client Ready(连接成功)'));
+// client.connect();
+
 /**
  *
  * @param dbNum 库号
@@ -51,7 +105,7 @@ client.connect();
             res=client.set(key, Buffer.from(value));
         }else if(typeof value === 'object'){
             for (let item in value) {
-                res=typeof value[item]==='object'?client.hSet(key, item, Buffer.from(JSON.stringify(value[item]))):client.hSet(key, item, Buffer.from(value[item]));
+                res=typeof value[item]==='object'?client.hset(key, item, Buffer.from(JSON.stringify(value[item]))):client.hset(key, item, Buffer.from(value[item]));
             }
         }
         if(expire){
@@ -64,7 +118,7 @@ redisDb.hSet =async (dbNum,hash_key,sub_key,value,expire) => {
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
         let res;
-        res=client.hSet(hash_key,sub_key,value);
+        res=client.hset(hash_key,sub_key,value);
         if(expire){
             client.expire(hash_key,expire);
         }
@@ -91,12 +145,14 @@ redisDb.get = async (dbNum,key) => {
 redisDb.hGetAll = async (dbNum,key) => {
      return new Promise(async(resolve,reject)=>{
         client.select(dbNum);
-        let result=await client.hGetAll(key);
+        let result=await client.hgetall(key);
+        // console.log(result)
         for(let item in result){
             try {
+                // console.log(result[item])
                 let obj=JSON.parse(result[item]);
                 if(typeof obj == 'object' && obj ){
-                    result[item]=JSON.parse(result[item])
+                    result[item]=obj
                 }
             } catch(err) {
             } 
@@ -114,7 +170,7 @@ redisDb.hGetAll = async (dbNum,key) => {
  redisDb.hGet = async (dbNum,hash_key,sub_key) => {
     return new Promise((resolve,reject)=>{
        client.select(dbNum);
-       let res=client.hGet(hash_key,sub_key);
+       let res=client.hget(hash_key,sub_key);
        resolve(res);
     })
 }
@@ -122,15 +178,17 @@ redisDb.hMset=async(dbNum,hash_key,obj,expire)=>{
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
         let emmm=[];
-        for (var key in obj) {
-            emmm.push(key)
-            emmm.push(JSON.stringify(obj[key]))
-        }
-        let cmd=['HMSET',hash_key];
-        emmm.unshift.apply(emmm,cmd)
+        // for (var key in obj) {
+        //     emmm.push(key)
+        //     emmm.push(JSON.stringify(obj[key]))
+        // }
+        // let cmd=['HMSET',hash_key];
+        // emmm.unshift.apply(emmm,cmd);
         // emmm.push.apply(emmm,cmd);
-        // console.log(cmd)
-        let res=client.sendCommand(emmm);
+        // console.log(emmm)
+        // let res=client.sendCommand(emmm);
+        let res=client.hmset(hash_key,obj)
+
         if(expire){
             client.expire(hash_key,expire);
         }
@@ -141,35 +199,38 @@ redisDb.hMget=async(dbNum,hash_key,sub_arr)=>{
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
 
-        let cmd=['HMGET',hash_key];
+        // let cmd=['HMGET',hash_key];
         
-        let ke=sub_arr;
-        ke.unshift.apply(ke,cmd)
+        // let ke=sub_arr;
+        // ke.unshift.apply(ke,cmd)
         // cmd.concat(sub_arr);
-        
-        let res=client.sendCommand(ke);
+        // console.log(ke)
+        // let res=client.sendCommand(ke);
+        // let res=client.hmget(hash_key,'xx')
         resolve(res);
      })
 }
 redisDb.hdel=async(dbNum,hash_key,sub_arr)=>{
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
-        let res=client.HDEL(hash_key,sub_arr);
+        let res=client.hdel(hash_key,sub_arr);
         resolve(res);
      })
 }
 // redis------list
+// 从列表List的右边插入一个元素
 redisDb.rPush = async (dbNum,key,value) => {
     return new Promise((resolve,reject)=>{
        client.select(dbNum);
-       let result=client.rPush(key,value);
+       let result=client.rpush(key,value);
        resolve(result);
     })
 }
+// 从列表List的最左边插入一个元素
 redisDb.lPush = async (dbNum,key,value) => {
     return new Promise((resolve,reject)=>{
        client.select(dbNum);
-       let result=client.lPush(key,value);
+       let result=client.lpush(key,value);
        resolve(result);
     })
 }
@@ -177,28 +238,29 @@ redisDb.lrem=async(dbNum,key,range,value)=>{
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
         
-        let result=client.lRem(key,range,value);
+        let result=client.lrem(key,range,value);
         resolve(result);
     })
 }
+// 打印当前列表List的元素个数
 redisDb.llen=async(dbNum,key)=>{
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
-        let result=client.lLen(key);
+        let result=client.llen(key);
         resolve(result);
     })
 }
 redisDb.lRange=async(dbNum,key,start,end)=>{
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
-        let result=client.lRange(key,start,end);
+        let result=client.lrange(key,start,end);
         resolve(result);
     })
 }
 redisDb.ltrim=async(dbNum,key,start,end)=>{
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
-        let result=client.lTrim(key,start,end);
+        let result=client.ltrim(key,start,end);
         resolve(result);
     })
 }
@@ -207,8 +269,8 @@ redisDb.zAdd =async (dbNum,zset_key, score, value,expire) => {
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
         let res;
-        res = client.sendCommand(['ZADD', zset_key,score ,value])
-        // client.ZADD("myzset", 2 ,"two" ,3,"three");
+        // res = client.sendCommand(['ZADD', zset_key,score ,value])
+        res = client.zadd("sortedSet",99, "33333");
         if(expire){
             client.expire(key,expire);
         }
@@ -228,16 +290,30 @@ redisDb.test =async (dbNum,key, start, end,expire) => {
         resolve(res);
     })
 }
-redisDb.expire = async (dbNum,key,value,expire) => {
+
+/**
+ * 
+ * @param {*} dbNum 
+ * @param {*} key 
+ * @param {*} expire 
+ * @param {*} model
+ * @returns 操作成功数据的数量
+ */
+// NX--仅当密钥没有到期时设置到期
+// XX--仅当密钥已有到期时间时才设置到期时间
+// GT--仅当新到期时间大于当前到期时间时才设置到期时间
+// LT--仅当新到期时间小于当前到期时间时才设置到期时间
+redisDb.expire = async (dbNum,key,expire,model) => {
     return new Promise((resolve,reject)=>{
         client.select(dbNum)
         let res;
-        res=client.expire(key,expire);
+        res =client.expire(key,expire)
+        //  model?:client.expire(key,expire);
         resolve(res);
     })
 }
 
-// 是否存在
+// 是否存在1   0
 redisDb.exists = async (dbNum,key)=>{
     return new Promise((resolve,reject)=>{
         client.select(dbNum)
@@ -246,27 +322,25 @@ redisDb.exists = async (dbNum,key)=>{
         resolve(res);
     })
 }
-// HEXISTS 
+// HEXISTS 1   0
 redisDb.hexists = async (dbNum, hash_key, sub_key) => {
     return new Promise((resolve, reject) => {
         client.select(dbNum)
         let res;
-        res=client.HEXISTS(hash_key,sub_key);
+        res=client.hexists(hash_key,sub_key);
         resolve(res);
     })
 }
 /**
  * 
  * @param {*} dbNum 数据库db
- * @param {*} key 字符串或者数组（多个）
- * @returns 数组
+ * @param {*} key 字符串或者数组（多个key）
+ * @returns 操作数量
  */
 redisDb.del = async (dbNum, key) => {
     return new Promise((resolve, reject) => {
         client.select(dbNum)
-        let res;
-        res=client.DEL(key);
-        resolve(res);
+        resolve(client.del(key));
     })
 }
 
@@ -274,17 +348,34 @@ redisDb.del = async (dbNum, key) => {
  * 
  * @param {*} dbNum 
  * @param {*} key 
- * @returns 数组
+ * @returns 数组(key)
  */
 redisDb.keys = async (dbNum, key) => {
     return new Promise((resolve, reject) => {
         client.select(dbNum)
-        let res;
-        res=client.keys(key);
-        resolve(res);
+        resolve(client.keys(key));
     })
 }
+
 // 导出
 module.exports = {
-    redisDb
+    redisDb,
+    client,
+    redlock
 }
+
+// redlock  使用
+// async function test(key, ttl, client) {
+//     try {
+//         const lock = await redlock.lock(key, ttl);
+
+//         console.log(client, lock.value);
+//         // do something ...
+//         await sleep(1113);
+//         return lock.unlock();
+//     } catch(err) {
+//         console.error(client, err.name);
+//     }
+// }
+// test('name1', 10000, 'client1')
+// test('name1', 10000, 'client2')
