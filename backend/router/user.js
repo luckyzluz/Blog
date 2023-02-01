@@ -26,20 +26,23 @@ router.post('/users/login',userValidator.login,userCtrl.login);
 router.post('/users/token',userCtrl.token);
 // userValidator.retoken,
 //用户注册
-router.post('/users',userValidator.register,userCtrl.register); // 3.通过验证，执行具体的控制器处理
+router.post('/users/register',userValidator.register,userCtrl.register); // 3.通过验证，执行具体的控制器处理
 
 
 //获取当前登录用户
-router.get('/user',auth,userCtrl.getCurrentUser);
+router.get('/users/user',auth,userCtrl.getCurrentUser);
 
 
 //更新当前登录用户userValidator.put
-router.put('/users/user',auth,userCtrl.updateCurrentUser);
+router.put('/users/update',auth,userCtrl.updateCurrentUser);
 
 //更新当前登录用户密码 
 router.post('/users/cipher',auth,userValidator.cipher,userCtrl.updatepasswordUser);
 
-// 注销当前用户
+// 退出登录
+router.post('/users/logout', auth, userCtrl.logout);
+
+// 删除当前用户
 router.delete('/users/del', auth, userCtrl.delCurrentUser);
 
 module.exports = router;
