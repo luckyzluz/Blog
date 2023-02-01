@@ -45,6 +45,8 @@ app.use('/api', router)
 // const bodyParser = require('body-parser')
 // app.use(errorHandler())
 
+// 定时任务
+// var myTask= require('./Scheduledtasks/test');
 
 app.get('/uploads/*', function (req, res) {
   res.sendFile( __dirname + "/" + req.url );
