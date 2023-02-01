@@ -3,7 +3,7 @@ const moment = require('moment')
 const { DateSort, DateSortx, getTimeInfo } = require('../util/utils')
 const nodemail = require('../util/nodemailer')
 const { redisDb } = require('../util/redis');
-const { EmailVerifyConfig } = require('../config/config.email');
+const { EmailVerifyConfig,EffectiveTime } = require('../config/config.email');
 const { REDIS_CONFIG } = require("../config/config.db")
 // let isEmailVerify=false;// 是否启用邮箱验证码
 
@@ -30,10 +30,10 @@ exports.email = async (req, res, next) => {
             // status  0：发送失败  1：成功 2：缓存失败 3:已发送
 
             // 查询是否已发放验证码
-            await redisDb.get(REDIS_CONFIG.database._user, user.email).then(res => {
+            await redisDb.get(REDIS_CONFIG.database._user, `VerifyCode:${user.email}`).then(res => {
                 res == null ? '' : status = 3;
             })
-            console.log(status)
+            // console.log(status)
             if(status !== 3){
                 // 发送验证邮件
                 await nodemail(user.email,code).then(res => {
@@ -46,7 +46,7 @@ exports.email = async (req, res, next) => {
             }
 
             if(status == 1){
-                await redisDb.set(REDIS_CONFIG.database._user, user.email, code, 5*60).then(res=>{
+                await redisDb.set(REDIS_CONFIG.database._user, `VerifyCode:${user.email}`, code, EffectiveTime).then(res=>{
                     res == 'OK' ? status = 1 : status = 2;
                 });
             }

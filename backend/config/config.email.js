@@ -15,6 +15,7 @@ module.exports = {
             pass: 'eckhfvvstjendjgh' //邮箱的授权码，不是注册时的密码,等你开启的stmp服务自然就会知道了
           }
         },
+        EffectiveTime: 5*60,
         Template: 'letter'
       }
 }
