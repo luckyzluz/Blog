@@ -179,6 +179,52 @@ const  Article  = require('../model/article.js')
 //     console.log(res)
 //     result =res
 // })
+
+// const uniqid = require('uniqid');
+const {client,redisDb,redlock} = require("../util/redis")
+const uuidv1 = require('uuid/v1');
+// 
+// const RedisLock = require('../util/RedisLock')
+const {sleep} = require('../util/utils')
+
+
+//  console.log('client:'+client)
+
+// console.log('client1:'+client1)
+// const {QueryMysqlUserInfos} = require('../util/User')
+// async function test(key, ttl, client) {
+//     // try {
+//         const lock = await redlock.lock(key, ttl,(err,result)=>{
+//             //  lock = 
+//             // console.log(result)
+//             err == null ? console.log(111):console.log(333)
+//         });
+
+//         // console.log(client, lock.value);
+//         // lock.value==null ? console.log(111) : console.log(22222)
+//         // do something ...
+//         await sleep(3000);
+//         return lock.unlock();
+//     // } catch(err) {
+//     //     err ? console.log(33) : console.log(44)
+//     //     // console.error(client, err.name);
+//     // }
+// }
+// result= await QueryMysqlUserInfos('wang')
+
+// test('name1', 10000, 'client1')
+// test('name1', 10000, 'client2')
+// result = await redisDb.lock();
+
+// result = await redisDb.redlock(0,'categorys')
+// result = await redisDb.hGetAll(0,'categorys')
+// test('name1', 10000, 'client1');'UsersInfo','90'
+// await sleep(200)
+// test('name1', 10000, 'client2');
+
+
+
+
         res.status(200).json({
             code:200,
             status:result
