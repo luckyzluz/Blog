@@ -9,6 +9,7 @@ const { resolveContent } = require('nodemailer/lib/shared');
 const {redisDb} = require('../util/redis');
 const { REDIS_CONFIG, mysqlUserKey } = require("../config/config.db");
 const { User } = require("../model");
+const { QueryUserInfos } =require('../util/User');
 
 module.exports = async (req, res, next) =>{
     try{
@@ -27,12 +28,13 @@ module.exports = async (req, res, next) =>{
 
         // console.log("access_token "+access_token)
         let UserLoginStatus = false; // true：  已登录  false： 未登录
-        let refreshTokenKey; // 存在的有效refresh_token
+        let refreshTokenKey; // 存在的有效refresh_token的key
+
         // 判断访问令牌(access_token)是否过期（未过期获取用户id）
         const accessDecodedToken = jwt.verify(access_token,jwtConfig.jwtAccessSecret);
         // console.log(accessDecodedToken)
         if(accessDecodedToken.Uuid !== undefined){ // access_token未过期，查询该用户id是否已登录（refresh_token是否存在redis）
-            await redisDb.keys(REDIS_CONFIG.database._user, `Token-${accessDecodedToken.Uuid}#*`).then(answerKeys => {
+            await redisDb.keys(REDIS_CONFIG.database._user, `Token:${accessDecodedToken.Uuid}#*`).then(answerKeys => {
                 // 判断是否存在有效 refresh_token
                 answerKeys.length !== 0 ? UserLoginStatus = true : '';
                 answerKeys.length !== 0 ? refreshTokenKey = answerKeys[0] : '';
@@ -43,7 +45,7 @@ module.exports = async (req, res, next) =>{
             if(accessDecodedToken.Uuid !== undefined){ // 未过期，继续查询redis中有效access_token
                 await redisDb.hGet(REDIS_CONFIG.database._user, refreshTokenKey,'access_token').then(res => {
                     // 判断 有效期内的access_token和refresh_token发放的是否相同
-                    if(res !== `"${access_token}"`){ // 不一致（已作废）
+                    if(res !== `${access_token}`){ // 不一致（已作废）
                         // 抛出错误TokenVoidedError
                         // throw new Error('TokenVoidedError');
                         throw { name: "TokenVoidedError", message: "accessToken has been voided" };
@@ -59,24 +61,17 @@ module.exports = async (req, res, next) =>{
         }
         
         // 这里获取用户信息，挂载到req.user
-        let user = await redisDb.hGet(REDIS_CONFIG.database._user, 'UsersInfo', accessDecodedToken.Uuid);
-
-        if(user !== null){ // redis存在用户信息
-            req.user = JSON.parse(user);
-        }else{ // 不存在，且
-            let mysqlSelectParams = {
-                field: '*',
-                options: {}
-            }
-            mysqlSelectParams.options[mysqlUserKey.table] = accessDecodedToken.Uuid;
-            user = await User.select(mysqlSelectParams);
-            delete user[0][mysqlUserKey.password];
-            req.user = user[0];
-        }
-        // console.log(req.user)
+        // let mysqlSelectParams = {}
+        // mysqlSelectParams[mysqlUserKey.id] = accessDecodedToken.Uuid;
+        // let user = await QueryUserInfos(mysqlSelectParams);
+        // console.log(user)
+        let user={} ;
+        user[mysqlUserKey.id] = accessDecodedToken.Uuid;
+        // console.log(user)
+        req.user = user;
         next()
     }catch(err){
-        // console.log("err"+err)
+        console.log("err"+err)
         
         switch (err.name) {
             case 'UserNotLoggedIn':
@@ -148,36 +143,36 @@ module.exports = async (req, res, next) =>{
 /**
  * 校验token是否过期
  * */
-function verson(req){
-    var token=req.headers.token;
-    let con = jwt.verify(token, 'x-token', (err, decoded) => {
-        if (err) {
-            console.log(err);
-            if(err.name == 'TokenExpiredError'){//token过期
-                let str = {
-                    iat:1,
-                    exp:0,
-                    msg: 'token过期'
-                }
-                return str;
-            }else if(err.name == 'JsonWebTokenError'){//无效的token
-                let str = {
-                    iat:1,
-                    exp:0,
-                    msg: '无效的token'
-                }
-                return str;
-            }
-        }else{
-            return decoded;
-        }
-    })
+// function verson(req){
+//     var token=req.headers.token;
+//     let con = jwt.verify(token, 'x-token', (err, decoded) => {
+//         if (err) {
+//             console.log(err);
+//             if(err.name == 'TokenExpiredError'){//token过期
+//                 let str = {
+//                     iat:1,
+//                     exp:0,
+//                     msg: 'token过期'
+//                 }
+//                 return str;
+//             }else if(err.name == 'JsonWebTokenError'){//无效的token
+//                 let str = {
+//                     iat:1,
+//                     exp:0,
+//                     msg: '无效的token'
+//                 }
+//                 return str;
+//             }
+//         }else{
+//             return decoded;
+//         }
+//     })
  
  
-    console.log(con);
-    if(con.iat<con.exp){
-        return true //开始时间小于结束时间，代表token还有效
-    }else{
-        return false
-    }
-}
+//     console.log(con);
+//     if(con.iat<con.exp){
+//         return true //开始时间小于结束时间，代表token还有效
+//     }else{
+//         return false
+//     }
+// }
