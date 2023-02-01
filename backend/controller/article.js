@@ -14,7 +14,7 @@ const { from } = require('form-data')
 //获取首页文章列表
 exports.getArticles = async (req, res, next) => {
     try {
-        //处理前端请求参数comment_count,like,modified,views
+        //处理前端请求参数comment_count,like,last,views
         const {https://www.imcharon.com/?orderby=
             // limit = 10, //每页条数
             offset = 1, // 页数
@@ -25,36 +25,73 @@ exports.getArticles = async (req, res, next) => {
         } = req.query
         let artResult;
         let isRedisArtsInfo = false; // 是否存在文章信息
+        let isRedisIdArtsList = false; // 是否存在文章id列表
+        let isRedisTypeArtsList = false; // 是否存在文章类型
         let AllArtInfo = [];
-        // 查询redis是否存在
+        // 查询redis是否存在  文章信息以及文章id信息
         await redisDb.exists(REDIS_CONFIG.database._article, 'ArtsInfo').then(res => {
             res !== 0 ? isRedisArtsInfo = true : '';
         })
-        // 不存在则获取mysql文章全部数据
-        isRedisArtsInfo ? '' : AllArtInfo =await knex('lz_article').select().orderBy(mysqlArtKey.createtime, 'desc');
-        // 这里对获取的数据处理，进行redis缓存
-        let RedisArtsInfo ={}
-        AllArtInfo.forEach((value, key, iterable) => {
-            RedisArtsInfo[value[mysqlArtKey.id]] = value;
+        await redisDb.exists(REDIS_CONFIG.database._article, 'IdArtsList').then(res => {
+            res !== 0 ? isIdArtsList = true : '';
         })
+        // 不存在则获取mysql文章全部数据
+        isRedisArtsInfo && isRedisIdArtsList ? '' : AllArtInfo =await knex('lz_article').select().orderBy(mysqlArtKey.createtime, 'desc');
         // console.log(RedisArtsInfo)
+
         // 确定文章数剧mysql查询成功，进行文章全部信息缓存
-        AllArtInfo.length !== 0 ? await redisDb.hMset(REDIS_CONFIG.database._article, 'ArtsInfo', RedisArtsInfo) : '';
+        if(AllArtInfo.length !== 0){
+            if(!isRedisArtsInfo){
+                // 这里对获取的文章数据处理，进行redis缓存
+                let RedisArtsInfo ={}
+                AllArtInfo.forEach((value, key, iterable) => {
+                RedisArtsInfo[value[mysqlArtKey.id]] = value;
+                })
+                await redisDb.hMset(REDIS_CONFIG.database._article, 'ArtsInfo', RedisArtsInfo);
+            }
+            if(!isRedisIdArtsList){
+                // 处理文章id
+                let IdArtsList=[];
+                AllArtInfo.forEach((value, key, iterable) => {
+                    IdArtsList.push(value[mysqlArtKey.id]);
+                })
+                // console.log(IdArtsList)
+                // 将全部文章id存储redis
+                await redisDb.rPush(REDIS_CONFIG.database._article, 'IdArtsList', IdArtsList);
+            }
+        }
 
-        await redisDb.hGet(REDIS_CONFIG.database._article, )
 
-        // let mysqlSelectParams = {
-        //     field: '*',
-        //     options: {
-        //         offset: 1,
-        //         limit: 10,
-        //         order: 'desc',
-        //         // remove: {'art_id', [110,105]}
-        //     }
-        // }
-        // await Article.all(mysqlSelectParams).then(res => {
-        //     artResult= res
-        // })
+        // await redisDb.hGet(REDIS_CONFIG.database._article, )
+
+        // {
+        //     "class":"喜剧,爱情,恐怖,动作,科幻,剧情,战争,警匪,犯罪,动画,奇幻,武侠,冒险,枪战,恐怖,悬疑,惊悚,经典,青春,文艺,微电影,古装,历史,运动,农村,儿童,网络电影",
+        //     "area":"大陆,香港,台湾,美国,法国,英国,日本,韩国,德国,泰国,印度,意大利,西班牙,加拿大,其他",
+        //     "lang":"国语,英语,粤语,闽南语,韩语,日语,法语,德语,其它","year":"2018,2017,2016,2015,2014,2013,2012,2011,2010",
+        //     "star":"王宝强,黄渤,周迅,周冬雨,范冰冰,陈学冬,陈伟霆,郭采洁,邓超,成龙,葛优,林正英,张家辉,梁朝伟,徐峥,郑恺,吴彦祖,刘德华,周星驰,林青霞,周润发,李连杰,甄子丹,古天乐,洪金宝,姚晨,倪妮,黄晓明,彭于晏,汤唯,陈小春",
+        //     "director":"冯小刚,张艺谋,吴宇森,陈凯歌,徐克,王家卫,姜文,周星驰,李安",
+        //     "state":"正片,预告片,花絮",
+        //     "version":"高清版,剧场版,抢先版,OVA,TV,影院版"}
+
+        // {"class":"情感,科幻,热血,推理,搞笑,冒险,萝莉,校园,动作,机战,运动,战争,少年,少女,社会,原创,亲子,益智,励志,其他",
+        // "area":"国产,日本,欧美,其他",
+        // "lang":"国语,英语,粤语,闽南语,韩语,日语,其它",
+        // "year":"2018,2017,2016,2015,2014,2013,2012,2011,2010,2009,2008,2007,2006,2005,2004","star":"","director":"","state":"",
+        // "version":"TV版,电影版,OVA版,真人版"}
+
+        // {"class":"选秀,情感,访谈,播报,旅游,音乐,美食,纪实,曲艺,生活,游戏互动,财经,求职",
+        // "area":"内地,港台,日韩,欧美",
+        // "lang":"国语,英语,粤语,闽南语,韩语,日语,其它",
+        // "year":"2018,2017,2016,2015,2014,2013,2012,2011,2010,2009,2008,2007,2006,2005,2004",
+        // "star":"何炅,汪涵,谢娜,周立波,陈鲁豫,孟非,李静,朱军,朱丹,华少,郭德纲,杨澜","director":"","state":"","version":""}
+        // {"class":"古装,战争,青春偶像,喜剧,家庭,犯罪,动作,奇幻,剧情,历史,经典,乡村,情景,商战,网剧,其他",
+        // "area":"内地,韩国,香港,台湾,日本,美国,泰国,英国,新加坡,其他",
+        // "lang":"国语,英语,粤语,闽南语,韩语,日语,其它",
+        // "year":"2018,2017,2016,2015,2014,2013,2012,2011,2010,2009,2008,2006,2005,2004",
+        // "star":"王宝强,胡歌,霍建华,赵丽颖,刘涛,刘诗诗,陈伟霆,吴奇隆,陆毅,唐嫣,关晓彤,孙俪,李易峰,张翰,李晨,范冰冰,林心如,文章,马伊琍,佟大为,孙红雷,陈建斌,李小璐",
+        // "director":"张纪中,李少红,刘江,孔笙,张黎,康洪雷,高希希,胡玫,赵宝刚,郑晓龙",
+        // "state":"正片,预告片,花絮",
+        // "version":"高清版,剧场版,抢先版,OVA,TV,影院版"}
 
         res.status(200).json({
             'code': 20000,
