@@ -15,8 +15,9 @@ const User = require('../model/user.js');
 const {EmailVerifyConfig} = require('../config/config.email');
 const {generateReToken, generateAcToken, existsReToken} = require('../util/token');
 const { REDIS_CONFIG, mysqlUserKey } = require("../config/config.db");
-const{ QueryMysqlUserInfos,CachingRedisUserInfos,QueryUserInfos } = require('../util/User');
+const{ QueryMysqlUserInfos, CachingRedisUserInfos, QueryUserInfos,ClearCacheRedisUserInfos } = require('../util/User');
 const Knex = require('../model/knex');
+const { sleep } = require('../util/utils');
 /**
  * 用户注册
  * @param {*} req 
@@ -38,13 +39,13 @@ exports.register = async (req, res, next) => {
         user[mysqlUserKey.regtime] = new Date().getTime(); // 当前时间
         user[mysqlUserKey.ip] = req.ip;
 
-        if(EmailVerifyConfig.isEmailVerify){ // 是否启用邮箱验证
-            await redisDb.get(REDIS_CONFIG.database._user, `VerifyCode:${req.body.user.email}`).then(res => {
+        if(EmailVerifyConfig.isEmailVerify.register){ // 是否启用邮箱验证
+            await redisDb.get(REDIS_CONFIG.database._user, `RegisterVerifyCode:${req.body.user.email}`).then(res => {
                 res == null ? Status = 3 : res == req.body.user.code ? Status = 4 : Status = 2;
             })
             if(Status == 4){ // 验证成功
                 // 如果开启了验证码，注册成功后删除验证码
-                await redisDb.del(REDIS_CONFIG.database._user, `VerifyCode:${user[0].user_email}`);
+                await redisDb.del(REDIS_CONFIG.database._user, `RegisterVerifyCode:${user[0].user_email}`);
                 results = await Knex(mysqlUserKey.table).insert(user);
                 results.length > 0 ? Status = 1 : Status = 0;
             }
@@ -109,7 +110,7 @@ exports.login = async (req, res, next) => {
         let refresh_token;
         // 在数据验证模块(validator)已核对信息，这里直接继续往下
         let SourceInfoJson = {
-            Uuid: req.user.user_id, 
+            Uuid: req.user[mysqlUserKey.id], 
             UserType: 'General',
             UserAgent:req.headers["user-agent"],
             Ip: req.ip
@@ -132,12 +133,12 @@ exports.login = async (req, res, next) => {
         // console.log("refresh_token1 "+refresh_token)
 
         // 确保只发放一条有效 refresh_token
-        redisDb.keys(REDIS_CONFIG.database._user,`Token:${req.user.user_id}#*`).then(answerKeys=>{
+        redisDb.keys(REDIS_CONFIG.database._user,`Token:${req.user[mysqlUserKey.id]}#*`).then(answerKeys=>{
             // 判断是否存在有效 refresh_token
             answerKeys.length !== 0 ? redisDb.del(REDIS_CONFIG.database._user, answerKeys) : '';
         })
         // redis缓存用户信息(refresh_token)JSON.stringify()
-        await redisDb.hMset(REDIS_CONFIG.database._user,`Token:${req.user.user_id}#${refresh_token}`,{...SourceInfoJson,access_token}, ReTokenExpiresIn).then(res => {
+        await redisDb.hMset(REDIS_CONFIG.database._user,`Token:${req.user[mysqlUserKey.id]}#${refresh_token}`,{...SourceInfoJson,access_token}, ReTokenExpiresIn).then(res => {
             if(res == 'OK' && status !== 2){
                 status = 1;
             }else{
@@ -200,7 +201,7 @@ exports.token = async (req, res, next) => {
             }
             // 删除旧refresh_token  （有效）
             // 确保只发放一条有效 refresh_token
-            await redisDb.del(REDIS_CONFIG.database._user, `Token-${Uuid}#${req.body.refresh_token}`);
+            await redisDb.del(REDIS_CONFIG.database._user, `Token:${Uuid}#${req.body.refresh_token}`);
 
             // 生成token
             await generateReToken(SourceInfoJson).then(res=>{
@@ -287,57 +288,59 @@ exports.getCurrentUser = async (req, res, next) => {
 exports.updateCurrentUser = async (req, res, next) => {
     try{
         // 有哪些参数要被修改，如何确保username  email  id  删除
-        
         //处理请求
         // console.log(req.user)
-        let message="更新失败";
-        let user;
+        let user = {};
         let updateUserInfo = {}; // 需要更新的用户信息
         let results = 0; //mysql数据库更新状态 0 不成功 1成功
-        delete req.body.user.id; // 禁止修改用户唯一标识
+
+        delete req.body.user[mysqlUserKey.id]; // 禁止修改用户唯一标识
+        delete req.body.user[mysqlUserKey.password]; // 禁止修改用户密码
+
+        // 用户名
         req.body.user.username !== undefined ? updateUserInfo[mysqlUserKey.name] = req.body.user.username : '';
-        req.body.user.email !== undefined ? updateUserInfo[mysqlUserKey.email] = req.body.user.email : '';
-        
-        JSON.stringify(updateUserInfo) !== "{}" ? await User.update(req.user.user_id, updateUserInfo).then(updateResult => {
+        // 邮箱
+        // req.body.user.email !== undefined ? updateUserInfo[mysqlUserKey.email] = req.body.user.email : '';
+        // 头像
+        req.body.user.avatar !== undefined ? updateUserInfo[mysqlUserKey.avatar] = req.body.user.avatar : '';
+
+        // 先删除缓存（查找相关信息）
+        // console.log(req.user)
+        await ClearCacheRedisUserInfos([req.user]);
+    
+        // 更改数据库
+        JSON.stringify(updateUserInfo) !== "{}" ? await Knex(mysqlUserKey.table).where(mysqlUserKey.id, '=', req.user[mysqlUserKey.id]).update(updateUserInfo).then(updateResult => {
             results = updateResult;
         }) : '';
 // console.log(results)
         if(results == 1){ // 数据库更新数据成功
-            await redisDb.hdel(REDIS_CONFIG.database._user, 'UsersInfo', req.user[mysqlUserKey.id]);
-            await redisDb.hdel(REDIS_CONFIG.database._user, 'Username.to.id', req.user[mysqlUserKey.name]);
-            await redisDb.hdel(REDIS_CONFIG.database._user, 'Email.to.id', req.user[mysqlUserKey.email]);
+            await sleep(3000); // 延时3秒
+            // 再次清除缓存
+            await ClearCacheRedisUserInfos([req.user]);
+            user[mysqlUserKey.id] = req.user[mysqlUserKey.id];
+            delete req.user; // 清除挂载的旧数据
+            // 这里不急着将用唯一标识id挂回去
 
-            let mysqlSelectParams = {
-                field: "*", 
-                options: {}
-            }
-            mysqlSelectParams.options[mysqlUserKey.id] = req.user.user_id;
-            await User.select(mysqlSelectParams).then(userInfos => {                
+            // 查询数据库最新信息
+            await QueryUserInfos(user).then(userInfos => {
                 user = userInfos[0];
-            })
+            });
             delete user.user_pwd;
             req.user = user;
             // console.log(req.user)
-            // 写入redis
-            await redisDb.hSet(REDIS_CONFIG.database._user,'UsersInfo', req.user.user_id, JSON.stringify(user)).then(writeResult => {
-                writeResult==1? message='更新成功' : '';
-            })
-            await redisDb.hSet(REDIS_CONFIG.database._user, 'Username.to.id', user.user_name, user.user_id);
-            await redisDb.hSet(REDIS_CONFIG.database._user, 'Email.to.id', user.user_email, user.user_id);
         }
-        // res.send('updateCurrentUser')
-        if(results == 1 && message == '更新成功'){
+        if(results == 1){ // 更新成功
             res.status(200).json({
                 code: 20000,
                 success: true,
-                message,
+                message: '更新成功',
                 data: user
             })
-        }else{
+        }else{ // 更新失败
             res.status(200).json({
                 code: 50000,
                 success: false,
-                message
+                message: '更新失败'
             })
         }
     }catch (err){
@@ -351,15 +354,31 @@ exports.updateCurrentUser = async (req, res, next) => {
 exports.updatepasswordUser = async (req, res, next) => {
     try{
         // console.log(req.body.password)
-        let updateStatus = 0; // 更新状态 0失败  1成功
+        let updateStatus = 0; // 更新状态 0失败  1成功 2 验证码错误 3 验证码不存在 4验证码正确
+        let mysqlUpdateParams = {};
+        mysqlUpdateParams[mysqlUserKey.password] = md5(req.body.password);
+        // console.log(`VerifyCode:${req.user.user_email}`)
+        if(EmailVerifyConfig.isEmailVerify.UpdatePassword){ // 是否开启邮箱验证
+            await redisDb.get(REDIS_CONFIG.database._user, `UpdatePwdVerifyCode:${req.user[mysqlUserKey.email]}`).then(res => {
+                res == null ? updateStatus = 3 : res == req.body.code ? updateStatus = 4 : updateStatus = 2;
+            })
+            if(updateStatus == 4){ // 验证成功
+                // 如果开启了验证码，注册成功后删除验证码
+                await redisDb.del(REDIS_CONFIG.database._user, `UpdatePwdVerifyCode:${req.user.user_email}`);
 
-        await User.update(req.user.user_id,{user_pwd:md5(req.body.password)}).then(updateResult => {
-            updateResult == 1 ? updateStatus = 1 : '';
-        })
+                await Knex(mysqlUserKey.table).where(mysqlUserKey.id, '=', req.user[mysqlUserKey.id]).update(mysqlUpdateParams).then(updateResult => {
+                    updateResult == 1 ? updateStatus = 1 : '';
+                });
+            }
+        }else{
+            await Knex(mysqlUserKey.table).where(mysqlUserKey.id, '=', req.user[mysqlUserKey.id]).update(mysqlUpdateParams).then(updateResult => {
+                updateResult == 1 ? updateStatus = 1 : '';
+            });
+        }
 
         if(updateStatus == 1){
             // 确保只发放一条有效 refresh_token
-            redisDb.keys(REDIS_CONFIG.database._user, `${req.user.user_id}#*`).then(answerKeys=>{
+            redisDb.keys(REDIS_CONFIG.database._user, `Token:${req.user[mysqlUserKey.id]}#*`).then(answerKeys=>{
                 // 判断是否存在有效 refresh_token
                 answerKeys.length !== 0 ? redisDb.del(REDIS_CONFIG.database._user, answerKeys) : ''
             })
@@ -367,6 +386,18 @@ exports.updatepasswordUser = async (req, res, next) => {
                 code: 20000,
                 success: true,
                 message: '用户密码更新成功'
+            })
+        }else if(updateStatus == 2){
+            res.status(200).json({
+                code: 40000,
+                success: false,
+                message: '验证码验证失败'
+            })
+        }else if(updateStatus == 3){
+            res.status(200).json({
+                code: 40000,
+                success: false,
+                message: '请先发送验证码'
             })
         }else{
             res.status(200).json({
@@ -387,10 +418,10 @@ exports.logout = async (req, res, next) =>{
     try{
          // 确保只发放一条有效 refresh_token
         let Status = false;
-        await redisDb.keys(REDIS_CONFIG.database._user, `Token-${req.user.user_id}#*`).then(async answerKeys => {
+        await redisDb.keys(REDIS_CONFIG.database._user, `Token:${req.user[mysqlUserKey.id]}#*`).then(async answerKeys => {
              // 判断是否存在有效 refresh_token
              answerKeys.length !== 0 ? await redisDb.del(REDIS_CONFIG.database._user, answerKeys).then(res=>{
-                res !== 0 ?Status = true : '';
+                res !== 0 ? Status = true : '';
                 // console.log(res)
              }) : '';
         })
@@ -419,19 +450,20 @@ exports.delCurrentUser = async (req, res, next) =>{
     try{
         // console.log(req.user.user_id);
         let delStatus = 0; // 删除状态  0： 不成功  1： 成功
-        // 先删除redis
-        await redisDb.hdel(REDIS_CONFIG.database._user, `UsersInfo:${req.user[mysqlUserKey.id]}`, req.user[mysqlUserKey.id]);
-        await redisDb.hdel(REDIS_CONFIG.database._user, 'user_name.to.id', req.user[mysqlUserKey.name]);
-        await redisDb.hdel(REDIS_CONFIG.database._user, 'user_email.to.id', req.user[mysqlUserKey.email]);
+        // 先删除redis缓存
+        await ClearCacheRedisUserInfos([req.user])
+        // await redisDb.hdel(REDIS_CONFIG.database._user, `UsersInfo:${req.user[mysqlUserKey.id]}`, req.user[mysqlUserKey.id]);
+        // await redisDb.hdel(REDIS_CONFIG.database._user, 'user_name.to.id', req.user[mysqlUserKey.name]);
+        // await redisDb.hdel(REDIS_CONFIG.database._user, 'user_email.to.id', req.user[mysqlUserKey.email]);
 
         // 删除发放的token
-        await redisDb.keys(REDIS_CONFIG.database._user, `Token-${req.user.user_id}#*`).then(answerKeys => {
+        await redisDb.keys(REDIS_CONFIG.database._user, `Token:${req.user.user_id}#*`).then(answerKeys => {
             answerKeys.length !== 0 ? redisDb.del(REDIS_CONFIG.database._user, answerKeys) : '';
         })
         
         // 删除mysql数据
         // console.log(req.user);
-        await User.delete(req.user[mysqlUserKey.id]).then(res => {
+        await Knex(mysqlUserKey.table).where(mysqlUserKey.id, '=', req.user[mysqlUserKey.id]).del().then(res => {
             res > 0 ? delStatus = 1 : delStatus = 0;
         })
         switch(delStatus){
