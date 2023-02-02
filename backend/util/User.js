@@ -50,7 +50,7 @@ let UserLogicFunc={
     },
     // 修改单个用户若干信息
     updateMysqlUserInfos: async(params) => {
-
+        
     },
     // redis
     // 缓存用户信息
@@ -65,10 +65,32 @@ let UserLogicFunc={
             resolve(true);
         })
     },
-    // 清除单个用户信息缓存
-    ClearCacheRedisUserInfos: async() => {
-        
+    /**
+     * 清除用户信息缓存
+     * @param {*} params [{},{}]
+     * @returns 
+     */
+    ClearCacheRedisUserInfos: async(params) => {
+        return new Promise((resolve, reject) => {
+            let delParams = {};
+            delParams[mysqlUserKey.id] = [];
+            delParams[mysqlUserKey.name] = [];
+            delParams[mysqlUserKey.email] = [];
+
+            params.forEach((v, i) => {
+                delParams[mysqlUserKey.id].push(`UsersInfo:${v[mysqlUserKey.id]}`);
+                delParams[mysqlUserKey.name].push(v[mysqlUserKey.name]);
+                delParams[mysqlUserKey.email].push(v[mysqlUserKey.email]);
+            });
+
+            // console.log(delParams)
+            redisDb.del(REDIS_CONFIG.database._user,delParams[mysqlUserKey.id]);
+            redisDb.hdel(REDIS_CONFIG.database._user, `${mysqlUserKey.name}.to.id`, delParams[mysqlUserKey.name]);
+            redisDb.hdel(REDIS_CONFIG.database._user, `${mysqlUserKey.email}.to.id`, delParams[mysqlUserKey.email]);
+            resolve(true);
+        })
     }
+
 
 }
 module.exports= UserLogicFunc;
