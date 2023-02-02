@@ -265,18 +265,97 @@ redisDb.ltrim=async(dbNum,key,start,end)=>{
     })
 }
 // client.sendCommand(['HINCRBY',hash_key,sub_key,value])
+
+// ---------zset--------start--------
+/**
+ * zset有序集合新增
+ * @param {*} dbNum 
+ * @param {*} zset_key 
+ * @param {*} score 
+ * @param {*} value 
+ * @param {*} expire 
+ * @returns 
+ */
 redisDb.zAdd =async (dbNum,zset_key, score, value,expire) => {
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
         let res;
         // res = client.sendCommand(['ZADD', zset_key,score ,value])
-        res = client.zadd("sortedSet",99, "33333");
+        res = client.zadd(zset_key,score, value);
         if(expire){
             client.expire(key,expire);
         }
         resolve(res);
     })
 }
+/**
+ * 计算zset集合中元素的数量
+ * @param {*} dbNum 
+ * @param {*} zset_key 
+ * @returns 当 key 存在且是有序集类型时，返回有序集的基数。 当 key 不存在时，返回 0 。
+ */
+redisDb.zard =async (dbNum,zset_key) => {
+    return new Promise((resolve,reject)=>{
+        client.select(dbNum);
+        resolve(client.zcard(zset_key));
+    })
+}
+
+/**
+ * 返回有序集中，指定区间内的成员
+ * @param {*} dbNum 
+ * @param {*} zset_key 
+ * @param {*} start 以 0 表示有序集第一个成员，以 1 表示有序集第二个成员，以此类推
+ * @param {*} stop 以 -1 表示最后一个成员， -2 表示倒数第二个成员
+ * @returns 
+ */
+redisDb.zrange =async (dbNum,zset_key,start,stop) => {
+    return new Promise((resolve,reject)=>{
+        client.select(dbNum);
+        resolve(client.zrange(zset_key,start,stop));
+    })
+}
+
+/**
+ * 通过字典区间返回有序集合的成员。
+ * @param {*} dbNum 
+ * @param {*} zset_key 
+ * @param {*} min 
+ * @param {*} max 
+ * @returns 
+ */
+redisDb.zrangebylex =async (dbNum,zset_key,min,max) => {
+    return new Promise((resolve,reject)=>{
+        client.select(dbNum);
+        resolve(client.zrangebylex(zset_key,min,max));
+    })
+}
+
+/**
+ * 返回有序集合中指定分数区间的成员列表。有序集成员按分数值递增(从小到大)次序排列。
+ * @param {*} dbNum 
+ * @param {*} zset_key 
+ * @param {*} min ([
+ * @param {*} max 
+ * @returns 
+ */
+redisDb.zrangebyscore =async (dbNum,zset_key,min,max) => {
+    return new Promise((resolve,reject)=>{
+        client.select(dbNum);
+        resolve(client.zrangebyscore(zset_key,min,max));
+    })
+}
+
+redisDb.zrem =async (dbNum,zset_key,min,max) => {
+    return new Promise((resolve,reject)=>{
+        client.select(dbNum);
+        resolve(client.zrem(zset_key,min,max));
+    })
+}
+
+
+// ---------zset--------end--------
+
 redisDb.test =async (dbNum,key, start, end,expire) => {
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
