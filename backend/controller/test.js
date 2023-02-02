@@ -221,7 +221,7 @@ const {sleep} = require('../util/utils')
 // test('name1', 10000, 'client1');'UsersInfo','90'
 // await sleep(200)
 // test('name1', 10000, 'client2');
-
+// await redisDb.hGet(0,)
 
 
 
