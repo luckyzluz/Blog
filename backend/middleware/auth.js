@@ -45,6 +45,7 @@ module.exports = async (req, res, next) =>{
             if(accessDecodedToken.Uuid !== undefined){ // 未过期，继续查询redis中有效access_token
                 await redisDb.hGet(REDIS_CONFIG.database._user, refreshTokenKey,'access_token').then(res => {
                     // 判断 有效期内的access_token和refresh_token发放的是否相同
+                    // console.log(res , `${access_token}`)
                     if(res !== `${access_token}`){ // 不一致（已作废）
                         // 抛出错误TokenVoidedError
                         // throw new Error('TokenVoidedError');
@@ -61,17 +62,17 @@ module.exports = async (req, res, next) =>{
         }
         
         // 这里获取用户信息，挂载到req.user
-        // let mysqlSelectParams = {}
-        // mysqlSelectParams[mysqlUserKey.id] = accessDecodedToken.Uuid;
-        // let user = await QueryUserInfos(mysqlSelectParams);
+        let mysqlSelectParams = {}
+        mysqlSelectParams[mysqlUserKey.id] = accessDecodedToken.Uuid;
+        let user = await QueryUserInfos(mysqlSelectParams);
         // console.log(user)
-        let user={} ;
-        user[mysqlUserKey.id] = accessDecodedToken.Uuid;
+        // let user={} ;
+        // user[mysqlUserKey.id] = accessDecodedToken.Uuid;
         // console.log(user)
-        req.user = user;
+        req.user = user[0];
         next()
     }catch(err){
-        console.log("err"+err)
+        // console.log("err"+err)
         
         switch (err.name) {
             case 'UserNotLoggedIn':
