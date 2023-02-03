@@ -10,12 +10,13 @@ const Article = require('../model/article.js');
 const knex = require('../model/knex');
 
 const { from } = require('form-data')
+const {QueryArtsInfosList, QueryArtInfos,QueryMysqlArtInfos} = require('../util/Article');
 
 //获取首页文章列表
 exports.getArticles = async (req, res, next) => {
     try {
         //处理前端请求参数comment_count,like,last,views
-        const {https://www.imcharon.com/?orderby=
+        const {//https://www.imcharon.com/?orderby=
             limit = 10, //每页条数
             offset = 1, // 页数
             orderby='last', //按照排序
@@ -30,10 +31,15 @@ exports.getArticles = async (req, res, next) => {
         let AllArtInfo = [];
         // redisDb.zAdd(2,"sortedSet",1,36)
 
-        let xx= await redisDb.zrangebyscore(2,'sortedSet',1,99999)
-        console.log(xx)
-
-
+        // let xx= await redisDb.zrevrange(2,'sortedSet',0,8)
+        // console.log(xx)
+        // 获取展示文章列表id
+        let ArtsIdList= await QueryArtsInfosList({limit, offset, orderby, sort});
+// console.log(new Date().getTime(),Math.round(new Date() / 1000))
+        if(ArtsIdList.length !== 0){
+            AllArtInfo = await QueryArtInfos(ArtsIdList);
+        }
+        // AllArtInfo = await QueryMysqlArtInfos([104,100]);
 
 
         // 查询redis是否存在  文章信息以及文章id信息
@@ -78,7 +84,7 @@ exports.getArticles = async (req, res, next) => {
             'code': 20000,
             "success": true,
             "message": "操作成功",
-            data: 'AllArtInfo',
+            data: AllArtInfo,
 
         })
     } catch (err) {
