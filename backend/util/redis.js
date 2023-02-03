@@ -276,14 +276,15 @@ redisDb.ltrim=async(dbNum,key,start,end)=>{
  * @param {*} expire 
  * @returns 
  */
-redisDb.zAdd =async (dbNum,zset_key, score, value,expire) => {
+redisDb.zAdd =async (dbNum,zset_key, params,expire) => {
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
         let res;
+
         // res = client.sendCommand(['ZADD', zset_key,score ,value])
-        res = client.zadd(zset_key,score, value);
+        res = client.zadd(zset_key,...params.map(({ name, score }) => [score, name]));
         if(expire){
-            client.expire(key,expire);
+            client.expire(zset_key,expire);
         }
         resolve(res);
     })
@@ -346,10 +347,47 @@ redisDb.zrangebyscore =async (dbNum,zset_key,min,max) => {
     })
 }
 
-redisDb.zrem =async (dbNum,zset_key,min,max) => {
+/**
+ * 移除有序集中的一个或多个成员，不存在的成员将被忽略。
+ * @param {*} dbNum 
+ * @param {*} zset_key 
+ * @param {*} member []多个
+ * @returns 被成功移除的成员的数量，不包括被忽略的成员
+ */
+redisDb.zrem =async (dbNum,zset_key,member) => {
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
-        resolve(client.zrem(zset_key,min,max));
+        resolve(client.zrem(zset_key,member));
+    })
+}
+
+/**
+ * zrevrange
+ * @param {*} dbNum 
+ * @param {*} zset_key 
+ * @param {*} start 
+ * @param {*} stop 
+ * @returns 
+ */
+redisDb.zrevrange =async (dbNum,zset_key,start, stop) => {
+    return new Promise((resolve,reject)=>{
+        client.select(dbNum);
+        resolve(client.zrevrange(zset_key,start, stop));
+    })
+}
+
+/**
+ * 计算给定的一个或多个有序集的并集，其中给定 key 的数量必须以 numkeys 参数指定，并将该并集(结果集)储存到 destination 
+ * @param {*} dbNum 
+ * @param {*} zset_key 
+ * @param {*} start 
+ * @param {*} stop 
+ * @returns 保存到 destination 的结果集的成员数量
+ */
+redisDb.zunionstore =async (dbNum,destination,start, stop) => {
+    return new Promise((resolve,reject)=>{
+        client.select(dbNum);
+        resolve(client.zunionstore(destination,start, stop));
     })
 }
 
