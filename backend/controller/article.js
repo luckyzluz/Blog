@@ -20,63 +20,17 @@ exports.getArticles = async (req, res, next) => {
             limit = 10, //每页条数
             offset = 1, // 页数
             orderby='last', //按照排序
-            // tag,  // 标签
-            // author, // 作者
             sort='desc' // 排序  desc降序  asc升序  heat  热度
         } = req.query
-        let artResult;
-        let isRedisArtsInfo = false; // 是否存在文章信息
-        let isRedisIdArtsList = false; // 是否存在文章id列表
-        let isRedisTypeArtsList = false; // 是否存在文章类型
-        let AllArtInfo = [];
-        // redisDb.zAdd(2,"sortedSet",1,36)
 
-        // let xx= await redisDb.zrevrange(2,'sortedSet',0,8)
-        // console.log(xx)
+        let AllArtInfo = []; // 返回前端的数据
         // 获取展示文章列表id
         let ArtsIdList= await QueryArtsInfosList({limit, offset, orderby, sort});
 // console.log(new Date().getTime(),Math.round(new Date() / 1000))
         if(ArtsIdList.length !== 0){
-            AllArtInfo = await QueryArtInfos(ArtsIdList);
+            AllArtInfo = await QueryArtInfos(ArtsIdList, offset);
         }
-        // AllArtInfo = await QueryMysqlArtInfos([104,100]);
 
-
-        // 查询redis是否存在  文章信息以及文章id信息
-        // await redisDb.exists(REDIS_CONFIG.database._article, 'ArtsInfo').then(res => {
-        //     res !== 0 ? isRedisArtsInfo = true : '';
-        // })
-        // await redisDb.exists(REDIS_CONFIG.database._article, 'IdArtsList').then(res => {
-        //     res !== 0 ? isIdArtsList = true : '';
-        // })
-        // 不存在则获取mysql文章全部数据
-        // isRedisArtsInfo && isRedisIdArtsList ? '' : AllArtInfo =await knex('lz_article').select().orderBy(mysqlArtKey.createtime, 'desc');
-        // console.log(RedisArtsInfo)
-
-        // 确定文章数剧mysql查询成功，进行文章全部信息缓存
-        // if(AllArtInfo.length !== 0){
-        //     if(!isRedisArtsInfo){
-        //         // 这里对获取的文章数据处理，进行redis缓存
-        //         let RedisArtsInfo ={}
-        //         AllArtInfo.forEach((value, key, iterable) => {
-        //         RedisArtsInfo[value[mysqlArtKey.id]] = value;
-        //         })
-        //         await redisDb.hMset(REDIS_CONFIG.database._article, 'ArtsInfo', RedisArtsInfo);
-        //     }
-        //     if(!isRedisIdArtsList){
-        //         // 处理文章id
-        //         let IdArtsList=[];
-        //         AllArtInfo.forEach((value, key, iterable) => {
-        //             IdArtsList.push(value[mysqlArtKey.id]);
-        //         })
-        //         // console.log(IdArtsList)
-        //         // 将全部文章id存储redis
-        //         await redisDb.rPush(REDIS_CONFIG.database._article, 'IdArtsList', IdArtsList);
-        //     }
-        // }
-
-
-        // await redisDb.hGet(REDIS_CONFIG.database._article, )
 
         
 
