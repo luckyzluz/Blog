@@ -95,6 +95,7 @@ let mysqlArtKey = { // 文章
     nickname: 'user_nickname',
     content: 'art_content',
     level: 'user_level',
+    istop: 'istop',
     comment_count: 'comment_count'
 }
 module.exports = {
