@@ -10,6 +10,7 @@ module.exports = require('knex')({
     password: MYSQL_CONFIG.password,
     database: MYSQL_CONFIG.database
   },
+  useNullAsDefault: true,
   asyncStackTraces:false,
   acquireConnectionTimeout: 10000, // 获取连接超时
   pool: {
