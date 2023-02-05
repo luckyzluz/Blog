@@ -9,37 +9,83 @@ let numShowTopArt = 3;
 
 let ArtLogicFunc = {
     /**
-     * 查询文章id列表
+     * 查询文章id列表(当超出最大页数，缓存返回空，会进行数据库查询)禁止数据库查询，需优化
      * @param {*} params {limit, offset, orderby, sort}
      * @returns []
      */
     QueryArtsInfosList: async(params) => { // 得到了置顶id，除去原有列表内的id。将置顶id拼接到第一页
+        let ArtsIdData = {};
         let ArtsIdList = []; // 要返回的id
         let ArtsAllIds = []; // mysql查询的全部id
         let TopArtsId = []; //置顶id
         // 文章下标计算
-        let start = (params.offset - 1) * params.limit;
-        let stop = start + params.limit -1;
+        let start = (Number(params.offset) - 1) * Number(params.limit);
+        let stop = start + Number(params.limit) -1;
         // 这里处理是否有置顶文章，插入列表开头
         if(isShowTopArt){
             TopArtsId = await ArtLogicFunc.QueryTopArtsId(numShowTopArt);
-            console.log(TopArtsId)
+            // console.log(TopArtsId)
             if(TopArtsId.length > 0){ // 存在置顶文章
-                // if(params.offset == 1){
-                //     start = 0;
-                //     stop = 
+                // if(TopArtsId.length < Number(params.limit)){
+                    start - TopArtsId.length > 0 ? start = start - TopArtsId.length : start = 0 ;
+                    stop = stop - TopArtsId.length;
                 // }
-                start - TopArtsId.length > 0 ? start = start - TopArtsId.length : start = 0 ;
-                stop = stop - TopArtsId.length;
-                // ArtsIdList = TopArtsId;
+                // else if(TopArtsId.length = Number(params.limit)){
+                //     if(params.offset== 1){
+                //         start = 99999999;
+                //         stop = 100000000000;
+                //     }else{
+                //         start = (Number(params.offset) - 2) * Number(params.limit);
+                //         stop = start + Number(params.limit) -1;
+                //     }
+                //     // 禁止此类情况出现,暂时不处理
+                // }else if(TopArtsId.length > Number(params.limit)){
+                //     if(params.offset== 1){
+
+                //     }
+                //     // start = start - TopArtsId.length;
+                //     // stop = stop - TopArtsId.length;
+                // }
+                if(TopArtsId.length >= Number(params.limit)){
+                    // throw 'not allow limit <= Number of top articles'
+                    return 'paramWarning'
+                }
+                
             }
         }
-        // console.log(start,stop)起始下标   无问题
+        // console.log(start,stop) // 起始下标   无问题
 
-        
+        let isExistsArtIdInfosList = await redisDb.exists(REDIS_CONFIG.database._article, `${params.orderby}ArtIdInfosList`);
+        // console.log(ff)
         // 获取缓存文章列表id
         params.sort == 'desc' ? ArtsIdList = await redisDb.zrevrange(REDIS_CONFIG.database._article,`${params.orderby}ArtIdInfosList`, start, stop) : ArtsIdList = await redisDb.zrange(REDIS_CONFIG.database._article,`${params.orderby}ArtIdInfosList`, start, stop);
-        if(ArtsIdList.length == 0){ // id缓存是否存在进行查询mysql
+
+        ArtsIdData.total = await redisDb.zard(REDIS_CONFIG.database._article, `${params.orderby}ArtIdInfosList`)
+        // console.log(ArtsIdList)
+        ArtsIdData.PageCount = Math.ceil(ArtsIdData.total/Number(params.limit));
+        // 这里处理置顶重复显示的问题
+        // 剔除返回id列表中的置顶id
+        // （中途废弃，直接在缓存时或取缓存时剔除（这里指的是id列表））
+        // 如果启用后又关闭，缓存id列表将缺失置顶id数据
+        if(isShowTopArt && TopArtsId.length > 0){
+            // 在返回id中，获取重复的置顶的id
+            let newA = new Set(ArtsIdList);
+            let newB = new Set(TopArtsId); 
+            let intersectionSet = new Set([...newA].filter(x => newB.has(x)));
+            // console.log(intersectionSet);
+            intersectionSet = Array.from(intersectionSet);
+            // console.log(intersectionSet);
+            if(intersectionSet.length > 0){
+                stop = stop + intersectionSet.length;
+                // 重新 获取缓存文章列表id
+                params.sort == 'desc' ? ArtsIdList = await redisDb.zrevrange(REDIS_CONFIG.database._article,`${params.orderby}ArtIdInfosList`, start, stop) : ArtsIdList = await redisDb.zrange(REDIS_CONFIG.database._article,`${params.orderby}ArtIdInfosList`, start, stop);
+                // 剔除id
+                ArtsIdList = ArtsIdList.filter(x => intersectionSet.every((val) => val != x));
+            }
+
+        }
+
+        if(isExistsArtIdInfosList !== 1){ //ArtsIdList.length == 0 id缓存是否存在进行查询mysql
             // 上锁
             let LockStatus = false; // 锁状态
             const lock = await redlock.lock(`QueryMysqlArtAllIdInfosListLock:${params.orderby}`, 10000,(err,result)=>{
@@ -48,26 +94,34 @@ let ArtLogicFunc = {
             if(LockStatus){ // 上锁成功
                 // 查询mysql所有id信息(符合条件，按顺序)
                 ArtsAllIds = await ArtLogicFunc.QueryMysqlArtIdInfosList(params.orderby);  // [{name:,score:}]
-                if(ArtsAllIds.length !== 0){
+                if(ArtsAllIds.cacheId.length !== 0){
                     // 存在数据，进行缓存
-                    await ArtLogicFunc.CachingRedisArtsIdInfos(ArtsAllIds, params.orderby);
+                    // if(isShowTopArt){ // 如果启用置顶，则剔除置顶id缓存进列表
+                    //     ArtsAllIds = ArtsAllIds.filter(x => TopArtsId.every((val) => val != x));
+                    // }
+                    await ArtLogicFunc.CachingRedisArtsIdInfos(ArtsAllIds.cacheId, params.orderby);
                 }
                 await lock.unlock(); // 释放锁
             }else{ // 上锁失败，延时后重新执行函数，尝试上锁
                 await sleep(200);
-                return QueryArtsInfosList(params);
+                return ArtLogicFunc.QueryArtsInfosList(params);
             }
-            // console.log(ArtsAllIds);
-            // 数据不对口
-            // params.sort == 'desc' ? ArtsIdList = ArtsAllIds.slice[start,stop] : ArtsIdList = ArtsAllIds.slice[-stop,-start];
-            return QueryArtsInfosList(params); // 重新执行函数
+            ArtsIdData.total = ArtsAllIds.ArrayId.length;
+
+            ArtsIdData.PageCount = Math.ceil(ArtsIdData.total/Number(params.limit));
+            
+            ArtsIdList = ArtsAllIds.ArrayId.slice(start,stop + 1);
+            console.log(ArtsAllIds.ArrayId)
+            // 这里 不做处理，直接重新执行函数
+            // return ArtLogicFunc.QueryArtsInfosList(params); 
         }
         if(params.offset == 1 && isShowTopArt){ // TopArtsId
-            TopArtsId.concat(ArtsIdList);
+            ArtsIdList = TopArtsId.concat(ArtsIdList);
         }
-        
-        console.log(ArtsIdList)
-        return ArtsIdList;
+        ArtsIdData.ArtsIdList = ArtsIdList;
+
+        // console.log(ArtsIdList)
+        return ArtsIdData;
     },
     /**
      * 根据id数组，查询文章信息
@@ -152,6 +206,13 @@ let ArtLogicFunc = {
         }
         return TopArtsId;
     },
+    InsertArticleInfo: async(params) => {
+        return new Promise((resolve, reject) => {
+            // 先插数据库
+            let xx = Knex(mysqlArtKey.table).insert(params[0]).returning('*')
+            resolve(xx)
+        })
+    },
     /**
      * 数据库查询全部文章id列表信息
      * @param {*} orderby comment_count,like,last,views
@@ -159,7 +220,7 @@ let ArtLogicFunc = {
      * @returns [id]
      */
     QueryMysqlArtIdInfosList: (orderby,sort = 'desc') => {
-        return new Promise((resolve,reject) => {
+        return new Promise(async(resolve,reject) => {
             let field = mysqlArtKey.createtime;
             if(orderby == 'like'){
                 field = mysqlArtKey.digg;
@@ -168,7 +229,13 @@ let ArtLogicFunc = {
             }else if(orderby == 'comment_count'){
                 field = mysqlArtKey.comment_count;
             }
-            let res = Knex(mysqlArtKey.table).select({name: mysqlArtKey.id, score: field}).orderBy(field,sort);
+            let resx =await Knex(mysqlArtKey.table).select({name: mysqlArtKey.id, score: field}).orderBy(field,sort);
+            let res = {ArrayId:[],cacheId:[]}
+            res.cacheId = resx;
+            // 返回俩个结果，数组纯id和缓存数组id
+            for(let i=0;i<resx.length;i++){
+                res.ArrayId.push(resx[i].name)
+            }
             resolve(res)
         })
     },

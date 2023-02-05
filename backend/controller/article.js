@@ -10,7 +10,8 @@ const Article = require('../model/article.js');
 const knex = require('../model/knex');
 
 const { from } = require('form-data')
-const {QueryArtsInfosList, QueryArtInfos,QueryMysqlArtInfos} = require('../util/Article');
+const {QueryArtsInfosList, QueryArtInfos,QueryMysqlArtInfos,InsertArticleInfo} = require('../util/Article');
+const logger =require("../util/logger");
 
 //获取首页文章列表
 exports.getArticles = async (req, res, next) => {
@@ -25,24 +26,43 @@ exports.getArticles = async (req, res, next) => {
 
         let AllArtInfo = []; // 返回前端的数据
         // 获取展示文章列表id
-        let ArtsIdList= await QueryArtsInfosList({limit, offset, orderby, sort});
+        let ArtsIdData= await QueryArtsInfosList({limit, offset, orderby, sort});
+        // console.log(ArtsIdData)
 // console.log(new Date().getTime(),Math.round(new Date() / 1000))
-        if(ArtsIdList.length !== 0){
-            AllArtInfo = await QueryArtInfos(ArtsIdList, offset);
+// AllArtInfo = ArtsIdData.ArtsIdList
+        if(ArtsIdData !== 'paramWarning'){
+            if(ArtsIdData.ArtsIdList.length !== 0){
+                AllArtInfo = await QueryArtInfos(ArtsIdData.ArtsIdList, offset);
+            }
+            res.status(200).json({
+                'code': 20000,
+                "success": true,
+                "message": "操作成功",
+                CurrentPage: offset,
+                PageCount: ArtsIdData.PageCount,
+                total: ArtsIdData.total,
+                data: AllArtInfo,
+    
+            })
+        }else{
+            res.status(200).json({
+                'code': 50000,
+                "success": true,
+                "message": "操作失败",
+                data: 'not allow limit <= Number of top articles'
+            })
         }
-
-
-        
-
-        res.status(200).json({
-            'code': 20000,
-            "success": true,
-            "message": "操作成功",
-            data: AllArtInfo,
-
-        })
     } catch (err) {
         next(err)
+        logger.reprocess_error("Failed to get the first page article list ("+err+")", res, req);
+        // next(new Error(`账号注册失败`+err));
+        // res.status(200).json({
+        //     'code': 50000,
+        //     "success": true,
+        //     "message": "操作失败",
+        //     data:err
+
+        // })
     }
 }
 
@@ -61,15 +81,20 @@ exports.getArticle = async (req, res, next) => {
     try {
         //处理请求
         let result=[];
-        await ArtRedis.getArticle('0','allArtsList',req.params.Id).then((res)=>{
-            result=res;
-        })
+        result = await QueryArtInfos([req.params.Id], 0);
+        // await ArtRedis.getArticle('0','allArtsList',req.params.Id).then((res)=>{
+        //     result=res;
+        // })
         res.status(200).json({
-            code:200,
-            data:result
+            code: 20000,
+            success: true,
+            message: "操作成功",
+            data: result
         })
     } catch (err) {
         next(err)
+        logger.reprocess_error("Failed to obtain article information ("+err.message+")", res, req);
+        // next(new Error(`账号注册失败`+err));
     }
 }
 
@@ -78,21 +103,24 @@ exports.createArticle = async (req, res, next) => {
     try {
         // //处理请求
         let article = req.body.article;
-        article.member_id = req.user[0].id;
-        let results = await MysqlMethods.insert('lz_article', ['title', 'tags', 'member_id', 'body', 'description', 'tid', 'litpic', 'addtime'], [`"${article.title}"`, `"${article.tagList.toString()}"`, `"${article.member_id}"`, `"${article.body}"`, `"${article.tabloid}"`, `"${article.type}"`, `"${article.litpic}"`, `"${Math.floor(Date.now() / 1000)}"`]);
+        // article.member_id = req.user[0].id;
+        let results = 00;
+        // await MysqlMethods.insert('lz_article', ['title', 'tags', 'member_id', 'body', 'description', 'tid', 'litpic', 'addtime'], [`"${article.title}"`, `"${article.tagList.toString()}"`, `"${article.member_id}"`, `"${article.body}"`, `"${article.tabloid}"`, `"${article.type}"`, `"${article.litpic}"`, `"${Math.floor(Date.now() / 1000)}"`]);
         let status=0;//是否成功
         let msg;
-        if(results.affectedRows==1 && REDIS_CONFIG.isRedis){
-            await redisDb.lPush('0', 'allIdArtsList', results.insertId).then(async res => {
-                if(res>0){
-                    status=1;
-                    msg='文章新增成功'
-                }
-            })
-        }else{
-            status=0;
-            msg='文章新增失败'
-        }
+        // if(results.affectedRows==1 && REDIS_CONFIG.isRedis){
+        //     await redisDb.lPush('0', 'allIdArtsList', results.insertId).then(async res => {
+        //         if(res>0){
+        //             status=1;
+        //             msg='文章新增成功'
+        //         }
+        //     })
+        // }else{
+        //     status=0;
+        //     msg='文章新增失败'
+        // }
+        status = article
+        //status =  await InsertArticleInfo([article]);
         res.status(201).json({
             code:200,
             status,
