@@ -1,7 +1,8 @@
-const { redisDb,redlock } = require('../util/redis');
+const { redisDb,redlock,client } = require('../util/redis');
 const {REDIS_CONFIG,mysqlArtKey} = require('../config/config.db')
 const Knex = require('../model/knex');
 const {sleep} = require('./utils')
+const { pinyin } = require('pinyin-pro');
 const { allLimit, reject } = require('async');
 let isShowTopArt = true;
 let numShowTopArt = 3;
@@ -10,6 +11,7 @@ let numShowTopArt = 3;
 let ArtLogicFunc = {
     /**
      * 查询文章id列表(当超出最大页数，缓存返回空，会进行数据库查询)禁止数据库查询，需优化
+     * 查询成功，进行缓存
      * @param {*} params {limit, offset, orderby, sort}
      * @returns []
      */
@@ -23,6 +25,7 @@ let ArtLogicFunc = {
         let stop = start + Number(params.limit) -1;
         // 这里处理是否有置顶文章，插入列表开头
         if(isShowTopArt){
+            // 获取置顶id
             TopArtsId = await ArtLogicFunc.QueryTopArtsId(numShowTopArt);
             // console.log(TopArtsId)
             if(TopArtsId.length > 0){ // 存在置顶文章
@@ -54,15 +57,11 @@ let ArtLogicFunc = {
             }
         }
         // console.log(start,stop) // 起始下标   无问题
-
+        // 查看id列表缓存是否存在
         let isExistsArtIdInfosList = await redisDb.exists(REDIS_CONFIG.database._article, `${params.orderby}ArtIdInfosList`);
         // console.log(ff)
-        // 获取缓存文章列表id
-        params.sort == 'desc' ? ArtsIdList = await redisDb.zrevrange(REDIS_CONFIG.database._article,`${params.orderby}ArtIdInfosList`, start, stop) : ArtsIdList = await redisDb.zrange(REDIS_CONFIG.database._article,`${params.orderby}ArtIdInfosList`, start, stop);
+        
 
-        ArtsIdData.total = await redisDb.zard(REDIS_CONFIG.database._article, `${params.orderby}ArtIdInfosList`)
-        // console.log(ArtsIdList)
-        ArtsIdData.PageCount = Math.ceil(ArtsIdData.total/Number(params.limit));
         // 这里处理置顶重复显示的问题
         // 剔除返回id列表中的置顶id
         // （中途废弃，直接在缓存时或取缓存时剔除（这里指的是id列表））
@@ -94,9 +93,10 @@ let ArtLogicFunc = {
             if(LockStatus){ // 上锁成功
                 // 查询mysql所有id信息(符合条件，按顺序)
                 ArtsAllIds = await ArtLogicFunc.QueryMysqlArtIdInfosList(params.orderby);  // [{name:,score:}]
+
                 if(ArtsAllIds.cacheId.length !== 0){
                     // 存在数据，进行缓存
-                    // if(isShowTopArt){ // 如果启用置顶，则剔除置顶id缓存进列表
+                    // if(isShowTopArt){ // (废弃)如果启用置顶，则剔除置顶id缓存进列表
                     //     ArtsAllIds = ArtsAllIds.filter(x => TopArtsId.every((val) => val != x));
                     // }
                     await ArtLogicFunc.CachingRedisArtsIdInfos(ArtsAllIds.cacheId, params.orderby);
@@ -111,9 +111,16 @@ let ArtLogicFunc = {
             ArtsIdData.PageCount = Math.ceil(ArtsIdData.total/Number(params.limit));
             
             ArtsIdList = ArtsAllIds.ArrayId.slice(start,stop + 1);
-            console.log(ArtsAllIds.ArrayId)
+            // console.log(ArtsAllIds.ArrayId)
             // 这里 不做处理，直接重新执行函数
             // return ArtLogicFunc.QueryArtsInfosList(params); 
+        }else{ // 存在id列表缓存则进行  取缓存
+            // 获取缓存文章列表id
+            params.sort == 'desc' ? ArtsIdList = await redisDb.zrevrange(REDIS_CONFIG.database._article,`${params.orderby}ArtIdInfosList`, start, stop) : ArtsIdList = await redisDb.zrange(REDIS_CONFIG.database._article,`${params.orderby}ArtIdInfosList`, start, stop);
+
+            ArtsIdData.total = await redisDb.zard(REDIS_CONFIG.database._article, `${params.orderby}ArtIdInfosList`)
+            // console.log(ArtsIdList)
+            ArtsIdData.PageCount = Math.ceil(ArtsIdData.total/Number(params.limit));
         }
         if(params.offset == 1 && isShowTopArt){ // TopArtsId
             ArtsIdList = TopArtsId.concat(ArtsIdList);
@@ -124,7 +131,7 @@ let ArtLogicFunc = {
         return ArtsIdData;
     },
     /**
-     * 根据id数组，查询文章信息
+     * 根据id数组，查询文章信息,并进行缓存
      * @param {*} params [id]
      * @param {*} offset (页数)
      * @returns [{},{}]
@@ -181,14 +188,14 @@ let ArtLogicFunc = {
      */
     QueryTopArtsId: async(num = 3) => {
         let TopArtsId = await redisDb.lRange(REDIS_CONFIG.database._article, 'TopArtsId', 0, num-1);
+        // console.log(TopArtsId.length)
         if(TopArtsId.length == 0){
             let LockStatus = false;
             const lock = await redlock.lock(`QueryTopArtsIdLock`, 10000,(err,result)=>{
                 err == null ? LockStatus = true : '';
             });
             if(LockStatus){
-                let mysqlTopArtsId = await Knex(mysqlArtKey.table).where((builder) =>
-            builder.whereIn(mysqlArtKey.istop, [1])).select(mysqlArtKey.id).orderBy(mysqlArtKey.createtime, 'desc');
+                let mysqlTopArtsId = await Knex(mysqlArtKey.table).where(mysqlArtKey.istop, 1).select(mysqlArtKey.id).orderBy(mysqlArtKey.addtime, 'desc');
             // console.log(TopArtsId)
                 // 这里处理查到的id数据，返回数据外，进行缓存
                 mysqlTopArtsId.length !==0 ?mysqlTopArtsId.forEach((v,i) => {
@@ -206,11 +213,48 @@ let ArtLogicFunc = {
         }
         return TopArtsId;
     },
-    InsertArticleInfo: async(params) => {
-        return new Promise((resolve, reject) => {
+    /**
+     * 新增文章，成功后进行缓存
+     * @param {*} params 
+     * @returns [{}](有bug，多条数据只返回一个)
+     */
+    InsertArtsInfos: async(params) => {
+        // return new Promise((resolve, reject) => {
+            // 先处理数据
+            let NewArtData = ArtLogicFunc.FrontEndDataProcess(params);
             // 先插数据库
-            let xx = Knex(mysqlArtKey.table).insert(params[0]).returning('*')
-            resolve(xx)
+            let InsertArts = await Knex(mysqlArtKey.table).insert(NewArtData);
+            let InsertArtsInfos = await Knex(mysqlArtKey.table).where((builder) =>
+            builder.whereIn(mysqlArtKey.id, InsertArts)
+          ).select();
+            // console.log(xx)
+            // 缓存文章信息
+            await ArtLogicFunc.CachingRedisArtInfos(InsertArtsInfos);
+            return InsertArtsInfos;
+            // resolve(InsertArts)
+        // })
+    },
+    /**
+     * 删除文章相关信息
+     * @param {*} params [id]
+     * @returns true
+     */
+    delArts:(params) => {
+        return new Promise(async(resolve, reject) => {
+            // 先删数据库
+            // let result =222;
+            let delMysqlResult = await Knex(mysqlArtKey.table).where((builder) =>
+            builder.whereIn(mysqlArtKey.id, params)).del();
+            // console.log(result)
+            if(delMysqlResult >= 0){ // 数据库删除成功,开始删除缓存
+                // result = 
+                await ArtLogicFunc.ClearCacheRedisArtInfos(params);
+            }
+            if(delMysqlResult == 0){ // 数据库不存在
+                resolve(0);
+            }else{
+                resolve(delMysqlResult);
+            }
         })
     },
     /**
@@ -221,11 +265,11 @@ let ArtLogicFunc = {
      */
     QueryMysqlArtIdInfosList: (orderby,sort = 'desc') => {
         return new Promise(async(resolve,reject) => {
-            let field = mysqlArtKey.createtime;
+            let field = mysqlArtKey.addtime;
             if(orderby == 'like'){
-                field = mysqlArtKey.digg;
+                field = mysqlArtKey.up;
             }else if(orderby == 'views'){
-                field = mysqlArtKey.view;
+                field = mysqlArtKey.hits;
             }else if(orderby == 'comment_count'){
                 field = mysqlArtKey.comment_count;
             }
@@ -236,6 +280,7 @@ let ArtLogicFunc = {
             for(let i=0;i<resx.length;i++){
                 res.ArrayId.push(resx[i].name)
             }
+            // console.log(res)
             resolve(res)
         })
     },
@@ -254,22 +299,99 @@ let ArtLogicFunc = {
      * 缓存文章id列表排序信息
      * @param {*} params [id]
      * @param {*} type comment_count,like,last,views
+     * @returns 
      */
     CachingRedisArtsIdInfos: async(params, type) => {
         await redisDb.zAdd(REDIS_CONFIG.database._article, `${type}ArtIdInfosList`, params);
     },
     /**
-     * 缓存文章信息
+     * 缓存文章信息(id列表【3】，文章信息，置顶文章)
      * @param {*} params [{},{}]
+     * @returns 1  缓存成功  0 缓存失败  -1 部分缓存失败
      */
     CachingRedisArtInfos: async(params) => {
-        params.forEach((v,i) => {
-            redisDb.hMset(REDIS_CONFIG.database._article, `ArtsInfos:${v[mysqlArtKey.id]}`, v);
-        })
+        // let num = 1;
+        for(let i = 0; i < params.length; i++){
+            // 缓存文章全部信息
+            await redisDb.hMset(REDIS_CONFIG.database._article, `ArtsInfos:${params[i][mysqlArtKey.id]}`, params[i]).then(res => {
+                // res == 'OK' ? num = num - 1 : '';
+            });
+            // 是否为置顶文章，进行缓存
+            if(Number(params[i][mysqlArtKey.istop]) == 1){
+                await redisDb.lPush(REDIS_CONFIG.database._article, 'TopArtsId',params[i][mysqlArtKey.id]);
+            }
+            // 插入id缓存列表对列
+            redisDb.zAdd(REDIS_CONFIG.database._article, 'lastArtIdInfosList', [{name: params[i][mysqlArtKey.id], score: params[i][mysqlArtKey.addtime]}]);
+            redisDb.zAdd(REDIS_CONFIG.database._article, 'likeArtIdInfosList', [{name: params[i][mysqlArtKey.id], score: params[i][mysqlArtKey.up]}]);
+            redisDb.zAdd(REDIS_CONFIG.database._article, 'comment_countArtIdInfosList', [{name: params[i][mysqlArtKey.id], score: params[i][mysqlArtKey.comment_count]}]);
+            redisDb.zAdd(REDIS_CONFIG.database._article, 'viewsArtIdInfosList', [{name: params[i][mysqlArtKey.id], score: params[i][mysqlArtKey.hits]}]);
+        }
     },
     // 清除文章缓存
-    ClearCacheRedisArtInfos: async() => {
-
+    ClearCacheRedisArtInfos: (params) => {
+        return new Promise(async(resolve, reject) => {
+            let result = 0;
+            if(params && params.length >0){ //删除单个
+                let ArtsInfosKeys = [];
+                // 删除置顶id
+                params.forEach((v, i) => {
+                    redisDb.lrem(REDIS_CONFIG.database._article, 'TopArtsId', 0, v);
+                    ArtsInfosKeys[i] = `ArtsInfos:${v}`;
+                })
+                // 删除文章信息hash
+                redisDb.del(REDIS_CONFIG.database._article, ArtsInfosKeys);
+                // 删除id缓存列表中的值
+                redisDb.zrem(REDIS_CONFIG.database._article, 'lastArtIdInfosList',params);
+                redisDb.zrem(REDIS_CONFIG.database._article, 'likeArtIdInfosList',params);
+                redisDb.zrem(REDIS_CONFIG.database._article, 'viewsArtIdInfosList',params);
+                redisDb.zrem(REDIS_CONFIG.database._article, 'comment_countArtIdInfosList',params);
+            }else{ // 删除全部缓存
+                let ArtsInfosKeys = await redisDb.keys(REDIS_CONFIG.database._article, 'ArtsInfos:*')
+                redisDb.del(REDIS_CONFIG.database._article, ArtsInfosKeys);
+                redisDb.del(REDIS_CONFIG.database._article, 'TopArtsId');
+                redisDb.del(REDIS_CONFIG.database._article, 'lastArtIdInfosList');
+                redisDb.del(REDIS_CONFIG.database._article, 'likeArtIdInfosList');
+                redisDb.del(REDIS_CONFIG.database._article, 'viewsArtIdInfosList');
+                redisDb.del(REDIS_CONFIG.database._article, 'comment_countArtIdInfosList');
+            }
+            // console.log(result)
+            resolve(result)
+        })
+    },
+    // 前端数据转换
+    FrontEndDataProcess: (data) => {
+        let NewData = [];
+        // NewData=data
+        data.forEach((v, i) => {
+            let transferData = {}
+            v.title ? transferData[mysqlArtKey.title] = v.title : v.title;
+            transferData[mysqlArtKey.en] = pinyin(v.title, { toneType: 'none', nonZh: 'consecutive' }).replace(/\s*/g,"");
+            transferData[mysqlArtKey.letter] = pinyin(v.title, { pattern: 'first', toneType: 'none', nonZh: 'consecutive' }).slice(0, 1).toUpperCase();
+            v.pic ? transferData[mysqlArtKey.pic] = v.pic : ''; 
+            v.blurb ? transferData[mysqlArtKey.blurb] = v.blurb : '';
+            v.content ? transferData[mysqlArtKey.content] = v.content : '';
+            v.type ? transferData[mysqlArtKey.type] = v.type : '';
+            v.type_1 ? transferData[mysqlArtKey.type_1] = v.type_1 : '';
+            v.tags ? transferData[mysqlArtKey.tags] = v.tags : '';
+            v.from ? transferData[mysqlArtKey.from] = v.from : '';
+            v.author ? transferData[mysqlArtKey.author] = v.author : '';
+            v.jumpurl ? transferData[mysqlArtKey.jumpurl] = v.jumpurl : '';
+            v.level ? transferData[mysqlArtKey.level] = v.level : '';
+            v.lock ? transferData[mysqlArtKey.lock] = v.lock : '';
+            v.up ? transferData[mysqlArtKey.up] = v.up : '';
+            v.down ? transferData[mysqlArtKey.down] = v.down : '';
+            v.hits ? transferData[mysqlArtKey.hits] = v.hits : '';
+            v.hits_day ? transferData[mysqlArtKey.hits_day] = v.hits_day : '';
+            v.hits_week ? transferData[mysqlArtKey.hits_week] = v.hits_week : '';
+            v.hits_month ? transferData[mysqlArtKey.hits_month] = v.hits_month : '';
+            v.password ? transferData[mysqlArtKey.password] = v.password : '';
+            v.istop ? transferData[mysqlArtKey.istop] = v.istop : '';
+            v.ishot ? transferData[mysqlArtKey.ishot] = v.ishot : '';
+            transferData[mysqlArtKey.addtime] = Math.round(new Date() / 1000);
+            transferData[mysqlArtKey.time] = Math.round(new Date() / 1000);
+            NewData[i] = transferData;
+        })
+        return NewData;
     }
 }
 module.exports = ArtLogicFunc;
