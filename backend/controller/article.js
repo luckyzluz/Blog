@@ -10,7 +10,7 @@ const Article = require('../model/article.js');
 const knex = require('../model/knex');
 
 const { from } = require('form-data')
-const {QueryArtsInfosList, QueryArtInfos,QueryMysqlArtInfos,InsertArticleInfo} = require('../util/Article');
+const {QueryArtsInfosList, QueryArtInfos,QueryMysqlArtInfos,InsertArtsInfos, delArts} = require('../util/Article');
 const logger =require("../util/logger");
 
 //获取首页文章列表
@@ -47,7 +47,7 @@ exports.getArticles = async (req, res, next) => {
         }else{
             res.status(200).json({
                 'code': 50000,
-                "success": true,
+                "success": false,
                 "message": "操作失败",
                 data: 'not allow limit <= Number of top articles'
             })
@@ -104,30 +104,30 @@ exports.createArticle = async (req, res, next) => {
         // //处理请求
         let article = req.body.article;
         // article.member_id = req.user[0].id;
-        let results = 00;
-        // await MysqlMethods.insert('lz_article', ['title', 'tags', 'member_id', 'body', 'description', 'tid', 'litpic', 'addtime'], [`"${article.title}"`, `"${article.tagList.toString()}"`, `"${article.member_id}"`, `"${article.body}"`, `"${article.tabloid}"`, `"${article.type}"`, `"${article.litpic}"`, `"${Math.floor(Date.now() / 1000)}"`]);
-        let status=0;//是否成功
-        let msg;
-        // if(results.affectedRows==1 && REDIS_CONFIG.isRedis){
-        //     await redisDb.lPush('0', 'allIdArtsList', results.insertId).then(async res => {
-        //         if(res>0){
-        //             status=1;
-        //             msg='文章新增成功'
-        //         }
-        //     })
-        // }else{
-        //     status=0;
-        //     msg='文章新增失败'
-        // }
-        status = article
-        //status =  await InsertArticleInfo([article]);
-        res.status(201).json({
-            code:200,
-            status,
-            msg
-        })
+        // 处理前端数据
+        let status = 0;//是否成功
+        // console.log(req.user.user_id)
+        article.author = req.user.user_id;
+        status =  await InsertArtsInfos([article]);
+        if(status.length > 0){
+            res.status(201).json({
+                code:20000,
+                success: true,
+                message: '操作成功',
+                data: status
+            })
+        }else{
+            res.status(200).json({
+                code:20000,
+                success: false,
+                message: '操作失败',
+            })
+        }
     } catch (err) {
-        next(err)
+        logger.reprocess_error("Failed to add article ("+err+")", res, req);
+        next(err);
+        
+        // next(new Error(`账号注册失败`+err));
     }
 }
 
@@ -135,31 +135,32 @@ exports.createArticle = async (req, res, next) => {
 exports.updateArticle = async (req, res, next) => {
     try {
         //处理请求
-        const article = req.article[0]
-        const bodyArticle = req.body.article
+        let article = 111
+        // req.article[0]
+        // const bodyArticle = req.body.article
         // article.title = bodyArticle.title || article.title
         // article.description = bodyArticle.description || article.description
         // article.body = bodyArticle.body || article.body
-        article.art_name = bodyArticle.art_name || article.art_name
-        article.art_tags = bodyArticle.art_tags || article.art_tags
-        article.art_content = bodyArticle.art_content || article.art_content
-        article.art_tabloid = bodyArticle.art_tabloid || article.art_tabloid
-        article.art_type = bodyArticle.art_type || article.art_type
-        article.art_pic = bodyArticle.art_pic || article.art_pic
-        article.art_status = bodyArticle.art_type || article.art_status
+        // article.art_name = bodyArticle.art_name || article.art_name
+        // article.art_tags = bodyArticle.art_tags || article.art_tags
+        // article.art_content = bodyArticle.art_content || article.art_content
+        // article.art_tabloid = bodyArticle.art_tabloid || article.art_tabloid
+        // article.art_type = bodyArticle.art_type || article.art_type
+        // article.art_pic = bodyArticle.art_pic || article.art_pic
+        // article.art_status = bodyArticle.art_type || article.art_status
         // await article.save()
-        let art_result = await MysqlMethods.update('z_arts', ['art_name', 'art_tags', 'art_content', 'art_tabloid', 'art_type', 'art_pic', 'art_status'], [`"${article.art_name}"`, `"${article.art_tags}"`, `"${article.art_content}"`, `"${article.art_tabloid}"`, `"${article.art_type}"`, `"${article.art_pic}"`, `"${article.art_status}"`], `where art_id="${article.art_id}"`)
-        if (art_result.changedRows > 0) {
+        // let art_result = await MysqlMethods.update('z_arts', ['art_name', 'art_tags', 'art_content', 'art_tabloid', 'art_type', 'art_pic', 'art_status'], [`"${article.art_name}"`, `"${article.art_tags}"`, `"${article.art_content}"`, `"${article.art_tabloid}"`, `"${article.art_type}"`, `"${article.art_pic}"`, `"${article.art_status}"`], `where art_id="${article.art_id}"`)
+        // if (art_result.changedRows > 0) {
             res.status(200).json({
                 article
             })
-        } else {
-            res.status(400).json({
-                // article
-                // ,
-                message: '未知错误，文章未能修改'
-            })
-        }
+        // } else {
+        //     res.status(400).json({
+        //         // article
+        //         // ,
+        //         message: '未知错误，文章未能修改'
+        //     })
+        // }
 
     } catch (err) {
         next(err)
@@ -170,27 +171,42 @@ exports.updateArticle = async (req, res, next) => {
 exports.deleteArticle = async (req, res, next) => {
     try {
         //处理请求
-        let msg='删除失败';
         let status=0;
         const artId = req.body.artId;
-        console.log(artId)
-        await redisDb.hdel('0','allArtsList',artId);
-        for(let item in artId){
-            await redisDb.lrem('0','allIdArtsList',0,artId[item]);
-        }
+        // console.log(artId)
+        status = await delArts(artId);
+        // await redisDb.hdel('0','allArtsList',artId);
+        // for(let item in artId){
+        //     await redisDb.lrem('0','allIdArtsList',0,artId[item]);
+        // }
         
-        let del_Result =await MysqlMethods.delete('lz_article', `where id in(${artId.toString()})`);
+        // let del_Result =await MysqlMethods.delete('lz_article', `where id in(${artId.toString()})`);
         // res.status(204).end()await
 
-        if(del_Result.affectedRows>0){
-            msg='删除成功';
-            status=1;
+        // if(del_Result.affectedRows>0){
+        //     msg='删除成功';
+        //     status=1;
+        // }
+        if(status >0){
+            res.status(200).json({
+                code: 20000,
+                success: true,
+                message:'操作成功'
+            })
+        }else if(status == 0){
+            res.status(200).json({
+                code: 40004,
+                success: false,
+                message:'数据不存在'
+            })
+        }else{
+            res.status(200).json({
+                code: 50000,
+                success: false,
+                message:'操作失败'
+            })
         }
-        res.status(200).json({
-            code:200,
-            msg,
-            status
-        })
+        
     } catch (err) {
         next(err)
     }
