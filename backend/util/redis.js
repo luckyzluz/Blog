@@ -234,6 +234,7 @@ redisDb.lPush = async (dbNum,key,value) => {
        resolve(result);
     })
 }
+// 删除list  的值
 redisDb.lrem=async(dbNum,key,range,value)=>{
     return new Promise((resolve,reject)=>{
         client.select(dbNum);
