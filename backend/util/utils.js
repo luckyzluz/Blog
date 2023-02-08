@@ -250,7 +250,8 @@ module.exports = {
                 resolve();
             }, time || 1000);
         });
-    }
+    },
+    
 
 
 }
