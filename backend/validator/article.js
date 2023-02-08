@@ -24,8 +24,8 @@ exports.getArticles = validate([
 // 创建文章时验证数据
 exports.createArticle = validate([
     body('article.title').notEmpty().withMessage('文章标题不能为空'),
-    body('article.description').notEmpty().withMessage('文章摘要不能为空'),
-    body('article.body').notEmpty().withMessage('文章内容不能为空'),
+    body('article.blurb').notEmpty().withMessage('文章摘要不能为空'),
+    body('article.content').notEmpty().withMessage('文章内容不能为空'),
 ])
 
 // 获取文章时验证数据(封装验证ID格式是否有效)
@@ -52,10 +52,10 @@ exports.updateArticle = [
     // ]),
     // 验证文章是否存在
     async (req, res, next) => {
-        const articleId = req.body.artId;
-        await ArtRedis.getArtsList('0','artLists',articleId).then((res)=>{
-            console.log(res)
-        })
+        // const articleId = req.body.artId;
+        // await ArtRedis.getArtsList('0','artLists',articleId).then((res)=>{
+        //     console.log(res)
+        // })
         // let art_result=await MysqlMethods.select('*','lz_article',`where id in (${req.body.artId.toString()})`)
         // req.article = art_result
         // if(art_result.length<=0){
@@ -87,19 +87,19 @@ exports.deleteArticle = [
     async (req, res, next) => {
         let isArtExists=0;
         let dontdel=[];
-        let artId=req.body.artId;
-        let art_result=await MysqlMethods.select('id,member_id','lz_article',`where id in (${req.body.artId.toString()})`);
-        if(art_result.length<=0){
-            return res.status(404).end("文章不存在");
-        }
-        for(let item in art_result){
-            if(art_result[item].member_id!==req.user[0].id){
-                dontdel.push(artId[item]);
-            }
-        }
-        if(dontdel.length>0){
-            return res.status(404).end("存在操作权限问题，请检查")
-        }
+        // let artId=req.body.artId;
+        // let art_result=await MysqlMethods.select('id,member_id','lz_article',`where id in (${req.body.artId.toString()})`);
+        // if(art_result.length<=0){
+        //     return res.status(404).end("文章不存在");
+        // }
+        // for(let item in art_result){
+        //     if(art_result[item].member_id!==req.user[0].id){
+        //         dontdel.push(artId[item]);
+        //     }
+        // }
+        // if(dontdel.length>0){
+        //     return res.status(404).end("存在操作权限问题，请检查")
+        // }
         next()
     },
 ]
