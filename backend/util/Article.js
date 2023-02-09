@@ -99,6 +99,7 @@ let ArtLogicFunc = {
                     // if(isShowTopArt){ // (废弃)如果启用置顶，则剔除置顶id缓存进列表
                     //     ArtsAllIds = ArtsAllIds.filter(x => TopArtsId.every((val) => val != x));
                     // }
+                    console.log(ArtsAllIds.cacheId)
                     await ArtLogicFunc.CachingRedisArtsIdInfos(ArtsAllIds.cacheId, params.orderby);
                 }
                 await lock.unlock(); // 释放锁
@@ -224,15 +225,70 @@ let ArtLogicFunc = {
             let NewArtData = ArtLogicFunc.FrontEndDataProcess(params);
             // 先插数据库
             let InsertArts = await Knex(mysqlArtKey.table).insert(NewArtData);
+            // 查询成功信息
             let InsertArtsInfos = await Knex(mysqlArtKey.table).where((builder) =>
             builder.whereIn(mysqlArtKey.id, InsertArts)
           ).select();
             // console.log(xx)
             // 缓存文章信息
             await ArtLogicFunc.CachingRedisArtInfos(InsertArtsInfos);
+            // 缓存进id列表
+            let lastIdList = [];
+            let viewsIdList = [];
+            let likeIdList = [];
+            let comment_countIdList = [];
+            InsertArtsInfos.forEach((v, i) => {
+                lastIdList[i] = {name: v[mysqlArtKey.id], score: v[mysqlArtKey.addtime]};
+                viewsIdList[i] = {name: v[mysqlArtKey.id], score: v[mysqlArtKey.hits]};
+                likeIdList[i] = {name: v[mysqlArtKey.id], score: v[mysqlArtKey.up]};
+                comment_countIdList[i] = {name: v[mysqlArtKey.id], score: v[mysqlArtKey.comment_count]};
+
+                // 判断是否置顶，进行缓存
+                if(InsertArtsInfos[0][mysqlArtKey.istop] == 1){
+                    redisDb.lPush(REDIS_CONFIG.database._article, 'TopArtsId', v[mysqlArtKey.id]);
+                }
+            })
+            
+            ArtLogicFunc.CachingRedisArtsIdInfos(lastIdList, 'last');
+            ArtLogicFunc.CachingRedisArtsIdInfos(likeIdList, 'like');
+            ArtLogicFunc.CachingRedisArtsIdInfos(viewsIdList, 'views');
+            ArtLogicFunc.CachingRedisArtsIdInfos(comment_countIdList, 'comment_count');
             return InsertArtsInfos;
             // resolve(InsertArts)
         // })
+    },
+    /**
+     * 
+     * @param {*} targetId [id]
+     * @param {*} params [{}]
+     * @returns 
+     */
+    UpdateArtsInfos: async(targetId, params) => {
+        let results = 0; //mysql数据库更新状态 0 不成功 1成功
+        // 转换数据
+        let updateData = ArtLogicFunc.FrontEndDataProcess(params, 'update');
+        let returnResult = [];
+        // 删除缓存
+        await ArtLogicFunc.ClearCacheRedisArtInfos(targetId);
+        
+        // 更改数据库(只能修改一个字段updateData[0])
+        JSON.stringify(updateData[0]) !== "{}" ? await Knex(mysqlArtKey.table).where((builder) =>
+            builder.whereIn(mysqlArtKey.id, targetId)
+        ).update(updateData[0]).then(updateResult => {
+            results = updateResult;
+        }) : '';
+        // console.log(results)
+        if(results > 0){ // 数据库更新成功
+            await sleep(3000); // 延时3秒
+            // 删除缓存
+            await ArtLogicFunc.ClearCacheRedisArtInfos(targetId);
+
+            // 缓存最新数据
+            returnResult = await ArtLogicFunc.QueryArtInfos(targetId);
+            // 处理id
+        }
+        return returnResult;
+        
     },
     /**
      * 删除文章相关信息
@@ -257,6 +313,7 @@ let ArtLogicFunc = {
             }
         })
     },
+    // ----------------------mysql-------------------------
     /**
      * 数据库查询全部文章id列表信息
      * @param {*} orderby comment_count,like,last,views
@@ -295,47 +352,50 @@ let ArtLogicFunc = {
             builder.whereIn(mysqlArtKey.id, params)));
         })
     },
+    // -----------------redis----------------------------
     /**
      * 缓存文章id列表排序信息
-     * @param {*} params [id]
-     * @param {*} type comment_count,like,last,views
+     * @param {*} params [{name(id):,score(??):}]
+     * @param {*} type comment_count,like,last,views。不存在时进行全部缓存
      * @returns 
      */
     CachingRedisArtsIdInfos: async(params, type) => {
-        await redisDb.zAdd(REDIS_CONFIG.database._article, `${type}ArtIdInfosList`, params);
+        // if(type){
+            await redisDb.zAdd(REDIS_CONFIG.database._article, `${type}ArtIdInfosList`, params);
+        // }else{
+        //     console.log(222)
+        // }
+        // 
     },
     /**
      * 缓存文章信息(id列表【3】，文章信息，置顶文章)
-     * @param {*} params [{},{}]
+     * @param {*} params [{},{}]!!!!(判断是否存在)
+     * @param {*} params
      * @returns 1  缓存成功  0 缓存失败  -1 部分缓存失败
      */
-    CachingRedisArtInfos: async(params) => {
+    CachingRedisArtInfos: async(params, isCacheIdList = true) => {
         // let num = 1;
         for(let i = 0; i < params.length; i++){
             // 缓存文章全部信息
             await redisDb.hMset(REDIS_CONFIG.database._article, `ArtsInfos:${params[i][mysqlArtKey.id]}`, params[i]).then(res => {
                 // res == 'OK' ? num = num - 1 : '';
             });
-            // 是否为置顶文章，进行缓存
-            if(Number(params[i][mysqlArtKey.istop]) == 1){
-                await redisDb.lPush(REDIS_CONFIG.database._article, 'TopArtsId',params[i][mysqlArtKey.id]);
-            }
-            // 插入id缓存列表对列
-            redisDb.zAdd(REDIS_CONFIG.database._article, 'lastArtIdInfosList', [{name: params[i][mysqlArtKey.id], score: params[i][mysqlArtKey.addtime]}]);
-            redisDb.zAdd(REDIS_CONFIG.database._article, 'likeArtIdInfosList', [{name: params[i][mysqlArtKey.id], score: params[i][mysqlArtKey.up]}]);
-            redisDb.zAdd(REDIS_CONFIG.database._article, 'comment_countArtIdInfosList', [{name: params[i][mysqlArtKey.id], score: params[i][mysqlArtKey.comment_count]}]);
-            redisDb.zAdd(REDIS_CONFIG.database._article, 'viewsArtIdInfosList', [{name: params[i][mysqlArtKey.id], score: params[i][mysqlArtKey.hits]}]);
         }
     },
-    // 清除文章缓存
+    /**
+     * 清除n个文章所有缓存
+     * @param {*} params [id]  无参数  默认为all
+     * @returns 
+     */
     ClearCacheRedisArtInfos: (params) => {
         return new Promise(async(resolve, reject) => {
             let result = 0;
-            if(params && params.length >0){ //删除单个
+            if(params && params.length >0){ //删除n个
                 let ArtsInfosKeys = [];
                 // 删除置顶id
                 params.forEach((v, i) => {
                     redisDb.lrem(REDIS_CONFIG.database._article, 'TopArtsId', 0, v);
+                    // 转换keys
                     ArtsInfosKeys[i] = `ArtsInfos:${v}`;
                 })
                 // 删除文章信息hash
@@ -359,14 +419,18 @@ let ArtLogicFunc = {
         })
     },
     // 前端数据转换
-    FrontEndDataProcess: (data) => {
+    /**
+     * 
+     * @param {*} data [{}]
+     * @param {*} mode insert  or   update
+     * @returns [{}]
+     */
+    FrontEndDataProcess: (data, mode = 'insert') => {
         let NewData = [];
         // NewData=data
         data.forEach((v, i) => {
             let transferData = {}
             v.title ? transferData[mysqlArtKey.title] = v.title : v.title;
-            transferData[mysqlArtKey.en] = pinyin(v.title, { toneType: 'none', nonZh: 'consecutive' }).replace(/\s*/g,"");
-            transferData[mysqlArtKey.letter] = pinyin(v.title, { pattern: 'first', toneType: 'none', nonZh: 'consecutive' }).slice(0, 1).toUpperCase();
             v.pic ? transferData[mysqlArtKey.pic] = v.pic : ''; 
             v.blurb ? transferData[mysqlArtKey.blurb] = v.blurb : '';
             v.content ? transferData[mysqlArtKey.content] = v.content : '';
@@ -387,8 +451,19 @@ let ArtLogicFunc = {
             v.password ? transferData[mysqlArtKey.password] = v.password : '';
             v.istop ? transferData[mysqlArtKey.istop] = v.istop : '';
             v.ishot ? transferData[mysqlArtKey.ishot] = v.ishot : '';
-            transferData[mysqlArtKey.addtime] = Math.round(new Date() / 1000);
-            transferData[mysqlArtKey.time] = Math.round(new Date() / 1000);
+            
+            if(mode == 'insert'){
+                v.en ? transferData[mysqlArtKey.en] = v.en : transferData[mysqlArtKey.en] = pinyin(v.title, { toneType: 'none', nonZh: 'consecutive' }).replace(/\s*/g,"");
+                v.letter ? transferData[mysqlArtKey.letter] = v.letter : transferData[mysqlArtKey.letter] = pinyin(v.title, { pattern: 'first', toneType: 'none', nonZh: 'consecutive' }).slice(0, 1).toUpperCase();
+                v.addtime ? transferData[mysqlArtKey.addtime] = v.addtime : transferData[mysqlArtKey.addtime] = Math.round(new Date() / 1000);
+                v.time ? transferData[mysqlArtKey.time] = v.time : '';
+            }else if(mode == 'update'){
+                v.en ? transferData[mysqlArtKey.en] = v.en : '';
+                v.letter ? transferData[mysqlArtKey.letter] = v.letter : '';
+                v.time ? transferData[mysqlArtKey.time] = v.time : transferData[mysqlArtKey.time] = Math.round(new Date() / 1000);
+            }
+            
+            
             NewData[i] = transferData;
         })
         return NewData;
