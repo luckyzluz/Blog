@@ -5,6 +5,9 @@ const {check, oneOf,query,body, param,validationResult } =require('express-valid
 const validate = require('../middleware/validator')
 const MysqlMethods = require('../util/mysql')
 const ArtRedis =require("../util/getArticle")
+const Knex = require('../model/knex')
+const { mysqlArtKey } = require('../config/config.db')
+const { QueryArtInfos } = require('../util/Article');
 // const mongoose = require('mongoose')
 // const { Article } = require('../model')
 
@@ -58,9 +61,18 @@ exports.updateArticle = [
         // })
         // let art_result=await MysqlMethods.select('*','lz_article',`where id in (${req.body.artId.toString()})`)
         // req.article = art_result
-        // if(art_result.length<=0){
-        //     return res.status(404).end();
-        // }
+        // console.log(req.params.articleId)
+
+        let selectResult = await QueryArtInfos([req.params.articleId]);
+        // await Knex(mysqlArtKey.table).where(mysqlArtKey.id, req.params.articleId).select();
+        // console.log(selectResult);  // [{}]
+        if(JSON.stringify(selectResult[0]) == "{}"){
+            return res.status(404).json({
+                code: 40004,
+                success: false,
+                message: '该文章数据不存在'
+            });
+        }
         // if(!article){
         //     return res.status(404).end()
         // }
