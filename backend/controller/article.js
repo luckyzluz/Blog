@@ -10,7 +10,7 @@ const Article = require('../model/article.js');
 const knex = require('../model/knex');
 
 const { from } = require('form-data')
-const {QueryArtsInfosList, QueryArtInfos,QueryMysqlArtInfos,InsertArtsInfos, delArts} = require('../util/Article');
+const {QueryArtsInfosList, QueryArtInfos,QueryMysqlArtInfos,InsertArtsInfos, UpdateArtsInfos, delArts} = require('../util/Article');
 const logger =require("../util/logger");
 
 //获取首页文章列表
@@ -134,25 +134,14 @@ exports.createArticle = async (req, res, next) => {
 //更新文章
 exports.updateArticle = async (req, res, next) => {
     try {
-        //处理请求
-        let article = 111
-        // req.article[0]
-        // const bodyArticle = req.body.article
-        // article.title = bodyArticle.title || article.title
-        // article.description = bodyArticle.description || article.description
-        // article.body = bodyArticle.body || article.body
-        // article.art_name = bodyArticle.art_name || article.art_name
-        // article.art_tags = bodyArticle.art_tags || article.art_tags
-        // article.art_content = bodyArticle.art_content || article.art_content
-        // article.art_tabloid = bodyArticle.art_tabloid || article.art_tabloid
-        // article.art_type = bodyArticle.art_type || article.art_type
-        // article.art_pic = bodyArticle.art_pic || article.art_pic
-        // article.art_status = bodyArticle.art_type || article.art_status
-        // await article.save()
-        // let art_result = await MysqlMethods.update('z_arts', ['art_name', 'art_tags', 'art_content', 'art_tabloid', 'art_type', 'art_pic', 'art_status'], [`"${article.art_name}"`, `"${article.art_tags}"`, `"${article.art_content}"`, `"${article.art_tabloid}"`, `"${article.art_type}"`, `"${article.art_pic}"`, `"${article.art_status}"`], `where art_id="${article.art_id}"`)
+        // console.log(JSON.stringify(req.body.article)=="{}")
+        let UpdateResult = await UpdateArtsInfos([req.params.articleId], [req.body.article]);
         // if (art_result.changedRows > 0) {
             res.status(200).json({
-                article
+                code: 20000,
+                success: true,
+                message: '操作成功',
+                data: UpdateResult
             })
         // } else {
         //     res.status(400).json({
@@ -161,7 +150,7 @@ exports.updateArticle = async (req, res, next) => {
         //         message: '未知错误，文章未能修改'
         //     })
         // }
-
+            
     } catch (err) {
         next(err)
     }
