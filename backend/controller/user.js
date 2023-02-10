@@ -314,9 +314,9 @@ exports.updateCurrentUser = async (req, res, next) => {
         }) : '';
 // console.log(results)
         if(results == 1){ // 数据库更新数据成功
-            await sleep(3000); // 延时3秒
+            sleep(3000); // 延时3秒
             // 再次清除缓存
-            await ClearCacheRedisUserInfos([req.user]);
+            ClearCacheRedisUserInfos([req.user]);
             user[mysqlUserKey.id] = req.user[mysqlUserKey.id];
             delete req.user; // 清除挂载的旧数据
             // 这里不急着将用唯一标识id挂回去

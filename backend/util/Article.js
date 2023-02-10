@@ -279,9 +279,9 @@ let ArtLogicFunc = {
         }) : '';
         // console.log(results)
         if(results > 0){ // 数据库更新成功
-            await sleep(3000); // 延时3秒
+            sleep(3000); // 延时3秒
             // 删除缓存
-            await ArtLogicFunc.ClearCacheRedisArtInfos(targetId);
+            ArtLogicFunc.ClearCacheRedisArtInfos(targetId);
 
             // 缓存最新数据
             returnResult = await ArtLogicFunc.QueryArtInfos(targetId);

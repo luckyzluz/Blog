@@ -39,7 +39,7 @@ exports.register = validate([
     .bail()
     .isEmail().withMessage('邮箱格式不正确')
     .bail()
-    .custom(async email => {
+    .custom(async email => { // normalizeEmail
         let knexSelectParams = {};
         knexSelectParams[mysqlUserKey.email] = email;
         let user = await QueryUserInfos(knexSelectParams);
