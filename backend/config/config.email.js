@@ -6,7 +6,7 @@ module.exports = {
     EmailVerifyConfig:{
         isEmailVerify: {
           RegisteredAccount : false,
-          UpdatePassword: false
+          UpdatePassword: true
         },
         smtpConfig: {
           host: 'smtp.qq.com',
