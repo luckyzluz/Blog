@@ -14,11 +14,33 @@ const { QueryArtInfos } = require('../util/Article');
 //获取文章列表验证数据check
 exports.getArticles = validate([
     // async (res,req,next)=>{
-        query('offset').custom(async value=>{
-            if(value<0){
-                // return Promise.reject('只允许是正整数并且要大于于等于 1')
-            //     //同步:失败
-                throw new Error('只允许是正整数并且要大于于等于 0')
+        query('offset').custom(async (value,{req})=>{
+            // console.log(value > req.query.limit)
+            if(value <= 0){
+                return Promise.reject('不得小于且等于0')
+            }
+            if(Number(value) > Number(req.query.limit)){
+                return Promise.reject('limit不得小于offset')
+            }
+        }),
+        query('limit').custom(async(value) => {
+            // console.log(typeof(value))
+            if(Number(value) < 4){
+                return Promise.reject('limit不得小于4')
+            }
+        }),
+        query('orderby').custom(async(value) => {
+            // console.log(value == "")
+
+            if(!(value == 'like' || value == 'last' || value == 'views' || value == 'comment_count' || value== undefined)){
+                // console.log(333)
+                return Promise.reject('The orderby parameter value is illegal');
+            }
+        }),
+        query('sort').custom(async(value) => {
+            if(!(value == 'desc' || value == 'asc' || value== undefined)){
+                // console.log(333)
+                return Promise.reject('The sort parameter value is illegal');
             }
         })
     // }

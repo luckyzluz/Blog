@@ -17,10 +17,10 @@ exports = module.exports = validations => {
       return next();
     }
     let err_result=errors.array()
-    err_result.forEach(v=>{
-      delete v.param
-      delete v.location
-    })
+    // err_result.forEach(v=>{
+      // delete v.param
+      // delete v.location
+    // })
     
     res.status(200).json({ 
       code: 40000,
