@@ -5,6 +5,7 @@ const nodemail = require('../util/nodemailer')
 const { redisDb } = require('../util/redis');
 const { EmailVerifyConfig } = require('../config/config.email');
 const { REDIS_CONFIG, mysqlUserKey } = require("../config/config.db")
+const logger =require("../util/logger");
 // let isEmailVerify=false;// 是否启用邮箱验证码
 
 // 生成的随机六位数
@@ -113,16 +114,17 @@ exports.updatePwdValidation = async (req, res, next) => {
             let status = 0; // 当前状态 
     
             // status  0：发送失败  1：成功 2：缓存失败 3:已发送
-
+            // console.log(req.body.email)
             // 查询是否已发放验证码
-            await redisDb.get(REDIS_CONFIG.database._user, `UpdatePwdVerifyCode:${req.user[mysqlUserKey.email]}`).then(res => {
+            await redisDb.get(REDIS_CONFIG.database._user, `UpdatePwdVerifyCode:${req.body.email}`).then(res => {
                 res == null ? '' : status = 3;
             })
-            // console.log(status)
+            
             if(status !== 3){
                 // 发送验证邮件
-                await nodemail(req.user[mysqlUserKey.email], code).then(res => {
+                await nodemail(req.body.email, code).then(res => {
                     if(res.response.indexOf('OK') >= 0){ // 发送成功
+                        // console.log(res)
                         status = 1;
                     }else{ // 发送失败
                         status = 0;
@@ -131,11 +133,11 @@ exports.updatePwdValidation = async (req, res, next) => {
             }
 
             if(status == 1){
-                await redisDb.set(REDIS_CONFIG.database._user, `UpdatePwdVerifyCode:${req.user[mysqlUserKey.email]}`, code, EmailVerifyConfig.EffectiveTime).then(res=>{
+                await redisDb.set(REDIS_CONFIG.database._user, `UpdatePwdVerifyCode:${req.body.email}`, code, EmailVerifyConfig.EffectiveTime).then(res=>{
                     res == 'OK' ? status = 1 : status = 2;
                 });
             }
-            
+            // console.log(status)
             if(status == 3){
                 res.status(200).json({
                     code: 40000,
@@ -179,7 +181,7 @@ exports.updatePwdValidation = async (req, res, next) => {
         
         
     } catch (err) {
-        logger.reprocess_error("Failed to send mailbox verification code ("+err.message+")", res, req);
+        logger.reprocess_error("Failed to send mailbox verification code ("+err+")", res, req);
         next(new Error(`邮箱验证码发送失败`));
         // next(err)
     }
