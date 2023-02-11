@@ -156,8 +156,9 @@ exports.updatePwdValidation = validate([
 ])
 exports.test = validate([
     check('email').isEmail().normalizeEmail().withMessage('格式不正确').bail(),
-    check('password').isLength({ min: 6 }).withMessage('长度不符').bail(),
-    check("ff").if(body('newPassword').exists()).bail().isLength({ min: 6 })
+    check('password').isLength({ min: 6,max:6 }).withMessage('长度不符').bail(),
+    check("ff").if(body("ff").exists()).isInt({min:-7}).withMessage("11515155").notEmpty()
+    // .isLength({ min: 6 }).isInt({max:10}).bail().isLocale()
     // .custom((value,{req}) => {
     //     console.log(value)
     // })
