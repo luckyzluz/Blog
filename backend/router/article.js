@@ -17,7 +17,7 @@ router.get('/:Id',articleValidator.getArticle,articleCtrl.getArticle)
 router.post('/',auth,articleValidator.createArticle,articleCtrl.createArticle)
 
 //更新文章
-router.put('/:articleId',auth,articleValidator.updateArticle,articleCtrl.updateArticle)
+router.put('/:Id',auth,articleValidator.updateArticle,articleCtrl.updateArticle)
 
 //删除文章:articleId
 router.delete('/',auth,articleValidator.deleteArticle,articleCtrl.deleteArticle)
@@ -26,15 +26,15 @@ router.delete('/',auth,articleValidator.deleteArticle,articleCtrl.deleteArticle)
 router.post('/:articleId/comments',articleCtrl.createArticleComment)
 
 //获取文章评论列表
-router.get('/:articleId/comments',articleCtrl.getArticleComments)
+router.get('/:Id/comments',articleCtrl.getArticleComments)
 
 // 删除文章评论
-router.delete('/:articleId/comments/:id',articleCtrl.deleteArticleComment)
+router.delete('/:Id/comments/:id',articleCtrl.deleteArticleComment)
 
 // 文章点赞
-router.post('/:articleId/favorite',articleCtrl.favoriteArticle)
+router.post('/:Id/favorite',articleCtrl.favoriteArticle)
 
 //取消文章点赞
-router.delete('/:articleId/favorite',articleCtrl.unfavoriteArticle)
+router.delete('/:Id/favorite',articleCtrl.unfavoriteArticle)
 
 module.exports = router
