@@ -28,7 +28,7 @@ exports.register = validate([
     body('user.password')
     .notEmpty()
     .withMessage('密码不能为空')
-    .bail()
+    .bail().isInt({min: 8}).withMessage('密码最少8位').bail()
     .custom(async password => {
         if(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^\w\s]).{8,}$/.test(password)==false){
             return Promise.reject('密码不符合规定，请重新编辑')
@@ -37,7 +37,7 @@ exports.register = validate([
     body('user.email')
     .notEmpty().withMessage('邮箱不能为空')
     .bail()
-    .isEmail().withMessage('邮箱格式不正确')
+    .isEmail().normalizeEmail().withMessage('邮箱格式不正确')
     .bail()
     .custom(async email => { // normalizeEmail
         let knexSelectParams = {};
@@ -53,11 +53,7 @@ exports.register = validate([
 exports.login = [
     validate([
         // body('user.username').notEmpty().withMessage('账户不能为空'),
-        body('user.email').notEmpty().withMessage('邮箱不能为空'),
-        body('user.password').notEmpty().withMessage('密码不能为空')
-    ]),
-    validate([
-        body('user.email').custom(async (email, {req,res}) => {
+        body('user.email').notEmpty().withMessage('邮箱不能为空').bail().isEmail().normalizeEmail().withMessage('邮箱格式不正确').bail().custom(async (email, {req,res}) => {
             let knexSelectParams = {};
             knexSelectParams[mysqlUserKey.email] = email;
             let queryResult = await QueryUserInfos(knexSelectParams,true);
@@ -68,10 +64,8 @@ exports.login = [
             if(user.length == 0){ 
                 return Promise.reject('邮箱不存在');
             }
-        })
-    ]),
-    validate([
-        body('user.password').custom(async (password,{req,res}) => {
+        }),
+        body('user.password').notEmpty().withMessage('密码不能为空').bail().isInt({min: 8}).withMessage('密码最少8位').bail().custom(async (password,{req,res}) => {
             let pwdMysql = ""; // 是否继续mysql查询
             // console.log(req.user)
             if(req.user.user_pwd){ //确保数据存在
@@ -93,12 +87,31 @@ exports.login = [
 
 // 用户更新前参数验证
 exports.put = validate([
-    // body('user.username')
-    // .notEmpty().withMessage('用户名不能为空')
-    // .bail()
-    // .custom(async username => {
-    //         // return Promise.reject('用户名已存在')
-    // }),
+    body('user.username').if(body('user.username').exists())
+    .notEmpty().withMessage('用户名不能为空')
+    .bail()
+    .custom(async username => {
+        let knexSelectParams = {};
+        knexSelectParams[mysqlUserKey.name] = username;
+        let user = await QueryUserInfos(knexSelectParams);
+        if(user.length !== 0){ 
+            return Promise.reject('用户名已存在');
+        }
+            // return Promise.reject('用户名已存在')
+    }),
+    body('user.email').if(body('user.email').exists())
+    .notEmpty().withMessage('邮箱不能为空')
+    .bail()
+    .isEmail().normalizeEmail().withMessage('邮箱格式不正确')
+    .bail()
+    .custom(async email => { // normalizeEmail
+        let knexSelectParams = {};
+        knexSelectParams[mysqlUserKey.email] = email;
+        let user = await QueryUserInfos(knexSelectParams);
+        if(user.length !== 0){ 
+            return Promise.reject('邮箱已存在');
+        }
+    })
 ])
 
 // 用户更新密码参数验证
@@ -106,6 +119,7 @@ exports.cipher = validate([
     body('password')
     .notEmpty().withMessage('密码不能为空')
     .bail()
+    .isInt({min: 8}).withMessage('密码最少8位').bail()
     .custom(async password => {
             // return Promise.reject('用户名已存在')
             if(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[^\w\s]).{8,}$/.test(password)==false){
