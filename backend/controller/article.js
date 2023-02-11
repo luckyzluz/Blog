@@ -82,15 +82,21 @@ exports.getArticle = async (req, res, next) => {
         //处理请求
         let result=[];
         result = await QueryArtInfos([req.params.Id], 0);
-        // await ArtRedis.getArticle('0','allArtsList',req.params.Id).then((res)=>{
-        //     result=res;
-        // })
-        res.status(200).json({
-            code: 20000,
-            success: true,
-            message: "操作成功",
-            data: result
-        })
+        if(JSON.stringify(result[0]) == "{}"){
+            res.status(200).json({
+                code: 40004,
+                success: false,
+                message: "操作失败"
+            })
+        }else{
+            res.status(200).json({
+                code: 20000,
+                success: true,
+                message: "操作成功",
+                data: result
+            })
+        }
+        
     } catch (err) {
         next(err)
         logger.reprocess_error("Failed to obtain article information ("+err.message+")", res, req);
@@ -135,7 +141,7 @@ exports.createArticle = async (req, res, next) => {
 exports.updateArticle = async (req, res, next) => {
     try {
         // console.log(JSON.stringify(req.body.article)=="{}")
-        let UpdateResult = await UpdateArtsInfos([req.params.articleId], [req.body.article]);
+        let UpdateResult = await UpdateArtsInfos([req.params.Id], [req.body.article]);
         // if (art_result.changedRows > 0) {
             res.status(200).json({
                 code: 20000,
@@ -161,21 +167,10 @@ exports.deleteArticle = async (req, res, next) => {
     try {
         //处理请求
         let status=0;
-        const artId = req.body.artId;
+        const artId = req.body.id;
         // console.log(artId)
-        status = await delArts(artId);
-        // await redisDb.hdel('0','allArtsList',artId);
-        // for(let item in artId){
-        //     await redisDb.lrem('0','allIdArtsList',0,artId[item]);
-        // }
-        
-        // let del_Result =await MysqlMethods.delete('lz_article', `where id in(${artId.toString()})`);
-        // res.status(204).end()await
+        // status = await delArts(artId);
 
-        // if(del_Result.affectedRows>0){
-        //     msg='删除成功';
-        //     status=1;
-        // }
         if(status >0){
             res.status(200).json({
                 code: 20000,
