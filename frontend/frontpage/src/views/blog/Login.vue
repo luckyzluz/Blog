@@ -1,3 +1,4 @@
+<!-- 登录 & 注册 窗口 -->
 <template>
   <div
     id="login"
@@ -6,9 +7,11 @@
   >
     <div class="sign-content">
       <div class="sign">
+        <!-- 窗口关闭按钮 -->
         <button class="close" @click="muisLogin">
           <i class="ic-close iconfont icon-off-search"></i>
         </button>
+        <!-- 窗口logo -->
         <div class="sign-logo">
           <!-- https://img30.360buyimg.com/pop/jfs/t1/149566/34/23125/22225/620c7d32Ec4e152c8/7e9aeb8c952d0c9d.png -->
           <img src="../../assets/image/logo.png" alt="mxone" />
@@ -114,9 +117,9 @@
                     <div class="line-form">
                       <input
                         type="text"
-                        name="username"
+                        name="email"
                         @blur="blurPrice($event)"
-                        v-model="login.username"
+                        v-model="login.email"
                         class="line-form-input"
                         placeholder=""
                       /><i class="line-form-line"></i>
@@ -409,6 +412,7 @@ export default {
       }
     },
     bloglogin() {
+      console.log(this.login)
       this.$api.login({ user: this.login }).then((res) => {
         let token = res.data.token;
         token.refresh_token = `Bearer ${token.refresh_token}`;
