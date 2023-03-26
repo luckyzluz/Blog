@@ -57,7 +57,8 @@ export default[
           return {
             code: 20000,
             success: true,
-            data: [
+            data: {
+              slider: [
                 {
                   title:'更优雅的Wordpress主题模板_WP中文主题_zibll主题_子比主题官方演示',
                   url:'http://baidu.com',
@@ -96,7 +97,8 @@ export default[
                     layer_2: 'src/assets/image/slider/定制-图层2-3.png'
                   }
                 }
-              ],
+              ]
+            },
             message: '数据获取成功'
           }
         },

@@ -6,6 +6,8 @@
 <script setup>
 import Slider from 'c/Slider.vue'
 import { reactive,watch, watchEffect,onMounted,getCurrentInstance } from 'vue'
+import { useStore } from "vuex";
+let {state,getters, dispatch,commit} = useStore();
 const {proxy} = getCurrentInstance();
 let home= reactive({
   slider: [
@@ -17,10 +19,12 @@ let home= reactive({
   ]
 })
 onMounted(()=>{
-  proxy.$api.getSlider().then((res)=>{
-    // console.log(res.data.data);
-    home.slider = [...res.data.data];
-  })
+  // console.log(getters['web/getWebData'])
+  // proxy.$api.getBlogConfig().then((res)=>{
+  //   // console.log(res.data.data);getters.web.getWebData()
+  //   home = res.data.data;
+  //   console.log(home)
+  // })
 })
 </script>
 <style lang="scss">

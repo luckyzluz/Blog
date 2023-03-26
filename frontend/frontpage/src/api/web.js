@@ -12,7 +12,7 @@ export default {
             // mock:false
         })
     },
-    getBlog(){
+    getBlogConfig(){
         return request({
             url: '/blog',
             method:'get',
