@@ -1,0 +1,36 @@
+/* 白天 */
+:root{
+    /* 颜色 */
+    --main-color: #4e5358;
+    --main-shadow:rgba(116, 116, 116, 0.08);
+    --main-bg-color: #fff;
+    --main-border-color: rgba(50, 50, 50, 0.06);
+    --muted-color: #777;
+    --muted-2-color: #999;
+    --muted-3-color: #b1b1b1;
+    --blur-bg: rgba(255, 255, 255, 0.8);
+}
+
+/* 夜间 */
+body.dark-theme{
+    --main-color: #e5eef7;
+    --main-shadow:rgba(24, 24, 24, 0.1);
+    --main-bg-color: #323335;
+    --main-border-color: rgba(114, 114, 114, 0.1);
+    --muted-color: #b4b6bb;
+    --muted-2-color: #888a8f;
+    --muted-3-color: #636469;
+    --blur-bg: rgba(50, 51, 53, 0.8);
+}
+
+
+:root{
+    --theme-color: #16b597;
+    --focus-color: var(--theme-color);
+    --focus-shadow-color: rgba(22,181,151,.4);
+    --focus-color-opacity1: rgba(22,181,151,.1);
+    --main-radius: 4px;
+    --mian-max-width: 1200px;
+    
+}
+

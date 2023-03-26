@@ -1,7 +1,9 @@
 <template>
+  <!-- 右侧悬浮工具 -->
   <div id="fixed-tool">
     <div class="fixed-tool">
       <a class="tool-btn service-qq" @click="modelBrn">
+        <!-- <svg-icon class="btn" iconName='icon-taiyang'></svg-icon> -->
         <i
           :class="[
             'btn',
@@ -13,12 +15,15 @@
       </a>
       <a class="tool-btn service-qq">
         <i class="iconfont icon-QQ"></i>
+        <!-- <svg-icon iconName="icon-QQ"></svg-icon> -->
       </a>
       <a class="tool-btn service-qq" @click="muisLogin">
         <i class="iconfont icon-menu21"></i>
+        <!-- <svg-icon iconName="icon-menu21"></svg-icon> -->
       </a>
       <a v-show="arrowup" class="tool-btn service-qq" @click="goTop">
         <i class="iconfont icon-arrowup"></i>
+        <!-- <svg-icon iconName="icon-arrowup"></svg-icon> -->
       </a>
     </div>
   </div>
@@ -81,8 +86,10 @@ export default {
       this.dark = !this.dark;
       if (this.dark) {
         window.document.documentElement.setAttribute("data-theme", "dark");
+        document.getElementsByTagName('body')[0].className += ' dark-theme';
       } else {
         window.document.documentElement.setAttribute("data-theme", "light");
+        document.getElementsByTagName('body')[0].classList.remove("dark-theme");
       }
     },
     gundong() {
@@ -109,7 +116,7 @@ export default {
 };
 </script>
 <style lang="scss">
-@import "/@/assets/style/scss/common/common";
+// @import "/@/assets/style/scss/common/common";
 .fixed-tool {
   position: fixed;
   bottom: 60px;
@@ -130,8 +137,10 @@ export default {
     // --this-bg: var(--float-btn-bg);
     // background: rgba(70, 70, 70, 0.4);
     // background: rgba(200,200,200,.4);
-    @include background_color("fixed-btn-bg");
-    @include font_color("fixed-btn-color");
+    // @include background_color("fixed-btn-bg");
+    background-color: rgba(200,200,200,.4);
+    // @include font_color("fixed-btn-color");
+    color: #999;
     i {
       display: inline-block;
       font: normal normal normal 14px/1 FontAwesome;

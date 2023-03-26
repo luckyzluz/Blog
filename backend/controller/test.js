@@ -222,14 +222,23 @@ const {sleep} = require('../util/utils')
 // await sleep(200)
 // test('name1', 10000, 'client2');
 // await redisDb.hGet(0,)
-const scores = [
-    { name: "Bob", score: 80 },
-    { name: "Jeff", score: 59.5 },
-    { name: "Tom", score: 100 },
-    { name: "Alex", score: 99.5 },
-  ];
-await redisDb.zAdd(2,'xx',scores)
-
+// const scores = [
+//     { name: "Bob", score: 80 },
+//     { name: "Jeff", score: 59.5 },
+//     { name: "Tom", score: 100 },
+//     { name: "Alex", score: 99.5 },
+//   ];
+// await redisDb.zAdd(2,'xx',scores)
+let getClientIp = function (req) {
+    return req.headers['x-forwarded-for'] ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress || '';
+};
+let ip = getClientIp(req).match(/\d+.\d+.\d+.\d+/);
+console.log(ip);
+ip = ip ? ip.join('.') : null;
+console.log(ip);
 
         res.status(200).json({
             code:200,

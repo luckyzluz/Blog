@@ -1,11 +1,28 @@
-import { createRouter, createWebHashHistory,createWebHistory} from 'vue-router'
-// import adminRouter from './modules/adminRouter'
-import blogRouter_1 from './modules/blogRouter_1'
+import {createRouter, createWebHashHistory, createWebHistory} from 'vue-router';
 
-const router = createRouter({
-    // createWebHashHistory,createWebHistory 
-    history:createWebHistory(),
-    routes:[...blogRouter_1]
+// 路由列表
+const routes = [
+    {
+        path: '/',
+        name: 'home',
+        meta:{
+            title: '首页'
+        },
+        component: () => import('../views/home.vue')
+    },
+    {
+        path: '/test',
+        name: 'test',
+        meta:{
+            title: 'test'
+        },
+        component: () => import('../views/test.vue')
+    }
+]
+
+
+// 导出路由
+export default  createRouter({
+    history: createWebHashHistory(),
+    routes
 })
-// ,...adminRouter
-export default router

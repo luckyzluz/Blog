@@ -1,25 +1,34 @@
 /**
  * 环境配置封装
+ * https://www.fastmock.site/mock/9c617ea4462b67936e0f6c46e5c09235/api
  */
-const env= import.meta.env.MODE || 'test';
+// import { getCurrentInstance } from 'vue'
+// const {proxy} = getCurrentInstance();
+// proxy.
+// this.$api.signedin().then((res) => {
+//     console.log(res)
+// });
+const env= import.meta.env.MODE || 'development';
 const EnvConfig = {
-    dev:{
-        baseApi:'http://localhost:3000/api',
-        mockApi:'https://www.fastmock.site/mock/edfe3e6794e5c3273dcbd720d7657349/api'
-        // 
-    },
-    test:{
-        baseApi:'http://localhost:3000/api',
-        mockApi:'https://www.fastmock.site/mock/454f58b030e7903400b943b9163118e5/blog1'
-    },
-    prod:{
-        baseApi:'http://localhost:3000/api',
-        mockApi:'https://www.fastmock.site/mock/edfe3e6794e5c3273dcbd720d7657349/api'
-    }
+    baseApi:`/api`, // 后端接口
+    localMockApi:`/localmock`,//本地mock
+    remoteMockApi: '/remotemock' // 远程mock
 }
+// const EnvConfig = {
+//     development:{
+//         baseApi:`/api`, // 后端接口
+//         localMockApi:`/localmock`,//本地mock
+//         remoteMockApi: '/remotemock' // 远程mock
+//     },
+//     production:{
+//         baseApi:`/api`, // 后端接口
+//         localMockApi:`/localmock`,//本地mock
+//         remoteMockApi: '/remotemock' // 远程mock
+//     }
+// }
 export default{
     env,
-    mock:false,
+    mock: 'local', // '' 'local'  'remote'
     namespace:'zblog',
-    ...EnvConfig[env]
+    ...EnvConfig //...EnvConfig[env]
 }

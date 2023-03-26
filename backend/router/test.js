@@ -5,6 +5,6 @@ const emailValidator = require('../validator/email')
 const auth = require('../middleware/auth')
 // var child_process = require("child_process");
 
-router.get('/',emailValidator.test, testCtrl.test)
-
+router.get('/', testCtrl.test)
+// emailValidator.test,
 module.exports = router

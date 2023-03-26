@@ -1,0 +1,107 @@
+// 颜色配置
+$focus-color:rgb(255,63,159);
+
+// blue
+$c-blue-color: #2997f7;
+$c-blue-background:rgba(41, 151, 247, .1);
+
+$c-blue-2-color: #5c7cff;
+$c-blue-2-background: rgba(77, 130, 249, .1);
+
+// green
+$c-green-color: #18a52a;
+$c-green-background:rgba(18, 185, 40, .1);
+// purple
+$c-purple-color: #e434e1;
+$c-purple-background:rgba(213, 72, 245, 0.1);
+// red
+$c-red-color: #ff5473;
+$c-red-background: rgba(255, 84, 115, .1);
+// yellow
+$c-yellow-color: #ff6f06;
+$c-yellow-background: rgba(255, 111, 6, 0.1);
+
+
+// size配置
+$main-max-width: 1200px;
+$main-radius:4px; // 8px
+
+$lazy-animation: 'lazy_fade';
+
+// 模块配置
+$icon-signin-color: $c-blue-color;
+$icon-signin-background: $c-blue-background;
+$icon-signup-color: $c-green-color;
+$icon-signup-background: $c-green-background;
+$icon-findpwd-color: $c-purple-color;
+$icon-findpwd-background: $c-purple-background;
+
+$this-color: $c-red-color;
+$this-bg: $c-red-background;
+$this-shadow: none;
+$this-border: transparent;
+
+// 主题配置
+$themes: (
+  light: (
+    body-bg-color: #f5f6f7,
+    main-bg-color:#fff,
+    main-color: rgb(78,83,88),
+    global-bg: #f3f8fb,//全局背景
+    font-color: #001737,//全局字体颜色
+    secondary-bg: #fff,
+    secondary-color:#828a92,
+    body-bg:#f5f6f7,
+    header-bg:rgba(255,255,255,.8),
+    header-color:#4e5358,
+    nav-fix-bg:rgba(255,255,255,0.8),
+    nav-hover-color:#ff4e20,
+    img-brightness:100%,
+    blur-bg:rgba(255, 255, 255, 0.8),
+    muted-color:#777,
+    muted-2-color:#999,
+    muted-3-color:#b1b1b1,
+    input-shadow: 0 0 0 1000px #fff inset,
+    main-border-color: rgba(50,50,50,.06),
+    muted-border-color: rgba(0, 0, 0, 0.03),
+    footer-color: #999,
+    footer-bg:#fff,
+    // a标签
+    // 右下角按钮配色#9266f9
+    fixed-btn-bg:rgba(200,200,200,.4),
+    fixed-btn-color:#999,
+    // 变量
+    main-shadow: rgba(116, 116, 116, 0.08)
+  ),
+  dark: (
+    body-bg-color: #292a2d,
+    main-bg-color:#323335,
+    main-color:rgb(229,238,247),
+    global-bg: #292a2d,
+    font-color:#fff,
+    secondary-bg: #323335,
+    secondary-color:#a4a8b4,
+    body-bg:#292a2d,
+    header-bg:rgba(50,51,53,.8),
+    header-color:#e5eef7,
+    nav-fix-bg:rgba(18,18,18,0.8),
+    nav-hover-color:#ff4e20,
+    img-brightness:60%,
+    blur-bg:rgba(55, 56, 58, 0.8),
+    muted-color:#b4b6bb,
+    muted-2-color:#888a8f,
+    muted-3-color:#636469,
+    input-shadow: 0 0 0 1000px #323335 inset,
+    main-border-color: rgba(114,114,114,.1),
+    muted-border-color: rgba(184, 184, 184, 0.02),
+    footer-color:#888a8f,
+    footer-bg: #323335,
+    // a标签
+    // 右下角按钮配色#9266f9
+    fixed-btn-bg:rgba(70,70,70,.4),
+    fixed-btn-color:#888a8f,
+    // 变量
+    main-shadow: rgba(24, 24, 24, 0.1)
+  )
+);
+// main-border-color

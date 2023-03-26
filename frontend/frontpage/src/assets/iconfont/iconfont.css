@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 2851110 */
-  src: url('iconfont.woff2?t=1644930027166') format('woff2'),
-       url('iconfont.woff?t=1644930027166') format('woff'),
-       url('iconfont.ttf?t=1644930027166') format('truetype');
+  src: url('iconfont.woff2?t=1678184001740') format('woff2'),
+       url('iconfont.woff?t=1678184001740') format('woff'),
+       url('iconfont.ttf?t=1678184001740') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,154 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-shujuyewu:before {
+  content: "\e643";
+}
+
+.icon-xihuan:before {
+  content: "\e86f";
+}
+
+.icon-xihuan1:before {
+  content: "\e870";
+}
+
+.icon-icon-test:before {
+  content: "\e6de";
+}
+
+.icon-caidan:before {
+  content: "\e63e";
+}
+
+.icon-zanting:before {
+  content: "\e63a";
+}
+
+.icon-shangyishou:before {
+  content: "\e63b";
+}
+
+.icon-arrow-:before {
+  content: "\e63c";
+}
+
+.icon-audio-up:before {
+  content: "\e63d";
+}
+
+.icon-danquxunhuan:before {
+  content: "\e639";
+}
+
+.icon-24gf-playlist4:before {
+  content: "\ea84";
+}
+
+.icon-xunhuanbofang:before {
+  content: "\e6bf";
+}
+
+.icon-a-27Gxunhuanbofang:before {
+  content: "\e68c";
+}
+
+.icon-zhanghaodenglu:before {
+  content: "\e640";
+}
+
+.icon-saomadenglu:before {
+  content: "\e638";
+}
+
+.icon-bangzhu:before {
+  content: "\e637";
+}
+
+.icon-jiazailoading-A:before {
+  content: "\e8fc";
+}
+
+.icon-jiazai:before {
+  content: "\e66d";
+}
+
+.icon-tuichudenglu:before {
+  content: "\e71e";
+}
+
+.icon-redu:before {
+  content: "\e636";
+}
+
+.icon-wendang:before {
+  content: "\e66b";
+}
+
+.icon-xiaoxi1:before {
+  content: "\e641";
+}
+
+.icon-wodetiezi:before {
+  content: "\e647";
+}
+
+.icon-tubiaoku01-copy:before {
+  content: "\e635";
+}
+
+.icon-money1:before {
+  content: "\e600";
+}
+
+.icon-jinbi:before {
+  content: "\e6f4";
+}
+
+.icon-money:before {
+  content: "\e832";
+}
+
+.icon-qiandao:before {
+  content: "\e634";
+}
+
+.icon-xiaoxi:before {
+  content: "\e632";
+}
+
+.icon-point:before {
+  content: "\e631";
+}
+
+.icon-aixin_shixin:before {
+  content: "\eca1";
+}
+
+.icon-weixin1:before {
+  content: "\e660";
+}
+
+.icon-github:before {
+  content: "\e691";
+}
+
+.icon-jiesuo:before {
+  content: "\e630";
+}
+
+.icon-zuanshi_o:before {
+  content: "\eb70";
+}
+
+.icon-huangguan:before {
+  content: "\e62f";
+}
+
+.icon-paixu:before {
+  content: "\e66c";
 }
 
 .icon-zhuce:before {
