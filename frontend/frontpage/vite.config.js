@@ -1,74 +1,160 @@
-import { defineConfig ,loadEnv} from 'vite'
+import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { resolve } from 'path'
+
 import AutoImport from 'unplugin-auto-import/vite'
 import Components from 'unplugin-vue-components/vite'
 import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
-import { resolve } from "path"
-import { viteMockServe } from 'vite-plugin-mock'
-// import config from './src/config/index.js'
-// , UserConfigExport, ConfigEnv
+
+function pathResolve(dir) {
+  return resolve(__dirname, ".", dir);
+}
 // https://vitejs.dev/config/
-export default (({ mode, command } )=>{
-  let prodMock = false;
-  console.log(loadEnv(mode, process.cwd()).VITE_BASE_API_URL)
-  return defineConfig({
-    base: "./",
-    // 本地运行配置，及反向代理配置
-    server: {
-      cors: true, // 默认启用并允许任何源
-      open: false, // 在服务器启动时自动在浏览器中打开应用程序
-      // 开启控制台输出日志
-      silent: false,
-      host: 'localhost',
-      hmr: true,
-      port: 5173,
-      //反向代理配置，注意rewrite写法，开始没看文档在这里踩了坑
-      proxy: {
-        '/api': { //项目代理
-          target: loadEnv(mode, process.cwd()).VITE_BASE_API_URL, //实际请求地址http://localhost:3000loadEnv('VITE_MOCK_API_URL')
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, '')
-        },
-        '/remotemock': { // 远程mock
-          target: loadEnv(mode, process.cwd()).VITE_REMOTE_MOCK_API_URL, //代理接口http://localhost:3000loadEnv('VITE_MOCK_API_URL')
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/remotemock/, '') // 检测接口中出现的'api/'因为这段字符只是我们用来检测转发的而已，实际请求中要用正则将api设置为空，要记住他只是一个识别字符而已，因为我们的项目中可能存在需要请求不同的后端接口地址
-        }
-      }
-    },
-    plugins: [
-      vue(),
-      AutoImport({
-        resolvers: [ElementPlusResolver()],
-      }),
-      Components({
-        resolvers: [ElementPlusResolver()],
-      }),
-      viteMockServe({
-        // default
-        mockPath: './src/mock',
-        localEnabled: true, // 是否应用于本地
-    // prodEnabled: false, // 是否应用于生产
-    // watchFiles: true, // 监听mock文件变化
-    // logger: true,
-    // // 这个属性是给生产用的，也就是说prodEnabled必须是true才有用
-    // // 如果只是本地使用的话，这个属性就没必要加了
-    //     injectCode: `
-    //       import { setupProdMockServer } from './mockProdServer';
-    //       setupProdMockServer();
-    //     `
-      }),
-    ],
-    resolve: {
-      // ↓路径别名，主要是这部分
-      alias: {
-        "@": resolve(__dirname, "./src"),
-        "c": resolve(__dirname, "./src/components"),
-        "v": resolve(__dirname, "./src/views"),
-        // "u": resolve(__dirname, "./src/utils"),
-        // "s": resolve(__dirname, "./src/store"),
-        "a": resolve(__dirname, "./src/assets")
+export default defineConfig({
+  base: "",
+  // 本地运行配置，及反向代理配置
+  server: {
+    cors: true, // 默认启用并允许任何源
+    open: true, // 在服务器启动时自动在浏览器中打开应用程序
+    // 开启控制台输出日志
+    silent: false,
+    host: 'localhost',
+    port: 8082,
+    //反向代理配置，注意rewrite写法，开始没看文档在这里踩了坑
+    proxy: {
+      '/api': {
+        target: "http://localhost:3000", //代理接口
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, '')
       }
     }
-  })
+  },
+  plugins: [
+    vue(),
+    AutoImport({
+      resolvers: [ElementPlusResolver()],
+    }),
+    Components({
+      resolvers: [ElementPlusResolver()],
+    }),
+  ],//配置需要使用的插件列表，这里将vue添加进去
+  resolve: {
+    alias: {
+      // 配置文件别名 vite1.0是/@/  2.0改为/@
+      // 这里是将src目录配置别名为 /@ 方便在项目中导入src目录下的文件
+      "/@": pathResolve("src"),
+      "c": pathResolve("src/components"),
+      "v": pathResolve("src/views"),
+      "u": pathResolve("src/utils"),
+      "s": pathResolve("src/store"),
+      "a": pathResolve("src/assets")
+    }
+  },
+  // 强制预构建插件包
+  optimizeDeps: {
+    include: ['axios'],
+  },
+  // 打包配置
+  build: {
+    target: 'modules',
+    outDir: 'dist', //指定输出路径
+    assetsDir: 'assets', // 指定生成静态资源的存放路径
+    minify: 'terser', // 混淆器，terser构建后文件体积更小
+    ssr:false,// 是否开启ssr服务断渲染src/pages/blog/index.html
+    rollupOptions: {
+      // input: {
+      //   main: resolve(__dirname, 'index.html'),
+      //   admin: resolve(__dirname, '/src/pages/admin/admin.html')
+      // },
+      terserOptions: {
+        compress: {
+          drop_console: true,
+          drop_debugger: true,
+        },
+      },
+      output: {
+        chunkFileNames: 'static/js/[name]-[hash].js',//文件名
+        entryFileNames: 'static/js/[name]-[hash].js',//入口文件名
+        assetFileNames:  function(ext) {
+          // 后缀获取
+          let suffix = '';
+          // 获取类型结果
+          let result = '';
+          try {
+           suffix = ext.name.slice(ext.name.lastIndexOf('.') + 1);
+          } catch (err) {
+           suffix = '';
+          }
+          // fileName无后缀返回 false
+          if (!suffix) { return false; }
+          suffix = suffix.toLocaleLowerCase();
+          // 图片格式
+          const imglist = ['png', 'jpg', 'jpeg', 'bmp', 'gif'];
+          // 进行图片匹配
+          result = imglist.find(item => item === suffix);
+          if (result) {
+          //  return 'image';
+           return 'static/picture/[name].[ext]';
+          }
+          // 匹配 excel
+          const excelist = ['xls', 'xlsx'];
+          result = excelist.find(item => item === suffix);
+          if (result) {
+          //  return 'excel';
+           return 'static/excel/[name].[ext]';
+          }
+          // 匹配 word
+          const wordlist = ['doc', 'docx','pdf','ppt', 'pptx','txt'];
+          result = wordlist.find(item => item === suffix);
+          if (result) {
+          //  return 'doc';
+           return 'static/doc/[name].[ext]';
+          }
+          // 匹配 视频
+          const videolist = ['mp4', 'm2v', 'mkv', 'rmvb', 'wmv', 'avi', 'flv', 'mov', 'm4v'];
+          result = videolist.find(item => item === suffix);
+          if (result) {
+          //  return 'video';
+           return 'static/video/[name].[ext]';
+          }
+          // 匹配 音频
+          const radiolist = ['mp3', 'wav', 'wmv'];
+          result = radiolist.find(item => item === suffix);
+          if (result) {
+          //  return 'music';
+           return 'static/music/[name].[ext]';
+          }
+          // 匹配 字体
+          const fontlist = ['woff', 'woff2', 'ttf'];
+          result = fontlist.find(item => item === suffix);
+          if (result) {
+          //  return 'fonts'; 
+           return 'static/fonts/[name].[ext]';
+          }
+          // 匹配 字体
+          const csslist = ['css'];
+          result = csslist.find(item => item === suffix);
+          if (result) {
+          //  return 'fonts'; 
+           return 'static/css/[name].[ext]';
+          }
+          // 其他 文件类型
+          // return 'other';
+          return 'static/other/[name].[ext]';
+         },
+        manualChunks(id) { //静态资源分拆打包
+          if (id.includes('node_modules')) {
+            return id.toString().split('node_modules/')[1].split('/')[0].toString();
+          }
+        }
+      }
+    }
+  },
+  cssPreprocessOptions: {
+    scss: {
+      //  additionalData: '@import "./src/assets/style/scss/common/common";' // 全局公共样式
+    }
+ }
 })
+
+

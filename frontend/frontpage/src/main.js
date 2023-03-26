@@ -1,49 +1,27 @@
 import { createApp } from 'vue'
-import App from './App.vue'
-// 引入路由
-import router from './router/index.js'
-// 引入vuex
+import Zblog from './Zblog.vue'
+import router from './router'
+// import ElementPlus from 'element-plus'  //引入插件
+// import 'element-plus/theme-chalk/index.css' //默认css样式
+// import zhCn from 'element-plus/es/locale/lang/zh-cn'   //引入中文包
+import * as icons from '@element-plus/icons-vue'
+import { ElIcon } from 'element-plus'
+import request from './utils/request'
+import storage from './utils/storage'
+import api from './api'
 import store from './store'
 
-
-// swiper轮播图css引入
-import 'swiper/css';
-
-import SvgIcon from 'c/SvgIcon.vue'
-
-// 引入ElementPlus
-import ElementPlus from 'element-plus'
-import 'element-plus/dist/index.css'
-import 'element-plus/theme-chalk/display.css'
-// icontant 图标引入
-import './assets/iconfont/iconfont.css'
-import './assets/iconfont/iconfont.js';
-// import '//at.alicdn.com/t/c/font_2851110_621gzdpa1j6.js'
-
-// 引入自定义css样式（放在最后确保覆盖原有样式）
-import './styles/common.scss'
-import './styles/themes.css'
-import './styles/main.scss'
-
-const app = createApp(App);
-app.component('SvgIcon', SvgIcon);
-
-// 全局挂载请求封装方法
-import request from './utils/request'
+console.log("环境变量=>",import.meta.env.MODE);
+const app=createApp(Zblog);
+Object.keys(icons).forEach(key => {
+    app.component(key, icons[key])
+})
 app.config.globalProperties.$request = request;
-// 全局挂载api接口方法
-import api from './api'
 app.config.globalProperties.$api = api;
-
-// 全局挂载vuex方法
-
-import storage from './utils/storage'
 app.config.globalProperties.$storage = storage;
-
-
-// 应用向根组件 App 中注入一个 property
-// app.provide('$api', api)
-app.use(router)
-.use(ElementPlus)
+app
+.use(router)
 .use(store)
-.mount('#app')
+.use(ElIcon)
+// .use(ElementPlus,{locale:zhCn})
+.mount('#zblog');

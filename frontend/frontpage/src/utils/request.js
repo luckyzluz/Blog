@@ -19,15 +19,14 @@ const service =axios.create({
 service.interceptors.request.use((req)=>{
     //TO-DO
     const headers=req.headers;
-    // if(!headers.authorization) headers.authorization = storage.getItem("token").refresh_token
+    if(!headers.authorization) headers.authorization = storage.getItem("token").refresh_token
     return req;
 })
 
 //响应拦截
 service.interceptors.response.use((res)=>{
     const { code, data, msg} = res.data;
-    
-    if(code === 20000){
+    if(code === 200){
         // data.user=""
         return res;
     }else if(code === 500001){
@@ -43,32 +42,23 @@ service.interceptors.response.use((res)=>{
 })
 /**
  * 请求核心函数
- * @param {*} options api请求配置
+ * @param {*} options 请求配置
  * @returns 
  */
 function request(options){
-    options.method = options.method || 'get';
+    options.method = options.method || 'get'
     if(options.method.toLowerCase() === 'get'){
         options.params = options.data;
     }
-    if(typeof options.mock != 'undefined'){ // 是否存在单独mock配置（比总配置权限高）
+    if(typeof options.mock != 'undefined'){
         config.mock = options.mock;
     }
-    if(config.env === 'production'){ // 生产环境判断development
-        service.defaults.baseURL = config.baseApi;
+    if(config.env === 'prod'){
+        service.defaults.baseURL = config.baseApi
     }else{
-        // 判断是否进行mock
-        if(config.mock){
-            // 这里不是远程mock，统统按本地算
-            service.defaults.baseURL = config.mock == 'remote' ? config.remoteMockApi : config.localMockApi;
-        }else{
-            service.defaults.baseURL = config.baseApi;
-        }
-        // console.log(service.defaults.baseURL)
-        // service.defaults.baseURL = config.mock ? config.mockApi:config.baseApi
+        service.defaults.baseURL = config.mock ? config.mockApi:config.baseApi
     }
-    // console.log(import.meta.env.MODE)
-    return service(options);
+    return service(options)
 }
 
 ['get', 'post', 'put', 'delete', 'patch'].forEach((item)=>{

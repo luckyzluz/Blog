@@ -1,0 +1,2 @@
+NODE_ENV=production
+VITE_Name=xiaoming1
