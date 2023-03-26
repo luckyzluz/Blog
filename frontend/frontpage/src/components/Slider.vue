@@ -37,7 +37,8 @@
     :modules="modules"
     class="mySwiper"
   >
-    <swiper-slide v-for="(item, i) in props.Data" :key=i>
+    <swiper-slide v-for="(item, i) in state.web.WebData.slider" :key=i>
+      <!-- props.Data -->
       <a target="_blank" :href="item.url">
         <img :src="typeof item.imgUrl == 'string'?item.imgUrl:item.imgUrl.bg" loading="lazy"/>
         <div class="slide-layer" v-if="typeof item.imgUrl !== 'string'">
@@ -52,25 +53,28 @@
   </swiper>
 </template>
 <script setup>
+
   import { Swiper, SwiperSlide } from 'swiper/vue';
   import 'swiper/css';
   import 'swiper/css/pagination';
   import 'swiper/css/navigation';
   import "swiper/css/effect-coverflow";
   import {  Autoplay, Pagination, Navigation, EffectCoverflow } from 'swiper';
+  import { useStore } from "vuex";
+let {state,getters, dispatch,commit} = useStore();
    
-  const props = defineProps({
-    Data: {
-      type: Array,
-      default: () => [
-        {
-          title:'更优雅的Wordpress主题模板_WP中文主题_zibll主题_子比主题官方演示',
-          url:'http://baidu.com',
-          imgUrl: 'https://oss.zibll.com/zibll.com/2021/12/%E7%A4%BE%E5%8C%BA%E8%AE%BA%E5%9D%9B-%E5%B9%BB%E7%81%AF%E7%89%871.jpg'
-        }
-      ]
-    },
-  });
+  // const props = defineProps({
+  //   Data: {
+  //     type: Array,
+  //     default: () => [
+  //       {
+  //         title:'更优雅的Wordpress主题模板_WP中文主题_zibll主题_子比主题官方演示',
+  //         url:'http://baidu.com',
+  //         imgUrl: 'https://oss.zibll.com/zibll.com/2021/12/%E7%A4%BE%E5%8C%BA%E8%AE%BA%E5%9D%9B-%E5%B9%BB%E7%81%AF%E7%89%871.jpg'
+  //       }
+  //     ]
+  //   },
+  // });
   const modules= [ Autoplay, Pagination, Navigation, EffectCoverflow];
 </script>
 <style lang="scss" scoped>

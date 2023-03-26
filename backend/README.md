@@ -1,7 +1,7 @@
-
+# 博客后端
 
 express+mysql(......)
-
+## 文件结构
 ├── README.md            项目介绍
 ├── app.js # 用于自定义启动时的初始化工作 
 ├── config # 配置文件
@@ -14,6 +14,16 @@ express+mysql(......)
 ├── validator    验证器
 ├── package.json          npm包配置文件，里面定义了项目的npm脚本，依赖包等信息
 └── test              
+
+## 实现功能
+数据爬虫采集
+redis、lock锁
+数据校验
+
+## 待实现功能
+socket双向通信
+##
+##
 
 # 配置常用中间件
 ## 解析请求体

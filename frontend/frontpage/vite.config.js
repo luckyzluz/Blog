@@ -67,7 +67,8 @@ export default (({ mode, command } )=>{
         "v": resolve(__dirname, "./src/views"),
         // "u": resolve(__dirname, "./src/utils"),
         // "s": resolve(__dirname, "./src/store"),
-        "a": resolve(__dirname, "./src/assets")
+        "a": resolve(__dirname, "./src/assets"),
+        "api":resolve(__dirname,"./src/api")
       }
     }
   })

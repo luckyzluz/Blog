@@ -1,6 +1,7 @@
 <template>
     <div class="slider">
-        <Slider :Data="home.slider" />
+      <!-- :Data="home.slider" -->
+        <Slider  />
     </div>
 </template>
 <script setup>

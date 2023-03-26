@@ -32,7 +32,7 @@ let UserData = {
   comment: 33,
   view:33
 }
-let BlogSite=reactive({});
+let WebData=reactive({});
 // 统一监听
 watchEffect(() => {
   if(state.isShowModalBackdrop){
@@ -44,11 +44,13 @@ watchEffect(() => {
 
 
 onMounted(()=>{
-  proxy.$api.getBlogConfig().then((res)=>{
+  // proxy.$api.getBlogConfig().then((res)=>{
     // console.log(res.data.data);getters.web.getWebData()
-    BlogSite = res.data.data;
+    // WebData = res.data.data;
     // console.log(home)
-  })
+  // })
+  dispatch("web/getBlog");
+  // console.log(state.web.WebData.slider)
 })
 </script>
 <template>
@@ -56,6 +58,7 @@ onMounted(()=>{
   <!-- header -->
   <Header />
   <FluidWidget :notice="notice"/>
+  {{ state.web.WebData.slider }}
   <!-- main -->
   <main class="container">
     <div class="content">

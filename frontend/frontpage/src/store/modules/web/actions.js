@@ -1,6 +1,6 @@
 // 发起异步请求
 import axios from 'axios'
-import api from '@/api/index'
+import api from 'api/index'
 export default{
     // 切换登录框开关
     isShowSign({ state, commit }){
@@ -20,9 +20,10 @@ export default{
             }
         })
     },
-    getBlog({ state, commit }){
+    getBlog({ commit }){
         api.getBlog().then((res)=>{
-            console.log(res)
+            // console.log(res)
+            commit('setWebData',res.data.data)
         })
     }
 }
