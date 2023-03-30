@@ -51,5 +51,13 @@ export default {
             data:{},
             // mock:false
         })
+    },
+    getUserInfos(params){
+        return request({
+            url: '/user',
+            method:'get',
+            data:{},
+            // mock:false
+        })
     }
 }

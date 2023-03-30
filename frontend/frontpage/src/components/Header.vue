@@ -10,7 +10,7 @@
           <div class="navbar-brand">
             <a class="navbar-logo" href="">
               <img
-                src="https://oss.zibll.com/demo.zibll.com/2021/01/ZIBLL-LOGO-精简-白天.svg"
+                :src="state.web.WebData.webConfig.Logo"
                 switch-src="static/picture/ZIBLL-LOGO-精简-白天.svg"
                 alt="更优雅的Wordpress主题模板_WP中文主题_zibll主题_子比主题官方演示"
                 data-src=""
@@ -26,8 +26,8 @@
         <div class="navbar-collapse">
           <!-- 导航菜单列表 -->
           <ul class="navbar-nav">
-             <!-- class="current-menu-item" -->
-            <li v-for="(item, i) in data" :key="i">
+             <!-- class="current-menu-item" data-->
+            <li v-for="(item, i) in state.web.WebData.pageList" :key="i">
               <a href="" v-if="item.color !== ''">
                 <span :class="item.color">{{ item.name }}</span>
                 <span class="badge" :class="item.badge.color " v-if="item.badge.name !== ''">{{ item.badge.name }}</span>

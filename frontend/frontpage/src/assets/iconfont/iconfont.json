@@ -6,6 +6,41 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "7588088",
+      "name": "播放",
+      "font_class": "bofang",
+      "unicode": "e644",
+      "unicode_decimal": 58948
+    },
+    {
+      "icon_id": "623564",
+      "name": "阅读",
+      "font_class": "yuedu",
+      "unicode": "e63f",
+      "unicode_decimal": 58943
+    },
+    {
+      "icon_id": "4015806",
+      "name": "图片",
+      "font_class": "tupian1",
+      "unicode": "e6b1",
+      "unicode_decimal": 59057
+    },
+    {
+      "icon_id": "6766330",
+      "name": "书籍",
+      "font_class": "shuji",
+      "unicode": "e642",
+      "unicode_decimal": 58946
+    },
+    {
+      "icon_id": "18931183",
+      "name": "下载",
+      "font_class": "xiazai",
+      "unicode": "e663",
+      "unicode_decimal": 58979
+    },
+    {
       "icon_id": "259818",
       "name": "声音",
       "font_class": "shujuyewu",

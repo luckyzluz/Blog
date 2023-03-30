@@ -19,10 +19,11 @@ $jb-yellow-bg: linear-gradient(135deg, #f59f54 10%, #ff6922 100%);
     filter: blur(0);
     transform: unset;
     transition: .3s;
+    --lazy-animation: lazy_blur;
 }
 img.lazyloaded {
-    -webkit-animation: $lazy-animation .5s;
-    animation: $lazy-animation .5s;
+    -webkit-animation: var(--lazy-animation) .5s;
+    animation: var(--lazy-animation) .5s;
 }
 /* CDN 服务仅供平台体验和调试使用，平台不承诺服务的稳定性，企业客户需下载字体包自行发布使用并做好备份。 */
 @font-face {
@@ -90,6 +91,12 @@ article, aside, details, figcaption, figure, footer, header, hgroup, main, menu,
     text-align: center;
     --this-bg: #fe3459;
     z-index: 1;
+}
+.badg.badg-sm, .but.badg-sm {
+    font-size: .8em;
+    padding: 0 .2em;
+    vertical-align: .1em;
+    min-width: 1.6em;
 }
 .c-blue {
     --this-color: #2997f7;

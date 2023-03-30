@@ -5,5 +5,8 @@ export default{
     },
     isLogin(state){
         state.isLogin = !state.isLogin;
+    },
+    setUserInfos(state,data){
+        state.UserData = data;
     }
 }

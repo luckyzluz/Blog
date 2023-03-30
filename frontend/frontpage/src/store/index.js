@@ -28,7 +28,7 @@ const store = createStore({
     modules,
     state: {
         name: 'allen',
-        isShowModalBackdrop: true, //模态背景
+        isShowModalBackdrop: false, //模态背景
         modulesKey:storage.getItem('modulesKey') || modulesKey,
     },
     mutations,

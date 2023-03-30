@@ -20,7 +20,7 @@ let xx= async()=>{
     //         request.continue();
     //     }
     // })
-    await page.goto('http://hdyp.net/31/31368/715604_4.html', {
+    await page.goto('http://hdyp.net/33/33406/', {
         timeout: 0, // 不限制超时时间
         
         waitUntil: 'networkidle0'
@@ -42,18 +42,33 @@ let xx= async()=>{
     //    await page.waitForNavigation();
     
     //    return await page.content();
-    
-    
-let column = await page.$$eval('.page-content .neirong',xx=>{
-    return [xx[0].innerHTML];
+    // await page.waitForSelector('.update:last-child');
+    // function delay(time) {
+    //     return new Promise(function(resolve) { 
+    //         setTimeout(resolve, time)
+    //     });
+    // }
+let column = await page.$$eval('.update .list li a',xx=>{//.container div.chapter-list .bd ul li a
+    // return xx.innerHTML; 
+    // .bd ul li a[1].innerHTML;.querySelectorAll('li a').innerHTML
+    let xxy=xx.map(xx=>{
+        return xx.innerHTML
+    })
+    if(xxy.length>=6){
+        xxy.splice(0,3)
+    }else{
+        xxy.splice(0,(xxy.length/2))
+    }
+    return xxy;
+    // .match(/\/(\S*)\u9875/)[1];`(${xxy.length},${xxy.length/2})`
 });
-column= verifya(column[0]);
+// column= verifya(column);
     console.log(column)
 
     browser.close();
 }
 xx();
-
+// .match(/(?<=:).+/g);
 // node webCrawler\test.js
 
 // 

@@ -15,15 +15,18 @@ import SvgIcon from 'c/SvgIcon.vue'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
 import 'element-plus/theme-chalk/display.css'
+
 // icontant 图标引入
 import './assets/iconfont/iconfont.css'
 import './assets/iconfont/iconfont.js';
 // import '//at.alicdn.com/t/c/font_2851110_621gzdpa1j6.js'
 
 // 引入自定义css样式（放在最后确保覆盖原有样式）
+import './styles/reset.scss'
 import './styles/common.scss'
-import './styles/themes.css'
+
 import './styles/main.scss'
+import './styles/themes.css'
 
 const app = createApp(App);
 app.component('SvgIcon', SvgIcon);

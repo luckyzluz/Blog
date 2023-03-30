@@ -9,7 +9,11 @@ const store = {
         name: 'web',
         isShowSign: true, //登录注册弹窗
         isLogin: false, // 是否已登录
-        WebData:{} // 网站数据
+        WebData:{
+            webConfig:{},
+            slider:[],
+            pageList:[]
+        } // 网站数据
     },
     mutations,
     actions,

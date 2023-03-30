@@ -19,7 +19,7 @@
     :modules="modules"
     class="mySwiper"
   >
-    <swiper-slide v-for="(item, i) in props.notice" :key=i>
+    <swiper-slide v-for="(item, i) in state.web.WebData.webConfig.notice" :key=i>
       <a class="text-ellipsis">
         <div class="relative bulletin-icon mr6">
           <i :class='["iconfont","abs-center",item.icon]'></i>
@@ -36,7 +36,7 @@
   import { Swiper, SwiperSlide } from 'swiper/vue';
   import 'swiper/css';
   import { Autoplay, Pagination, Navigation } from 'swiper';
-
+  import { useStore } from "vuex";
   export default {
     components: {
       Swiper,
@@ -58,9 +58,12 @@
       } 
     },
     setup(props) {
+      
+  let {state,getters, dispatch,commit} = useStore();
       return {
         modules: [Autoplay],
-        props
+        props,
+        state
       };
     },
   };

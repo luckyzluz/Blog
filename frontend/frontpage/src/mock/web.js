@@ -58,6 +58,19 @@ export default[
             code: 20000,
             success: true,
             data: {
+              webConfig:{
+                Logo: 'src/assets/image/web/ZIBLL-LOGO-精简-白天.svg',
+                notice:[
+                  {
+                    icon:'icon-point',
+                    content: '主题功能较多，部分功能未能演示，敬请谅解，如有疑问请与客服联系'
+                  },
+                  {
+                    icon: 'icon-aixin_shixin',
+                    content: '本站为演示站，购买主题、管理授权请转至www.zibll.com'
+                  }
+                ]
+              },
               slider: [
                 {
                   title:'更优雅的Wordpress主题模板_WP中文主题_zibll主题_子比主题官方演示',
@@ -96,6 +109,95 @@ export default[
                     layer_1: 'src/assets/image/slider/定制-图层1.png',
                     layer_2: 'src/assets/image/slider/定制-图层2-3.png'
                   }
+                }
+              ],
+              pageList: [
+                {
+                  name: '购买主题',
+                  color:'c-blue',
+                  badge:{
+                    name: '优惠',
+                    color: 'jb-yellow'
+                  },
+                  submenu:[]
+                },
+                {
+                  name: '社区',
+                  color:'',
+                  badge:{
+                    name: 'NEW',
+                    color: 'jb-blue'
+                  },
+                  submenu:[]
+                },
+                {
+                  name: '官方演示',
+                  color:'',
+                  badge:{
+                    name: '',
+                    color: ''
+                  },
+                  submenu:[]
+                },
+                {
+                  name: '需求提交',
+                  color:'',
+                  badge:{
+                    name: '',
+                    color: ''
+                  },
+                  submenu:[]
+                },
+                {
+                  name: 'BUG反馈',
+                  color:'',
+                  badge:{
+                    name: '',
+                    color: ''
+                  },
+                  submenu:[]
+                },
+                {
+                  name: '主题教程',
+                  color:'',
+                  badge:{
+                    name: '',
+                    color: ''
+                  },
+                  submenu:[
+                    {
+                      name: '视频教程',
+                      color: '',
+                      badge: {
+                        name: 'NEW',
+                        color: 'jb-blue'
+                      }
+                    },
+                    {
+                      name: '文档检索',
+                      color: '',
+                      badge: {
+                        name: '',
+                        color: ''
+                      }
+                    },
+                    {
+                      name: '主题功能',
+                      color: '',
+                      badge: {
+                        name: '',
+                        color: ''
+                      }
+                    },
+                    {
+                      name: '配置教程',
+                      color: '',
+                      badge: {
+                        name: '',
+                        color: ''
+                      }
+                    }
+                  ]
                 }
               ]
             },

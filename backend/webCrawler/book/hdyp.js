@@ -10,60 +10,65 @@ const {delay}=require('../util/tool');
 // const proxyserver= require("../script/proxyserver");
 
 // 配置信息
-const config = require('../script/config');
+const {config} = require('../script/config');
 // const bookUtils = require('../script/book');
-const mrlyConfig = {
-    name: '诗雪',
-    txtFileName: '诗雪.txt',// 小说文件名
-    indexUrl: 'http://hdyp.net/32/32919/',// 小说目录页
+const WebConfig = {
+  // http://hdyp.net/16/16518/
+  // http://hdyp.net/30/30853/
+  // http://hdyp.net/25/25732/
+  // http://hdyp.net/15/15013/
+  // http://hdyp.net/30/30901/
+  // http://hdyp.net/27/27931/
+  // http://hdyp.net/20/20116_2/
+  // http://hdyp.net/17/17658/
+  // http://hdyp.net/29/29316/
+  // http://hdyp.net/1/1878/
+  // http://hdyp.net/32/32075/
+  // http://hdyp.net/29/29040/
+  // http://hdyp.net/28/28062/
+  // http://hdyp.net/27/27349/
+  // -----
+  // http://hdyp.net/13/13105/
+  // http://hdyp.net/13/13106/
+  // http://hdyp.net/13/13107/
+  // http://hdyp.net/13/13108/
+  // http://hdyp.net/13/13109/
+  // http://hdyp.net/19/19099/
+    indexUrl: 'http://hdyp.net/5/5729/',// 小说目录页
     chapterUrlPrefix: 'http://hdyp.net',// 目录每一章链接的前缀
     novelInfoCls: 'div.bd.column-2 > .right', // 目录页小说书名作者等信息
     linkpagingCls:'.pagelistbox',
-    linkCls: 'div.chapter-list:last-child .bd ul.list li a', //目录页每一章的a标签的css选择器
+    linkCls: '.container div.chapter-list .bd ul li a', //目录页每一章的a标签的css选择器
     adCls: [],// 要移除的广告标签的css选择器 （每一章内容区域内的广告和不需要的部分）'.google-auto-placed', '#p_ad_t3', '#content>p:last-child'
     titleCls: '.page-title',// 章节标题类名 css选择器
     contentpagingCls:'.chapterPages a',
     contentCls: '.page-content .neirong', // 每一章内容区域 css选择器
     // 开始章节下标 0 ~ length-1 的数字
-    // startIndex: 2409,
+    // startIndex: 2,
     // 爬取多少章 startIndex + count - 1 不能超过总章节数
-    // count: 2,
+    // count: 1,
 };
-// const mrlyConfig = {
-//     name: '邪神桃花劫',
-//     txtFileName: '邪神桃花劫.txt',// 小说文件名
-//     indexUrl: 'http://www.yuedsk.com/html/1/1124/',// 小说目录页
-//     chapterUrlPrefix: '',// 目录每一章链接的前缀
-//     novelInfoCls: 'div.headlink:last-child > h1', // 目录页小说书名作者等信息
-//     linkCls: 'ul.chapters> ul.chapters:last-child li.chapter a', //目录页每一章的a标签的css选择器
-//     adCls: [],// 要移除的广告标签的css选择器 （每一章内容区域内的广告和不需要的部分）'.google-auto-placed', '#p_ad_t3', '#content>p:last-child'
-//     titleCls: '#cont h1',// 章节标题类名 css选择器
-//     contentCls: 'div#clickeye_content', // 每一章内容区域 css选择器
-//     // 开始章节下标 0 ~ length-1 的数字
-//     // startIndex: 2409,
-//     // 爬取多少章 startIndex + count - 1 不能超过总章节数
-//     // count: 5,
-// };
 const start = (config, novelConfig) => {
     console.log(`================ 开始 ${novelConfig.name} ================`);
     config.startTime = +new Date();
     const bugConfig = novelConfig;
     // 小说配置信息 - 读取小说配置
-    if (!bugConfig.txtFileName) {
-        bugConfig.txtFileName = bqgConfig.getPinYin(bugConfig.name) + '.txt';
-    }
+    // if (!bugConfig.txtFileName) {
+    //     bugConfig.txtFileName = bqgConfig.getPinYin(bugConfig.name) + '.txt';
+    // }
     console.log('小说配置信息获取成功');
     // 小说目录页
     let site = bugConfig.indexUrl;
     // 目录每一章链接的前缀
     const chapterSitePrefix = bugConfig.chapterUrlPrefix;
     // 小说文件名
-    const txtFileName = bugConfig.txtFileName;
-    const txtFileFullpath = path.join(
-      __dirname,
-      config.dataFolder,
-      txtFileName
-    );
+    let txtFileName;
+    let txtFileFullpath;
+    // path.join(
+    //   __dirname,
+    //   config.dataFolder,
+    //   txtFileName
+    // );
     // 目录页小说书名作者等信息
     const novelInfoCls = bugConfig.novelInfoCls;
     // 目录页每一章的a标签的css选择器
@@ -91,7 +96,7 @@ const start = (config, novelConfig) => {
     };
     // 初始化 - 创建文件夹和文件
     const initFolderAndFile = () => {
-        const dataFullpath = path.join(__dirname, config.dataFolder);
+        const dataFullpath = path.join(__dirname, config.dataFolder); //存储文件夹
         // 创建数据文件夹
         if (!fs.existsSync(dataFullpath)) {
           console.log('创建数据文件夹:', dataFullpath);
@@ -103,7 +108,7 @@ const start = (config, novelConfig) => {
           fs.writeFileSync(txtFileFullpath, '', { encoding: 'utf-8' });
         }
     };
-    initFolderAndFile();
+    
 
     // 创建浏览器page对象
     const createPage = async () => {
@@ -153,21 +158,31 @@ const start = (config, novelConfig) => {
 
     // 处理小说名称等信息
     const handleNovelInfo = async (page) => {
-        const info = await page.$eval(
+        const infos = await page.$eval(
           novelInfoCls,
           (dm, config) => {
-            console.log(dm.innerText)
+            // console.log(dm.innerText)
+            // txtFileName=dm.children[0].innerText;
+            
             // 这里将章节和作者信息拼接到txt 段落分隔符
-            return dm.innerText + config.paraSplit;
+            return {name:dm.children[0].innerText,info:dm.innerText + config.paraSplit};
+            // return dm.innerText + config.paraSplit;
           },
           config
         );
-        fs.writeFileSync(txtFileFullpath, info, { encoding: 'utf-8' });
+        // initFolderAndFile();
+        txtFileFullpath=path.join(
+          __dirname,
+          config.dataFolder,
+          infos.name+'.txt'
+        );;
+        initFolderAndFile();
+        fs.writeFileSync(txtFileFullpath, infos.info, { encoding: 'utf-8' });
     };
     // 处理章节列表数据
     const handleChapterList = async (page) => {
-        let list = await page.$$eval('.container div.mod.block.update.chapter-list .bd ul li a', (links) => { // linkCls
-          return links.slice(3,links.length).map((v, i) => {
+        let list = await page.$$eval(linkCls, (links) => { // 
+          let Lists = links.map((v, i) => {
             // console.log(v.innerText)
             return {
               // _index: i,
@@ -175,6 +190,12 @@ const start = (config, novelConfig) => {
               title: v.innerText,
             };
           });
+          if(Lists.length>=6){//最新章节只显示3个，最新+每页总共有6个
+            Lists.splice(0,3);
+          }else{//不可能为5个，2+2=4  1+1=2
+            Lists.splice(0,(Lists.length/2));
+          }
+          return Lists;
         });
         
         // console.log(list); // node webCrawler\book\hdyp.js
@@ -257,6 +278,7 @@ const start = (config, novelConfig) => {
           const chapterTxt = contents.join('\r\n \r\n') + config.paraSplit;
         //   进行覆盖
         // console.log(chapterTxt);
+          
           updateTxtFile(chapterTxt); // 每个章节文本获取完就拼接进去
           // txt += chapterTxt; // 一次性拼接所有章节文本
         //   进行下标自增
@@ -297,10 +319,11 @@ const start = (config, novelConfig) => {
         await page.on('load', async () => {
           //   console.log(page.url());
           // 处理小说名称等信息（添加到txt文件
-            // await handleNovelInfo(page);
+            await handleNovelInfo(page);
+            // await initFolderAndFile();
             if(bugConfig.linkpagingCls){
               listNum = await page.$eval(bugConfig.linkpagingCls,num=>{
-                return Number(num.innerText.slice(16,17));
+                return Number(num.innerText.match(/\/(\d+)页/)[1]);
               });
             }
             // 处理章节列表数据（得到序号、地址、标题）
@@ -332,5 +355,5 @@ const start = (config, novelConfig) => {
     getChapters(site);
 }
 // bookUtils.
-start(config.config,mrlyConfig);
+start(config,WebConfig);
 // node webCrawler\book\hdyp.js

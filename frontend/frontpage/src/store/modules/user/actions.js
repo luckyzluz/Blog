@@ -19,5 +19,13 @@ export default{
                 console.log('denglu')
             }
         })
+    },
+    getUser({commit}){
+        api.getUserInfos().then(res=>{
+            // console.log(res.data)
+            if(res.data.success){
+                commit("setUserInfos",res.data.user);
+            }
+        })
     }
 }

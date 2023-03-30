@@ -37,7 +37,7 @@
                             :content="'LV' + props.UserData.level"
                             placement="top"
                         >
-                        <img :src="'https://demo.zibll.com/wp-content/themes/zibll/img/user-level-'+ props.UserData.level +'.png'" alt="">
+                        <img :src="'src/assets/image/user-level-'+ props.UserData.level +'.png'" alt="">
                         </el-tooltip>
                     </div>
                 </div>
@@ -157,10 +157,10 @@ const {proxy} = getCurrentInstance();
 let SignedIn=async()=>{
     // waitSigned.value.childNodes[1].nodeValue = '请稍候';
     // waitSigned.value.firstChild.classList.replace('icon-qiandao', 'icon-jiazailoading-A');
-    if(Data.SignedIn == 'not'){
-        Data.SignedIn = 'waiting';
+    if(Data.data.SignedIn == 'not'){
+        Data.data.SignedIn = 'waiting';
         proxy.$api.signedin().then((res) => {
-            Data.SignedIn = res.data.success ? 'yes' : 'not';
+            Data.data.SignedIn = res.data.success ? 'yes' : 'not';
         });
     }else{
         ElNotification({

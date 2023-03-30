@@ -44,12 +44,11 @@ watchEffect(() => {
 
 
 onMounted(()=>{
-  // proxy.$api.getBlogConfig().then((res)=>{
-    // console.log(res.data.data);getters.web.getWebData()
-    // WebData = res.data.data;
-    // console.log(home)
-  // })
   dispatch("web/getBlog");
+  if(true){
+    dispatch("user/getUser");
+  }
+  
   // console.log(state.web.WebData.slider)
 })
 </script>
@@ -57,8 +56,8 @@ onMounted(()=>{
 
   <!-- header -->
   <Header />
-  <FluidWidget :notice="notice"/>
-  {{ state.web.WebData.slider }}
+  <!-- 公告 -->
+  <FluidWidget/>
   <!-- main -->
   <main class="container">
     <div class="content">
@@ -67,7 +66,7 @@ onMounted(()=>{
       </div>
     </div>
     <aside class="sidebar">
-      <userCard :UserData="getters.getUserData" />
+      <userCard :UserData="state.user.UserData" />
     </aside>
   </main>
   <Footer />

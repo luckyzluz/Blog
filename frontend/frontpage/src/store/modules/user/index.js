@@ -7,9 +7,11 @@ const store = {
     namespaced:true,
     state: {
         name: 'user',
-        isShowSign: true, //登录注册弹窗
-        isLogin: false, // 是否已登录
-        UserData:{} // 用户数据
+        isShowSign: false, //登录注册弹窗
+        isLogin: true, // 是否已登录
+        UserData:{
+            level:1
+        } // 用户数据
     },
     mutations,
     actions,
