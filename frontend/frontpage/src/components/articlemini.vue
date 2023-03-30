@@ -11,7 +11,7 @@
             </ul>
             
             <div class="tab-content">
-                <div v-for="(v,i) in data" :key="i" :class="['tab-pane fade',tab==i?'active in':'']">
+                <div v-for="(v,i) in data" :key="i" ref="tabPanes" :class="['tab-pane fade',tab==i?'active':'']">
                     <div v-for="(x,y) in v.content" :key="y" class="posts-mini">
                         <div class="item-thumbnail">
                             <a :href="x.href">
@@ -64,7 +64,8 @@
 </template>
 <script setup>
 import Notop from 'c/notop.vue'
-import {ref} from 'vue'
+import {onMounted, ref} from 'vue'
+let tabPanes=ref(null);
 let notop={
     title:'多栏目',
     intro:'文章mini模块',
@@ -254,60 +255,14 @@ let data=[
         content:[
             {
                 href:'http://www.baidu.com',
-                thumbnail: 'src/assets/image/article/73aedaf4f6012dff306c73905402d9bd.jpg',
-                title:'iPhone XS：合格的 iPhone X 升级机型',
-                sub:'图片类型文章-幻灯片封面体验2',
+                thumbnail: 'src/assets/image/article/ef8881440228c1af4694cacc3983999b-scaled.jpg',
+                title:'iPhone 11 和 iPhone 11 Pro 该怎么选？',
+                sub:'',
                 author:{
                     id:1,
                     img:'src/assets/image/article/bizh-4-1.jpeg'
                 },
-                view:'8305'
-
-            },
-            {
-                href:'http://www.baidu.com',
-                thumbnail: 'src/assets/image/article/217c-fyqtwzu0475616-1.png',
-                title:'《超能陆战队》预告片 大白“三难三赞”等你发现',
-                sub:'视频文章体验',
-                author:{
-                    id:1,
-                    img:'src/assets/image/article/bizh-4-1.jpeg'
-                },
-                view:'2.1W+'
-
-            },
-            {
-                href:'http://www.baidu.com',
-                thumbnail: 'src/assets/image/article/2a655f846a8342da9d2c022680982e6f.png',
-                title:'子比主题优雅的支付体验[付费商品-付费图库体验]',
-                sub:'付费资源下载体验',
-                author:{
-                    id:1,
-                    img:'src/assets/image/article/bizh-4-1.jpeg'
-                },
-                pay:{
-                    icon:'icon-tupian1',
-                    name:'图片',
-                    sum:0.03
-                },
-                view:'1.2W+'
-
-            },
-            {
-                href:'http://www.baidu.com',
-                thumbnail: 'src/assets/image/article/0af7334cd892a851701ba4aa232e5dc6.jpeg',
-                title:'zibll子比主题最新支付功能',
-                sub:'付费查看视频文章体验',
-                author:{
-                    id:1,
-                    img:'src/assets/image/article/bizh-4-1.jpeg'
-                },
-                pay:{
-                    icon:'icon-bofang',
-                    name:'视频',
-                    sum:0.03
-                },
-                view:'7797'
+                view:'1015'
 
             },
             {
@@ -319,18 +274,59 @@ let data=[
                     id:1,
                     img:'src/assets/image/article/bizh-4-1.jpeg'
                 },
-                view:'5628'
+                view:'5635'
+
             },
             {
                 href:'http://www.baidu.com',
-                thumbnail: 'src/assets/image/article/2a655f846a8342da9d2c022680982e6f.png',
-                title:'谁是iPhone最佳搭档 各价位无线充电器横评',
+                thumbnail: 'src/assets/image/article/e3f205035ee22ff4fb0e3c2c035e1cb1.jpg',
+                title:'搞笑GIF趣图:右边的妹子是我女朋友，其他的你们选择吧！',
+                sub:'',
+                author:{
+                    id:1,
+                    img:'src/assets/image/article/bizh-4-1.jpeg'
+                },
+                view:'888'
+
+            },
+            {
+                href:'http://www.baidu.com',
+                thumbnail: 'src/assets/image/article/3cb9e7130b275e50b3155f518ccc8d50.jpg',
+                title:'早高FENG：Steam同时在线突破2000万/法拉利意大利厂停产',
+                sub:'',
+                author:{
+                    id:1,
+                    img:'src/assets/image/article/bizh-4-1.jpeg'
+                },
+                view:'590'
+
+            },
+            {
+                href:'http://www.baidu.com',
+                thumbnail: 'src/assets/image/article/f19c089b3d284d7e9bd54eb39ab1b972.jpeg',
+                title:'优雅的支付系统-给站长提供强劲的生产力',
+                sub:'支付功能简介及体验',
+                author:{
+                    id:1,
+                    img:'src/assets/image/article/bizh-4-1.jpeg'
+                },
+                pay:{
+                    icon:'icon-shuji',
+                    name:'阅读',
+                    sum:0.3
+                },
+                view:'3.2W+'
+            },
+            {
+                href:'http://www.baidu.com',
+                thumbnail: 'src/assets/image/article/74798a3a2419e2aad6905db40de5cf68.jpg',
+                title:'“理财产品”《健身环大冒险》在法国也缺货了',
                 sub:'',
                 author:{
                     id:1,
                     img:'src/assets/image/article/5d8dbbe6d757636411a7dab804cdf7ca.jpg'
                 },
-                view:'7057'
+                view:'650'
             }
         ]
     },
@@ -340,18 +336,6 @@ let data=[
         content:[
             {
                 href:'http://www.baidu.com',
-                thumbnail: 'src/assets/image/article/73aedaf4f6012dff306c73905402d9bd.jpg',
-                title:'iPhone XS：合格的 iPhone X 升级机型',
-                sub:'图片类型文章-幻灯片封面体验2',
-                author:{
-                    id:1,
-                    img:'src/assets/image/article/bizh-4-1.jpeg'
-                },
-                view:'8305'
-
-            },
-            {
-                href:'http://www.baidu.com',
                 thumbnail: 'src/assets/image/article/217c-fyqtwzu0475616-1.png',
                 title:'《超能陆战队》预告片 大白“三难三赞”等你发现',
                 sub:'视频文章体验',
@@ -360,23 +344,6 @@ let data=[
                     img:'src/assets/image/article/bizh-4-1.jpeg'
                 },
                 view:'2.1W+'
-
-            },
-            {
-                href:'http://www.baidu.com',
-                thumbnail: 'src/assets/image/article/2a655f846a8342da9d2c022680982e6f.png',
-                title:'子比主题优雅的支付体验[付费商品-付费图库体验]',
-                sub:'付费资源下载体验',
-                author:{
-                    id:1,
-                    img:'src/assets/image/article/bizh-4-1.jpeg'
-                },
-                pay:{
-                    icon:'icon-tupian1',
-                    name:'图片',
-                    sum:0.03
-                },
-                view:'1.2W+'
 
             },
             {
@@ -398,49 +365,70 @@ let data=[
             },
             {
                 href:'http://www.baidu.com',
-                thumbnail: 'src/assets/image/article/aac85dd060b1280685f199492d1fff89-scaled.jpg',
-                title:'iPhone XR上手：亮丽外观下却有一颗质朴的心',
+                thumbnail: 'src/assets/image/article/27cb79ca2691543dfd2ffca6dced8b51.jpg',
+                title:'SEO优化方案书+SEO必看的平台工具大全（非常实用，值得收藏）',
+                sub:'付费资源下载体验',
+                author:{
+                    id:1,
+                    img:'src/assets/image/article/bizh-4-1.jpeg'
+                },
+                view:'3075'
+
+            },
+            {
+                href:'http://www.baidu.com',
+                thumbnail: 'src/assets/image/article/10ac28f1501216bc2ca55c5f1df1af82.jpg',
+                title:'seo优化后期网站关键词排名下降原因',
                 sub:'',
                 author:{
                     id:1,
                     img:'src/assets/image/article/bizh-4-1.jpeg'
                 },
-                view:'5628'
+                view:'1245'
+
             },
             {
                 href:'http://www.baidu.com',
-                thumbnail: 'src/assets/image/article/2a655f846a8342da9d2c022680982e6f.png',
-                title:'谁是iPhone最佳搭档 各价位无线充电器横评',
+                thumbnail: 'src/assets/image/article/4c8db061e077c7f33d6dcebf5d82d0a5.jpg',
+                title:'网站seo优化到底该怎么做？',
+                sub:'',
+                author:{
+                    id:1,
+                    img:'src/assets/image/article/bizh-4-1.jpeg'
+                },
+                view:'1092'
+            },
+            {
+                href:'http://www.baidu.com',
+                thumbnail: 'src/assets/image/article/aebf3930594a0c59130ed79b1c47bf0d.jpg',
+                title:'老域名seo优化方法',
                 sub:'',
                 author:{
                     id:1,
                     img:'src/assets/image/article/5d8dbbe6d757636411a7dab804cdf7ca.jpg'
                 },
-                view:'7057'
+                view:'1032'
             }
         ]
     }
 ]
-let tab=ref(1);
-const changeTab=(index)=>{
-    // setTimeout(()=>{
-        tab.value=index;
-    // },1000)
-    
+let tab=ref(0);
+const changeTab=(index=tab.value)=>{
+    tab.value=index;
+    setTimeout(()=>{
+        tabPanes.value[index].classList.add('in')
+    },200)
 }
+onMounted(()=>{
+    changeTab();
+})
 
 </script>
 <style lang="scss">
-.move{
-    transition: all 0.5s ease;
-   }
-   .list-enter-from,.list-leave-to{
-    opacity: 0;
-    transform: translateX(30px);
-   }
+
 .fade {
     opacity: 0;
-    transition: opacity 5s linear;
+    transition: opacity .15s linear;
 }
 .fade.in {
     opacity: 1;
@@ -528,108 +516,5 @@ const changeTab=(index)=>{
         }
     }
 }
-.avatar, .fit-cover, .radius-cover {
-    width: 100%;
-    height: 100%;
-    transition: all .2s;
-    overflow: hidden;
-    -o-object-fit: cover;
-    object-fit: cover;
-}
 
-.tab-nav{
-    &.mini-scrollbar,&.swiper-wrapper{
-        &>li{
-            padding-left: 5px;
-            margin: 0;
-            padding-right: 5px;
-            line-height: 1.4;
-        }
-    }
-}
-.scroll-x, .scroll-y {
-    -webkit-overflow-scrolling: touch;
-    overflow: hidden;
-    overflow-x: auto;
-}
-.scroll-x {
-    white-space: nowrap;
-}
-.list-inline{
-    margin-left: 0;
-    &>li{
-        display: inline-block;
-        padding-right: 5px;
-        padding-left: 5px;
-    }
-}
-.tab-nav{
-    border-bottom: 1px solid var(--main-border-color);
-    padding-bottom: 6px;
-    margin: 8px 0 5px;
-    list-style: none;
-    li{
-        &:before {
-            position: absolute;
-            content: '';
-            background: var(--theme-color);
-            width: 20px;
-            height: 2px;
-            border-radius: 5px;
-            box-shadow: 1px 1px 3px -1px var(--theme-color);
-            bottom: 5px;
-            opacity: 0;
-            left: 0;
-            right: 0;
-            margin: auto;
-            top: auto;
-            transition: .4s;
-        }
-        &.active::before, &.swiper-slide-thumb-active::before {
-            opacity: 1;
-        }
-        &.active a {
-            color: var(--focus-color);
-        }
-    }
-}
-.widget {
-    clear: both;
-    background: var(--main-bg-color);
-    padding: 15px;
-    box-shadow: 0 0 10px var(--main-shadow);
-    border-radius: var(--main-radius);
-    margin-bottom: 20px;
-}
-.text-ellipsis-2 {
-    height: 2.8em;
-    -webkit-line-clamp: 2;
-}
-.text-ellipsis-2, .text-ellipsis-3, .text-ellipsis-5 {
-    line-height: 1.4em;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-    overflow: hidden;
-    white-space: normal;
-}
-
-.avatar-img, .avatar-lg, .avatar-mini, .square-box {
-    position: relative;
-    display: inline-block;
-    flex-shrink: 0;
-    --this-size: 38px;
-    width: var(--this-size);
-    height: var(--this-size);
-}
-.avatar-mini {
-    --this-size: 20px;
-}
-.avatar, .radius-cover {
-    border-radius: 100px;
-    display: inline-block;
-}
-.author-tag a .fa, .author-tag a .icon, .author-tag>span .fa, .author-tag>span .icon, .item-meta .meta-view .icon {
-    margin-right: 2px;
-}
 </style>
