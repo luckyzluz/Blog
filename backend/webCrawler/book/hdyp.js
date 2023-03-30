@@ -13,12 +13,6 @@ const {delay}=require('../util/tool');
 const {config} = require('../script/config');
 // const bookUtils = require('../script/book');
 const WebConfig = {
-  // http://hdyp.net/16/16518/
-  // http://hdyp.net/30/30853/
-  // http://hdyp.net/25/25732/
-  // http://hdyp.net/15/15013/
-  // http://hdyp.net/30/30901/
-  // http://hdyp.net/27/27931/
   // http://hdyp.net/20/20116_2/
   // http://hdyp.net/17/17658/
   // http://hdyp.net/29/29316/
@@ -34,7 +28,7 @@ const WebConfig = {
   // http://hdyp.net/13/13108/
   // http://hdyp.net/13/13109/
   // http://hdyp.net/19/19099/
-    indexUrl: 'http://hdyp.net/5/5729/',// 小说目录页
+    indexUrl: 'http://hdyp.net/27/27931/',// 小说目录页
     chapterUrlPrefix: 'http://hdyp.net',// 目录每一章链接的前缀
     novelInfoCls: 'div.bd.column-2 > .right', // 目录页小说书名作者等信息
     linkpagingCls:'.pagelistbox',
