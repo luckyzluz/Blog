@@ -4,10 +4,14 @@
         <Slider  />
     </div>
     <Articlemini />
+    <Aggregation />
+    <HomeTabCon />
 </template>
 <script setup>
 import Slider from 'c/Slider.vue'
 import Articlemini from 'c/articlemini.vue'
+import Aggregation from 'c/aggregation.vue'
+import HomeTabCon from 'c/homeTabCon.vue'
 import { reactive,watch, watchEffect,onMounted,getCurrentInstance } from 'vue'
 import { useStore } from "vuex";
 let {state,getters, dispatch,commit} = useStore();
