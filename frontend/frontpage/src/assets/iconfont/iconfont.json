@@ -6,6 +6,20 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "11218172",
+      "name": "热度",
+      "font_class": "redu1",
+      "unicode": "e671",
+      "unicode_decimal": 58993
+    },
+    {
+      "icon_id": "9162622",
+      "name": "时间",
+      "font_class": "shijian",
+      "unicode": "e645",
+      "unicode_decimal": 58949
+    },
+    {
       "icon_id": "7588088",
       "name": "播放",
       "font_class": "bofang",
