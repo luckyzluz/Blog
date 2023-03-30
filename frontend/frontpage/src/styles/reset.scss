@@ -1,6 +1,39 @@
+*{
+    margin: 0;
+    box-sizing: border-box;
+}
+*, :after, :before {
+    outline: 0!important;
+}
+dd, dl, dt, ol, ul {
+    margin: 0;
+    padding: 0;
+}
+svg:not(:root) {
+    overflow: hidden;
+}
+ul {
+    list-style: none;
+}
+img {
+    max-width: 100%;
+    max-height: 100%;
+    vertical-align: middle;
+    border: 0;
+}
 .h1, .h2, .h3, .h4, .h5, .h6, h1, h2, h3, h4, h5, h6 {
     font-family: inherit;
     font-weight: 500;
     line-height: 1.1;
     color: inherit;
+}
+a[href] {
+    transition: color .2s,background .3s,opacity .3s,box-shadow .3s,transform .3s;
+}
+a {
+    text-decoration: none;
+    cursor: pointer
+}
+:after, :before {
+    box-sizing: border-box;
 }

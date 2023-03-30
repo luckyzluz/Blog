@@ -79,48 +79,11 @@ label {
     font-weight: 700;
 }
 
-.img-badge {
-    position: absolute;
-    top: .6em;
-    right: 0;
-    border-radius: 50px 0 0 50px;
-    text-shadow: none;
-    box-shadow: 0 1px 5px rgb(0 0 0 / 20%);
-    z-index: 1;
-    padding: .2em .6em;
-}
+
 .modal-open {
     overflow: hidden;
 }
-.badg, .but, .post-page-numbers {
-    border-radius: 4px;
-    display: inline-block;
-    border-radius: 4px;
-    transition: .15s;
-    border: 1px solid transparent;
-    vertical-align: middle;
-    padding: .3em .6em;
-    text-align: center;
-    font-weight: 400;
-    box-shadow: var(--this-shadow);
-    background: var(--this-bg);
-    color: var(--this-color);
-    color: #888;
-    --main-color: var(--this-color);
-    --this-bg: rgba(136, 136, 136, .1);
-    --this-border: transparent;
-    --this-shadow: none;
-    --this-color: #888;
-    text-shadow: 0 0 0;
-    line-height: 1.44;
-}
-.but:focus, .but:hover {
-    opacity: .8;
-    color: var(--this-color);
-}
-.but>.iconfont {
-    margin-right: .25em;
-}
+
 .separator {
     text-align: center;
     display: flex;
