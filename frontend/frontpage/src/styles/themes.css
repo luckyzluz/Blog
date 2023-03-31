@@ -63,6 +63,10 @@ body.dark-theme{
     --this-color: #5c7cff !important;
     --this-bg: rgba(77, 130, 249, .1) !important;
 }
+.c-white {
+    --this-color: #fff;
+    --this-bg: rgba(255, 255, 255, 0.1);
+}
 .c-yellow {
     --this-color: #ff6f06;
     --this-bg: rgba(255, 111, 6, 0.1);

@@ -73,6 +73,9 @@ article, aside, details, figcaption, figure, footer, header, hgroup, main, menu,
     --this-bg: #fe3459;
     z-index: 1;
 }
+.badge.b-black {
+    --this-bg: rgba(0, 0, 0, .2);
+}
 .badg.badg-sm, .but.badg-sm {
     font-size: .8em;
     padding: 0 .2em;
@@ -369,4 +372,26 @@ body{
 }
 .author-tag a .fa, .author-tag a .icon, .author-tag>span .fa, .author-tag>span .icon, .item-meta span .icon {
     margin-right: 2px;
+}
+.abs-center, .abs-left, .abs-right, .form-select::before, .line-form-label, .payvip-icon:before, .toggle-radius .fa, .toggle-radius .icon {
+    position: absolute;
+    top: 50%;
+    right: .7em;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+.abs-center {
+    left: 0;
+    width: 100%;
+}
+.abs-center.right-bottom, .abs-center.right-conter, .abs-center.right-top {
+    text-align: right;
+}
+.abs-center.right-top {
+    left: auto;
+    width: auto;
+}
+.abs-center.left-top, .abs-center.right-top {
+    transform: unset;
+    top: 0;
 }
