@@ -13,12 +13,7 @@ const {delay}=require('../util/tool');
 const {config} = require('../script/config');
 // const bookUtils = require('../script/book');
 const WebConfig = {
-  // http://hdyp.net/20/20116_2/
-  // http://hdyp.net/17/17658/
-  // http://hdyp.net/29/29316/
-  // http://hdyp.net/1/1878/
-  // http://hdyp.net/32/32075/
-  // http://hdyp.net/29/29040/
+  // 
   // http://hdyp.net/28/28062/
   // http://hdyp.net/27/27349/
   // -----
@@ -28,7 +23,7 @@ const WebConfig = {
   // http://hdyp.net/13/13108/
   // http://hdyp.net/13/13109/
   // http://hdyp.net/19/19099/
-    indexUrl: 'http://hdyp.net/27/27931/',// 小说目录页
+    indexUrl: 'http://hdyp.net/29/29040/',// 小说目录页
     chapterUrlPrefix: 'http://hdyp.net',// 目录每一章链接的前缀
     novelInfoCls: 'div.bd.column-2 > .right', // 目录页小说书名作者等信息
     linkpagingCls:'.pagelistbox',
@@ -43,7 +38,8 @@ const WebConfig = {
     // count: 1,
 };
 const start = (config, novelConfig) => {
-    console.log(`================ 开始 ${novelConfig.name} ================`);
+  // ${novelConfig.name}
+    console.log(`================ 开始任务  ================`);
     config.startTime = +new Date();
     const bugConfig = novelConfig;
     // 小说配置信息 - 读取小说配置
@@ -289,7 +285,7 @@ const start = (config, novelConfig) => {
               const time = config.endTime - config.startTime;
               // console.log(`处理时间:${time}ms`);
               console.log(
-                `================ 结束 ${novelConfig.name} ================`
+                `================ 结束任务 ================`
               );
             } else {
                 idxcontent=1;
