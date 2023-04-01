@@ -191,7 +191,7 @@ onMounted(() => {
     if(!props.showmenu){
         setTimeout(()=>{document.querySelector(".dplayer-menu").remove();},0)
         // contextmenu 禁用右键菜单
-        document.addEventListener('contextmenu', function (e) {
+        document.querySelector('.dplayer').addEventListener('contextmenu', function (e) {
             e.preventDefault();
         })
     }
