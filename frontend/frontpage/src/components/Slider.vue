@@ -49,18 +49,18 @@
         </div>
       </a>
       <div class="swiper-lazy-preloader swiper-lazy-preloader-white"></div> 
-      </swiper-slide>
+    </swiper-slide>
   </swiper>
 </template>
 <script setup>
 
-  import { Swiper, SwiperSlide } from 'swiper/vue';
-  import 'swiper/css';
-  import 'swiper/css/pagination';
-  import 'swiper/css/navigation';
-  import "swiper/css/effect-coverflow";
-  import {  Autoplay, Pagination, Navigation, EffectCoverflow } from 'swiper';
-  import { useStore } from "vuex";
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/navigation';
+import "swiper/css/effect-coverflow";
+import {  Autoplay, Pagination, Navigation, EffectCoverflow } from 'swiper';
+import { useStore } from "vuex";
 let {state,getters, dispatch,commit} = useStore();
    
   // const props = defineProps({
