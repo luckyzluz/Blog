@@ -190,6 +190,10 @@ onMounted(() => {
     // 删除默认右键菜单
     if(!props.showmenu){
         setTimeout(()=>{document.querySelector(".dplayer-menu").remove();},0)
+        // contextmenu 禁用右键菜单
+        document.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+        })
     }
     // 删除设置按钮
     if(!props.showsetting){
@@ -198,9 +202,26 @@ onMounted(() => {
     document.querySelectorAll(".dplayer-menu-item")[document.querySelectorAll(".dplayer-menu-item").length - 1].remove(); // 去掉作者信息
     document.querySelectorAll(".dplayer-menu-item")[document.querySelectorAll(".dplayer-menu-item").length - 1].remove(); // 去掉项目地址
     if(props.getplayer){
-        emit('player',player)
+        emit('player',state.instance)
     }
+    // console.log(state)
+    // 视频信息
+    // document.querySelector(".dplayer-mask").remove();
+    document.querySelector(".dplayer-info-panel-item-version").remove();
+    // document.querySelector(".dplayer-info-panel-item-url").remove(); //隐藏播放源
+    // document.querySelector(".dplayer-info-panel-item-danmaku-id").remove();
+    // document.querySelector(".dplayer-info-panel-item-danmaku-api").remove();
+    // document.querySelector(".dplayer-info-panel-item-danmaku-amount").remove();
 })
+// const changePlay=()=>{
+//     state.instance.play();
+// }
+// const ee=()=>{
+//     state.instance.play();;
+// }
+// defineExpose({
+//     changePlay
+//     })
 // 销毁
 onBeforeUnmount(() => {
     state.instance.destroy()

@@ -7,7 +7,8 @@
                         <img class="fit-cover" :src="props.Data.cover" alt="">
                     </div>
                     <div class="video-thumb">
-                        <Dplayer class="dplayer-thumb controller-hide dplayer dplayer-thumb-hide dplayer-hide-controller"  :url="'https://vip.lz-cdn.com/20220606/17379_0df2db27/index.m3u8'" :getplayer="true" :volume=0 @player="clickEven"/>
+                        <!--  -->
+                        <Dplayer class="dplayer-thumb controller-hide dplayer dplayer-thumb-hide dplayer-hide-controller" :url="'https://vip.lz-cdn.com/20220606/17379_0df2db27/index.m3u8'" :showmenu=false :getplayer=true :volume=0 @player="clickEven"/>
                     </div>
                 </div>
                 <div class="abs-center right-top">
@@ -95,32 +96,41 @@
 </template>
 <script setup>
 import Dplayer from 'c/Dplayer.vue';
-import {ref} from 'vue'
-let player =ref();
+import {ref,reactive} from 'vue'
+const changePlayb=ref(null);
+let player =reactive({});
 const props = defineProps({
     Data: {
       type: Object,
     //   default: () =>[]
     }
 });
+const clickEven=(val)=>{
+//   val.paused=false
+  player=val
+  console.log(player);
+}
 let xx=(e)=>{
     // console.log();
     e.target.lastElementChild.lastElementChild.classList.remove('dplayer-thumb-hide','dplayer-hide-controller');
+    
+    document.querySelector('.dplayer-video').play();
     // dplayer-thumb-hide 
-    e.target.parentNode.classList.add('thumb-dplayer-playing')
-    e.target.lastElementChild.lastElementChild.classList.add('dplayer-playing');
-    // player.play();
+    // e.target.parentNode.classList.add('thumb-dplayer-playing')
+    // e.target.lastElementChild.lastElementChild.classList.add('dplayer-playing');
+    // player.toggle();
+    // changePlayb.value[0].changePlay();
+    // player.play()
+    // console.log()
     }
     let yy=(e)=>{
     // console.log();
     e.target.lastElementChild.lastElementChild.classList.add('dplayer-thumb-hide','dplayer-hide-controller');
-    e.target.parentNode.classList.remove('thumb-dplayer-playing'); //,'dplayer-playing'
-    e.target.lastElementChild.lastElementChild.classList.remove('dplayer-playing');
+    document.querySelector('.dplayer-video').pause();
+    // e.target.parentNode.classList.remove('thumb-dplayer-playing'); //,'dplayer-playing'
+    // e.target.lastElementChild.lastElementChild.classList.remove('dplayer-playing');
     }
-    const clickEven=(val)=>{
-  console.log(val);
-  player.value=val
-}
+    
 </script>
 <style lang="scss">
 .dplayer-controller,.controller-hide .dplayer-controller-mask,.mobile-nav-widget .dplayer-full-in,.mobile-nav-widget .dplayer-loop,.sidebar .dplayer-full-in,.sidebar .dplayer-loop{display:none!important}
