@@ -1,14 +1,13 @@
 <template>
-    <div class="posts-item">
-        <div v-if="props.Data.type=='article'" class="post-graphic">
-            <div v-if="props.Data.video&&props.Data.video !==''" class="item-thumbnail" :style="props.Data.type=='article'&&props.Data.video?'overflow: hidden; position: relative;':''">
-                <div @mouseenter="xx" @mouseleave="yy" class="video-thumb-box">
+    <div :class="['posts-item list',props.Data.data.type=='pic'?'mult-thumb':'',props.listStyle=='card'?'card style3':'']" :num='props.Data.index'>
+        <div v-if="!(props.Data.data.type=='pic')" class="post-graphic">
+            <div v-if="props.Data.data.video&&props.Data.data.video !==''" class="item-thumbnail" :style="props.Data.data.type=='article'&&props.Data.data.video?'overflow: hidden; position: relative;':''">
+                <div @mouseenter="xx(props.Data.index,$event)" @mouseleave="yy" class="video-thumb-box">
                     <div class="img-thumb">
-                        <img class="fit-cover" :src="props.Data.cover" alt="">
+                        <img class="fit-cover" :src="props.Data.data.covers[0]" alt="">
                     </div>
                     <div class="video-thumb">
-                        <!--  -->
-                        <Dplayer class="dplayer-thumb controller-hide dplayer dplayer-thumb-hide dplayer-hide-controller" :url="'https://vip.lz-cdn.com/20220606/17379_0df2db27/index.m3u8'" :showmenu=false :getplayer=true :volume=0 @player="clickEven"/>
+                        <Dplayer v-if="activeIndex==props.Data.index" class="dplayer-thumb controller-hide dplayer dplayer-thumb-hide dplayer-hide-controller" :url="props.Data.data.video" :showmenu=false :volume=0 />
                     </div>
                 </div>
                 <div class="abs-center right-top">
@@ -16,34 +15,45 @@
                 </div>
             </div>
             <div v-else class="item-thumbnail">
-                <a :href="props.Data.href">
-                    <img class="fit-cover" :src="props.Data.cover" alt="">
+                <a v-if="props.Data.data.covers.length==1" :href="props.Data.data.href">
+                    <img class="fit-cover" :src="props.Data.data.covers[0]" alt="">
                 </a>
-                <span v-if="props.Data.istop" class="badge img-badge jb-red">置顶</span>
+                <div v-else class="lz-slider">
+                    <swiper :loop="true" :style="{'--swiper-pagination-color': '#fff'}" :modules="modules" :autoplay="{delay: 5000,disableOnInteraction: false,}" :pagination="{clickable: true,}" class="mySwiper item-thumbnail miniswiper">
+                        <swiper-slide v-for="(z,w) in props.Data.data.covers" :key="w">
+                            <a :href="props.Data.data.href">
+                                <img :src="z" alt="">
+                            </a>
+                            <div class="swiper-lazy-preloader swiper-lazy-preloader-white"></div> 
+                        </swiper-slide>
+                    </swiper>
+                </div>
+                <span v-if="props.Data.data.istop" class="badge img-badge jb-red">置顶</span>
             </div>
         </div>
+        <!-- 图库列表只显示以下内容 -->
         <div class="item-body">
             <h2 class="item-heading">
-                <a :href="props.Data.href">{{ props.Data.title }}
-                    <span class="focus-color">[{{ props.Data.sub }}]</span>
+                <a :href="props.Data.data.href">{{ props.Data.data.title }}
+                    <span class="focus-color">[{{ props.Data.data.sub }}]</span>
                 </a>
             </h2>
-            <div v-if="props.Data.type=='article'" class="item-excerpt text-ellipsis muted-color">
-                {{ props.Data.intro }}
+            <div v-if="props.Data.data.type=='article'" class="item-excerpt text-ellipsis muted-color">
+                {{ props.Data.data.intro }}
             </div>
-            <a v-if="props.Data.type=='pic'" class="thumb-items">
-                <span v-for="(v,i) in props.Data.cover.lists">
+            <a v-if="props.Data.data.type=='pic'" class="thumb-items">
+                <span v-for="(v,i) in props.Data.data.covers.lists">
                     <div v-if="i==3" class="abs-center right-top">
                         <span class="badge b-black">
-                            <i class="iconfont icon-tupian2"></i>+{{ props.Data.cover.num }}
+                            <i class="iconfont icon-tupian2"></i>+{{ props.Data.data.covers.num }}
                         </span>
                     </div>
-                    <img class="fit-cover" :src="v" :alt="props.Data.title">
+                    <img class="fit-cover" :src="v" :alt="props.Data.data.title">
                 </span>
             </a>
             <div>
                 <div class="item-tags scroll-x">
-                    <a v-for="(w,p) in props.Data.tags" :class="['but',w.bgColor]">
+                    <a v-for="(w,p) in props.Data.data.tags" :class="['but',w.bgColor]">
                         <i v-if="w.icon&&w.icon!==''" :class="['iconfont',w.icon]"></i>
                         {{ w.name }}
                         <span v-if="w.pay&&JSON.stringify(w.pay)!=='{}'">R币</span>{{ w.pay&&JSON.stringify(w.pay)!=='{}'?w.pay.sum:'' }}
@@ -51,13 +61,13 @@
                 </div>
                 <div class="item-meta muted-2-color">
                     <span class="meta-author">
-                        <a :href="props.Data.author.id">
+                        <a :href="props.Data.data.author.id">
                             <span class="avatar-mini">
-                                <img class="avatar lazyloaded" :src="props.Data.author.img" :alt="props.Data.author.name+'的头像'">
+                                <img class="avatar lazyloaded" :src="props.Data.data.author.img" :alt="props.Data.data.author.name+'的头像'">
                             </span>
                         </a>
-                        <span class="hidden-sm-only" style="margin-left: 6px;">{{ props.Data.author.name }}</span>
-                        <span class="icon-circle" :title="props.Data.time">{{ props.Data.time }}</span>
+                        <span class="hidden-sm-only" style="margin-left: 6px;">{{ props.Data.data.author.name }}</span>
+                        <span class="icon-circle" :title="props.Data.data.time">{{ props.Data.data.time }}</span>
                     </span>
                     <div class="meta-right">
                         <span class="meta-comm">
@@ -70,7 +80,7 @@
                                     <a href="">
                                         <svg class="icon" aria-hidden="true">
                                             <use xlink:href="#icon-xiaoxi1"></use>
-                                        </svg>{{ props.Data.comment }}
+                                        </svg>{{ props.Data.data.comment }}
                                     </a>
                             </el-tooltip>
                         </span>
@@ -78,14 +88,14 @@
                             <a href="">
                                 <svg class="icon" aria-hidden="true">
                                     <use xlink:href="#icon-yuedu"></use>
-                                </svg>{{ props.Data.views }}
+                                </svg>{{ props.Data.data.views }}
                             </a>
                         </span>
                         <span class="meta-like">
                             <a href="">
                                 <svg class="icon" aria-hidden="true">
                                     <use xlink:href="#icon-zan"></use>
-                                </svg>{{ props.Data.like }}
+                                </svg>{{ props.Data.data.like }}
                             </a>
                         </span>
                     </div>
@@ -97,40 +107,35 @@
 <script setup>
 import Dplayer from 'c/Dplayer.vue';
 import {ref,reactive} from 'vue'
+import { Swiper, SwiperSlide } from 'swiper/vue';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import {  Autoplay, Pagination } from 'swiper';
+const modules= [ Autoplay, Pagination];
 const changePlayb=ref(null);
 let player =reactive({});
 const props = defineProps({
     Data: {
       type: Object,
     //   default: () =>[]
+    },
+    listStyle:{
+        type:String
     }
 });
-const clickEven=(val)=>{
-//   val.paused=false
-  player=val
-  console.log(player);
-}
-let xx=(e)=>{
-    // console.log();
-    e.target.lastElementChild.lastElementChild.classList.remove('dplayer-thumb-hide','dplayer-hide-controller');
-    
-    document.querySelector('.dplayer-video').play();
-    // dplayer-thumb-hide 
-    // e.target.parentNode.classList.add('thumb-dplayer-playing')
-    // e.target.lastElementChild.lastElementChild.classList.add('dplayer-playing');
-    // player.toggle();
-    // changePlayb.value[0].changePlay();
-    // player.play()
-    // console.log()
+let activeIndex=ref(-1); // 是否加载视频预览模块
+
+let xx=(index,e)=>{
+    activeIndex.value=index;
+    setTimeout(()=>{
+        e.target.lastElementChild.lastElementChild.classList.remove('dplayer-thumb-hide','dplayer-hide-controller');
+        e.target.querySelector('.dplayer-video').play();
+    },0)
     }
-    let yy=(e)=>{
-    // console.log();
+let yy=(e)=>{
     e.target.lastElementChild.lastElementChild.classList.add('dplayer-thumb-hide','dplayer-hide-controller');
-    document.querySelector('.dplayer-video').pause();
-    // e.target.parentNode.classList.remove('thumb-dplayer-playing'); //,'dplayer-playing'
-    // e.target.lastElementChild.lastElementChild.classList.remove('dplayer-playing');
-    }
-    
+    e.target.querySelector('.dplayer-video').pause();
+}
 </script>
 <style lang="scss">
 .dplayer-controller,.controller-hide .dplayer-controller-mask,.mobile-nav-widget .dplayer-full-in,.mobile-nav-widget .dplayer-loop,.sidebar .dplayer-full-in,.sidebar .dplayer-loop{display:none!important}
