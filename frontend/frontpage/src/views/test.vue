@@ -1,44 +1,35 @@
 <template>
-    <dplayer :url="dplayerObj.video.url" 
-    :theme="'var(--focus-color)'" :showmenu=false :showsetting=false />
-      <!--:video="dplayerObj.video" :subtitle="dplayerObj.subtitle" :danmaku="dplayerObj.danmaku" :contextmenu="dplayerObj.contextmenu" -->
-  </template>
-  <script setup>
-  import dplayer from 'c/Dplayer.vue';
-//   import Hls from 'hls.js';
-import Hls from 'hls.js/dist/hls.min.js'
-  import { ref, reactive } from 'vue'
-  const dplayerObj = reactive({
-    video: {
-      url: 'https://vip.lz-cdn.com/20220606/17379_0df2db27/index.m3u8', //视频地址src/assets/video/test1.mp4
-      type: 'customHls',
-      customType: {
-        customHls: function (video, player) {
-          const hls = new Hls(); //实例化Hls  用于解析m3u8
-          hls.loadSource(video.src);
-          hls.attachMedia(video);
-        }
-      }
-    },
-    danmaku: {
-        id: 4157142,
-        api: 'https://www.fastmock.site/mock/454f58b030e7903400b943b9163118e5/blog1/',
-        token: 'tokendemo',
-        maximum: 1000,
-        addition: ['src/assets/video/danmuku/test.json'],
-        user: 'DIYgod',
-        bottom: '15%',
-        unlimited: true,
-        speedRate: 0.5,
-  },
-  subtitle:{
-        url:'src/assets/video/subtitle/hikarunara.vtt', // 字幕链接
-        type:'webvtt', // 字幕类型，可选值: 'webvtt', 'ass'，目前只支持 webvtt
-        fontSize: '20px', // 字幕字号
-        bottom: '10%', // 字幕距离播放器底部的距离，取值形如: '10px' '10%'
-        color:'yellow'// 字幕颜色
-    },
-  })
-//  
-  </script>
-  
+  <Artplayer @get-instance="getInstance" :option="option" :style="style" :ads="ads" :danmuku="danmuku" :subtitle="subtitle" />
+</template>
+<!-- :test="true" -->
+<script setup>
+import Artplayer from '../components/player/AirPlayer.vue';
+let option= {
+  // url: 'https://r16---sn-2x3een76.c.2mdn.net/videoplayback/id/c1e292e1c1701f0e/itag/343/source/web_video_ads/ctier/L/acao/yes/ip/0.0.0.0/ipbits/0/expire/3804422295/sparams/acao,ctier,expire,id,ip,ipbits,ipbypass,itag,mh,mip,mm,mn,ms,mv,mvi,pl,source/signature/3B63F046E06C0A78798BEF91E68C3F894826171F.6C1B337A52B9667E66864E3A20BFC1F6EFB7B95E/key/cms1/mh/zp/pl/15/redirect_counter/1/rm/sn-2x3ld7l/req_id/3abc51b985aaa3ee/cms_redirect/yes/ipbypass/yes/mip/123.138.44.57/mm/42/mn/sn-2x3een76/ms/onc/mt/1667265896/mv/m/mvi/16?file=file.mp4'
+}
+
+let ads={
+  // type:'img',
+  // img:'https://img14.360buyimg.com/ddimg/jfs/t1/150492/36/14386/1170832/5ffaf2afEa91ce8f4/bfc4ad14c4eb85e9.jpg',
+  // video: 'https://wallpaper-static.cheetahfun.com/wallpaper/sites/dynamics/vm1.mp4',
+  // url:'http://www.baidu.com'
+}
+let danmuku={
+  // url:'src/assets/video/danmuku/danmuku-v2.xml'
+}
+let subtitle={
+  url: 'src/assets/video/subtitle/subtitle.srt', // 字幕地址
+  // style: {
+  //   color: '#03A9F4',
+  //   'font-size': '30px',
+  // }
+}
+let style= {
+  width: '600px',
+  height: '400px',
+  margin: '60px auto 0',
+}
+const getInstance = (art) => {
+  console.log(art);
+}
+</script>
