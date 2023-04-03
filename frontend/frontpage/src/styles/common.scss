@@ -479,3 +479,18 @@ body{
 .chat-next a:hover .fa, .theme-pagination .ajax-next a:hover .iconfont, .theme-pagination .ajax-next a:hover .icon, .theme-pagination .order-ajax-next a:hover .fa, .theme-pagination .order-ajax-next a:hover .icon {
     margin-right: 8px;
 }
+.posts-item.card .item-heading, .posts-mini-con .item-heading {
+    font-size: 14px;
+}
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.enlighter, .mini-scrollbar, .no-scrollbar {
+    -ms-overflow-style: none;
+    overflow: -moz-scrollbars-none;
+    scrollbar-width: thin;
+}
+.no-scrollbar {
+    overflow: -moz-scrollbars-none;
+    scrollbar-width: none;
+}
