@@ -11,6 +11,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "artplayer": "^4.6.2",
+    "artplayer-plugin-ads": "^1.0.6",
+    "artplayer-plugin-danmuku": "^4.4.11",
     "axios": "^1.3.3",
     "dplayer": "^1.27.1",
     "element-plus": "^2.2.30",
