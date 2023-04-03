@@ -12,12 +12,13 @@ const {delay}=require('../util/tool');
 // 配置信息
 const {config} = require('../script/config');
 // const bookUtils = require('../script/book');
+// 
+// 
+// 31/31795
 const WebConfig = {
-  // http://hdyp.net/13/13109/
-  // http://hdyp.net/19/19099/
-    indexUrl: 'http://hdyp.net/13/13108/',// 小说目录页
-    chapterUrlPrefix: 'http://hdyp.net',// 目录每一章链接的前缀
-    novelInfoCls: 'div.bd.column-2 > .right', // 目录页小说书名作者等信息
+    indexUrl: 'http://hdyp.net/23/23486/',// 小说目录页6/6146
+    chapterUrlPrefix: 'http://hdyp.net',// 目录每一章链接的前缀30/30707
+    novelInfoCls: 'div.bd.column-2 > .right', // 目录页小说书名作者等信息25/25137
     linkpagingCls:'.pagelistbox',
     linkCls: '.container div.chapter-list .bd ul li a', //目录页每一章的a标签的css选择器
     adCls: [],// 要移除的广告标签的css选择器 （每一章内容区域内的广告和不需要的部分）'.google-auto-placed', '#p_ad_t3', '#content>p:last-child'
