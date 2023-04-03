@@ -6,18 +6,18 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "7736151",
+      "name": "image",
+      "font_class": "image",
+      "unicode": "e8f8",
+      "unicode_decimal": 59640
+    },
+    {
       "icon_id": "822556",
       "name": "arrow-right",
       "font_class": "arrowright1",
       "unicode": "e6bc",
       "unicode_decimal": 59068
-    },
-    {
-      "icon_id": "6127276",
-      "name": "图片",
-      "font_class": "tupian2",
-      "unicode": "e646",
-      "unicode_decimal": 58950
     },
     {
       "icon_id": "11218172",
