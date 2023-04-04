@@ -8,6 +8,7 @@ import Sign from 'c/Sign.vue'
 import Fixedtool from 'c/Fixedtool.vue'
 import MusicPlayer from './components/MusicPlayer.vue'
 import { useStore } from "vuex";
+import singleCard from 'c/singleCard.vue';
 const {proxy} = getCurrentInstance();
 let {state,getters, dispatch,commit} = useStore();
 const data=[]
@@ -69,6 +70,7 @@ onMounted(()=>{
       <userCard :UserData="state.user.UserData" />
     </aside>
   </main>
+  <singleCard />
   <Footer />
   <!-- 窗格容器 -->
   <div v-show="state.isShowModalBackdrop" class="modal-dialog">
