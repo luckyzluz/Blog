@@ -22,7 +22,7 @@ const props = defineProps({
             return {
                 title:'模块标题',
                 intro:'模块介绍',
-                info:'右侧按钮'
+                // info:'右侧按钮'
             }
         }
     }
