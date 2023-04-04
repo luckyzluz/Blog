@@ -2,7 +2,7 @@
     <!-- 用户卡片 -->
     <div class="user-card">
         <div class="user-cover">
-            <img src="https://demo.zibll.com/wp-content/themes/zibll/img/user_t.jpg" alt="">
+            <img src="src/assets/image/user_t.jpg" alt="">
         </div>
         <div class="user-content">
             <!-- 签到按钮 -->
