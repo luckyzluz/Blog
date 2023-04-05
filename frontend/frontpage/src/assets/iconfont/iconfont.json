@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "836440",
+      "name": "clock-o",
+      "font_class": "clocko",
+      "unicode": "e692",
+      "unicode_decimal": 59026
+    },
+    {
       "icon_id": "7736151",
       "name": "image",
       "font_class": "image",
@@ -25,13 +32,6 @@
       "font_class": "redu1",
       "unicode": "e671",
       "unicode_decimal": 58993
-    },
-    {
-      "icon_id": "9162622",
-      "name": "时间",
-      "font_class": "shijian",
-      "unicode": "e645",
-      "unicode_decimal": 58949
     },
     {
       "icon_id": "7588088",
