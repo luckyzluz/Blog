@@ -1,4 +1,5 @@
 <template>
+    <!-- 一个单行显示的卡片文章模块 -->
     <div class="container fluid-widget">
         <notop :data="datax" />
         <swiper 
@@ -10,6 +11,7 @@
     :navigation="true"
     :spaceBetween="21"
     :slidesPerView="4"
+    :slidesPerGroup="4"
         :modules="modules"
         class="swiper-container swiper-scroll swiper-container-initialized"
         >
@@ -18,10 +20,9 @@
         </swiper-slide>
         </swiper>
     </div>
-    <!-- jianju -->
 </template>
 <script setup>
-import CardList from 'c/List/cardList.vue';
+import CardList from 'c/List/card.vue';
 import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -43,92 +44,8 @@ let data={
             href:'http://www.baidu.com',
             styleType:'card',
             lists:[
+            
             {
-                    title:'优雅的支付系统-给站长提供强劲的生产力',
-                    sub:'支付功能简介及体验',
-                    type:'article',
-                    covers: ['src/assets/image/article/f19c089b3d284d7e9bd54eb39ab1b972.jpeg'],
-                    href:'http://www.baidu.com',
-                    intro:'子比主题本次更新，终于带来了大家期待的支付功能，这下方便站长愉快的收钱啦.... 作为一款资讯阅读类的优质主题，付费阅读、付费下载、付费VIP等功能是必不可少的，子比主题本次更新则带来了付...',
-                    istop: true,
-                    tags:[
-                        {
-                            name:'付费阅读',
-                            pay:{
-                                sum:0.3
-                            },
-                            bgColor: 'jb-yellow'
-                        },
-                        {
-                            name:'智能硬件',
-                            icon:'icon-folder',
-                            bgColor: 'c-yellow'
-                        },
-                        {
-                            name:'科技新闻',
-                            icon:'icon-folder',
-                            bgColor: 'c-green'
-                        },
-                        {
-                            name:'# 付费下载'
-                        },
-                        {
-                            name:'# 支付功能'
-                        }
-                    ],
-                    author:{
-                        id:1,
-                        name:'糖巴',
-                        img:'src/assets/image/article/bizh-4-1.jpeg'
-                    },
-                    time:'2年前',//2021-04-09 23:38:43
-                    comment:7,
-                    views: '3.2W+',
-                    like:434
-                },
-            {
-                    title:'优雅的支付系统-给站长提供强劲的生产力',
-                    sub:'支付功能简介及体验',
-                    type:'article',
-                    covers: ['src/assets/image/article/f19c089b3d284d7e9bd54eb39ab1b972.jpeg'],
-                    href:'http://www.baidu.com',
-                    intro:'子比主题本次更新，终于带来了大家期待的支付功能，这下方便站长愉快的收钱啦.... 作为一款资讯阅读类的优质主题，付费阅读、付费下载、付费VIP等功能是必不可少的，子比主题本次更新则带来了付...',
-                    istop: true,
-                    tags:[
-                        {
-                            name:'付费阅读',
-                            pay:{
-                                sum:0.3
-                            },
-                            bgColor: 'jb-yellow'
-                        },
-                        {
-                            name:'智能硬件',
-                            icon:'icon-folder',
-                            bgColor: 'c-yellow'
-                        },
-                        {
-                            name:'科技新闻',
-                            icon:'icon-folder',
-                            bgColor: 'c-green'
-                        },
-                        {
-                            name:'# 付费下载'
-                        },
-                        {
-                            name:'# 支付功能'
-                        }
-                    ],
-                    author:{
-                        id:1,
-                        name:'糖巴',
-                        img:'src/assets/image/article/bizh-4-1.jpeg'
-                    },
-                    time:'2年前',//2021-04-09 23:38:43
-                    comment:7,
-                    views: '3.2W+',
-                    like:434
-                }, {
                     title:'优雅的支付系统-给站长提供强劲的生产力',
                     sub:'支付功能简介及体验',
                     type:'article',
@@ -474,18 +391,8 @@ let data={
 const modules= [Navigation];
 </script>
 <style>
-.swiper-container {
-    margin-left: auto;
-    margin-right: auto;
-    position: relative;
-    overflow: hidden;
-    list-style: none;
-    padding: 0;
-    z-index: 1;
-}
 .swiper-scroll .posts-item.card {
-    /* margin: 0!important;
-    margin-right: 21px!important; */
+    margin: 0;
 }
 .swiper-scroll .swiper-button-next, .swiper-scroll .swiper-button-prev, .swiper-thumbsbox .swiper-button-next, .swiper-thumbsbox .swiper-button-prev {
     background-color: rgba(0,0,0,.5);
