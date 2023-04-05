@@ -9,6 +9,11 @@ import Fixedtool from 'c/Fixedtool.vue'
 import MusicPlayer from './components/MusicPlayer.vue'
 import { useStore } from "vuex";
 import singleCard from 'c/singleCard.vue';
+import graphicCover from './components/graphicCover.vue'
+import graphicCover2 from './components/graphicCover2.vue'
+import hotPosts from 'c/aside/hotPosts.vue'
+import mediaImage from 'c/aside/mediaImage.vue'
+import postsMiniLists from 'c/aside/postsMiniLists.vue'
 const {proxy} = getCurrentInstance();
 let {state,getters, dispatch,commit} = useStore();
 const data=[]
@@ -68,9 +73,14 @@ onMounted(()=>{
     </div>
     <aside class="sidebar">
       <userCard :UserData="state.user.UserData" />
+      <hotPosts />
+      <mediaImage />
+      <postsMiniLists />
     </aside>
   </main>
   <singleCard />
+  <graphicCover />
+  <graphicCover2 />
   <Footer />
   <!-- 窗格容器 -->
   <div v-show="state.isShowModalBackdrop" class="modal-dialog">
