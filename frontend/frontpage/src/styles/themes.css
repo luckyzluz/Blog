@@ -71,6 +71,10 @@ body.dark-theme{
     --this-color: #ff6f06;
     --this-bg: rgba(255, 111, 6, 0.1);
 }
+.c-purple {
+    --this-color: #e434e1;
+    --this-bg: rgba(213, 72, 245, 0.1);
+}
 .c-blue, .c-blue-2, .c-cyan, .c-gray, .c-green, .c-green-2, .c-purple, .c-purple-2, .c-red, .c-red-2, .c-theme, .c-white, .c-yellow, .c-yellow-2 {
     color: var(--this-color);
 }
@@ -92,6 +96,12 @@ body.dark-theme{
 }
 .jb-blue, .jb-cyan, .jb-green, .jb-pink, .jb-purple, .jb-red, .jb-vip1, .jb-vip2, .jb-yellow {
     border: none;
+}
+.b-theme {
+    --this-bg: var(--focus-color);
+}
+.b-gray {
+    --this-bg: #818b95;
 }
 .b-blue, .b-blue-2, .b-cyan, .b-gray, .b-green, .b-purple, .b-red, .b-theme, .b-yellow, .jb-blue, .jb-cyan, .jb-green, .jb-pink, .jb-purple, .jb-red, .jb-vip1, .jb-vip2, .jb-yellow {
     color: var(--this-color);

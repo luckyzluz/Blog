@@ -7,7 +7,25 @@ $jb-yellow-bg: linear-gradient(135deg, #f59f54 10%, #ff6922 100%);
 自定义的公共样式...
 
 **/
+.mb20, .theme-box {
+    margin-bottom: 20px;
+}
+.mb10 {
+    margin-bottom: 10px;
+}
 
+.hover-zoom-img:hover img, .hover-zoom:hover, .social_loginbar .social-login-item:hover, .social_loginbar .xh-social-item:hover {
+    transform: scale(1.05);
+}
+.absolute, .fixed, .progress {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+}
 .text-ellipsis {
     overflow: hidden;
     text-overflow: ellipsis;
@@ -168,6 +186,19 @@ body{
     width: 100%;
     height: 100%;
 }
+.graphic-mask {
+    background: #000;
+}
+.graphic-text {
+    padding: 5px 10px;
+    transition: .3s;
+    text-align: center;
+}
+.this-font {
+    font-size: var(--font-size);
+    font-weight: var(--font-weight);
+    color: var(--color);
+}
 .avatar, .fit-cover, .radius-cover {
     width: 100%;
     height: 100%;
@@ -185,6 +216,14 @@ body{
     box-shadow: 0 1px 5px rgb(0 0 0 / 20%);
     z-index: 1;
     padding: .2em .6em;
+}
+.img-badge.left {
+    left: 0;
+    border-radius: 0 50px 50px 0;
+    right: auto;
+}
+.img-badge.hot {
+    padding: .25em .6em;
 }
 .key-color {
     color: var(--key-color);
@@ -345,6 +384,17 @@ body{
     overflow: hidden;
     white-space: normal;
 }
+.line-form, .relative {
+    position: relative;
+}
+.linear-mask {
+    background-image: linear-gradient(
+0deg,rgba(29,41,49,.4) 3em,rgba(255,255,255,0) 8em);
+}
+.box-body, .box-header {
+    padding: 15px;
+}
+
 
 .avatar-img, .avatar-lg, .avatar-mini, .square-box {
     position: relative;
@@ -394,6 +444,11 @@ body{
 .abs-center.left-top, .abs-center.right-top {
     transform: unset;
     top: 0;
+}
+.abs-center.conter-bottom, .abs-center.left-bottom, .abs-center.right-bottom {
+    top: auto;
+    transform: unset;
+    bottom: 0;
 }
 .hover-zoom-img-sm:hover img, .hover-zoom-sm:hover, .posts-item.mult-thumb .thumb-items>span>img:hover, .posts-item:hover .item-thumbnail img, .posts-mini:hover img {
     transform: scale(1.02);
@@ -493,4 +548,84 @@ body{
 .no-scrollbar {
     overflow: -moz-scrollbars-none;
     scrollbar-width: none;
+}
+.noshadow, .zib-widget-sm {
+    box-shadow: none!important;
+}
+.lz-widget {
+    clear: both;
+    background: var(--main-bg-color);
+    padding: 15px;
+    box-shadow: 0 0 10px var(--main-shadow);
+    border-radius: var(--main-radius);
+    margin-bottom: 20px;
+}
+.flex {
+    display: flex;
+    .flex1 {
+        flex: auto;
+        overflow: hidden;
+    }
+}
+.flex.jsb, .inflex.jsb {
+    justify-content: space-between;
+}
+.flex.xx, .inflex.xx {
+    flex-direction: column;
+}
+.radius {
+    border-radius: var(--main-radius);
+}
+.tab-nav-theme li:before {
+    left: 0;
+    right: 0;
+    margin: auto;
+}
+.tab-nav-theme {
+    border-bottom: 1px solid var(--main-border-color);
+    padding-bottom: 6px;
+    margin: 8px 0 5px;
+    list-style: none;
+    li{
+        position: relative;
+        padding-bottom: 8px;
+        &::before {
+            position: absolute;
+            content: '';
+            width: 4px;
+            background: var(--theme-color);
+            top: 10%;
+            left: 2px;
+            bottom: 10%;
+            border-radius: 5px;
+            box-shadow: 1px 1px 3px -1px var(--theme-color);
+            transition: .4s;
+        }
+        &:before {
+            width: 20px;
+            height: 2px;
+            bottom: 5px;
+            opacity: 0;
+            top: auto;
+            left: 0;
+            right: 0;
+            margin: auto;
+        }
+        &.active a {
+            color: var(--focus-color);
+        }
+        &.active::before, &.swiper-slide-thumb-active::before {
+            opacity: 1;
+        }
+    }
+    &.mini-scrollbar>li, &.swiper-wrapper>li {
+        padding-left: 5px;
+        margin: 0;
+        padding-right: 5px;
+        line-height: 1.4;
+    }
+}
+// 侧边栏
+.mobile-nav-widget .posts-mini, .sidebar .posts-mini {
+    width: 100%!important;
 }
