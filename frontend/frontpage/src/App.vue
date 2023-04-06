@@ -14,6 +14,10 @@ import graphicCover2 from './components/graphicCover2.vue'
 import hotPosts from 'c/aside/hotPosts.vue'
 import mediaImage from 'c/aside/mediaImage.vue'
 import postsMiniLists from 'c/aside/postsMiniLists.vue'
+import newComment from './components/aside/newComment.vue'
+import tagCloud from 'c/aside/tagCloud.vue'
+import search from 'c/aside/search.vue'
+import Video from './components/aside/video.vue'
 const {proxy} = getCurrentInstance();
 let {state,getters, dispatch,commit} = useStore();
 const data=[]
@@ -76,6 +80,10 @@ onMounted(()=>{
       <hotPosts />
       <mediaImage />
       <postsMiniLists />
+      <newComment />
+      <tagCloud />
+      <search />
+      <Video />
     </aside>
   </main>
   <singleCard />
