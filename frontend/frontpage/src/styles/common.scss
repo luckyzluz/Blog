@@ -13,7 +13,22 @@ $jb-yellow-bg: linear-gradient(135deg, #f59f54 10%, #ff6922 100%);
 .mb10 {
     margin-bottom: 10px;
 }
-
+button.null {
+    background: 0 0;
+    border: none;
+    margin: 0;
+    padding: 0;
+    overflow: visible;
+}
+button, input, select, textarea {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: inherit;
+}
+button, html input[type=button], input[type=reset], input[type=submit] {
+    -webkit-appearance: button;
+    cursor: pointer;
+}
 .hover-zoom-img:hover img, .hover-zoom:hover, .social_loginbar .social-login-item:hover, .social_loginbar .xh-social-item:hover {
     transform: scale(1.05);
 }
@@ -100,7 +115,7 @@ article, aside, details, figcaption, figure, footer, header, hgroup, main, menu,
     vertical-align: .1em;
     min-width: 1.6em;
 }
-.but>.iconfont {
+.but>.iconfont,.but>.icon {
     margin-right: .25em;
 }
 
@@ -111,6 +126,18 @@ article, aside, details, figcaption, figure, footer, header, hgroup, main, menu,
     fill: currentColor;
     overflow: hidden;
   }
+  .ajax-option .option-items>a+a:before, .fcode-links>a+a:before, .icon-spot:before {
+    content: "";
+    width: 4px;
+    height: 4px;
+    margin: 0 .5em;
+    border-radius: 50%;
+    display: inline-block;
+    vertical-align: middle;
+    background: var(--main-color);
+    opacity: .3;
+    vertical-align: .2em;
+}
 .btn {
     display: inline-block;
     margin-bottom: 0;
@@ -257,6 +284,13 @@ body{
 .but>.iconfont {
     margin-right: .25em;
 }
+.author-tag .badg, .author-tag .but {
+    margin-right: 5px;
+    margin: 2px;
+    padding: .15em .4em;
+    font-size: 12px;
+    font-weight: 400;
+}
 .icon-circle::before {
     content: "";
     width: .5em;
@@ -265,6 +299,13 @@ body{
     border-radius: 1em;
     margin: 0 .5em;
     vertical-align: .1em;
+    display: inline-block;
+}
+.img-icon {
+    height: 1em;
+    vertical-align: -.15em;
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
     display: inline-block;
 }
 .posts-row {
@@ -385,6 +426,10 @@ body{
     white-space: normal;
 }
 .line-form, .relative {
+    position: relative;
+}
+.relative-h {
+    overflow: hidden;
     position: relative;
 }
 .linear-mask {
@@ -567,11 +612,21 @@ body{
         overflow: hidden;
     }
 }
+
+.inflex {
+    display: inline-flex;
+}
+.flex .flex0 {
+    flex: none;
+}
 .flex.jsb, .inflex.jsb {
     justify-content: space-between;
 }
 .flex.xx, .inflex.xx {
     flex-direction: column;
+}
+.flex.ac, .inflex.ac {
+    align-items: center;
 }
 .radius {
     border-radius: var(--main-radius);
