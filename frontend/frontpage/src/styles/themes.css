@@ -35,6 +35,13 @@ body.dark-theme{
     --posts-card-scale: 70%;
     --posts-list-scale: 70%;
 }
+.main-shadow {
+    box-shadow: 0 0 10px var(--main-shadow);
+    transition: box-shadow .3s;
+}
+.main-bg {
+    background: var(--main-bg-color);
+}
 .muted-color {
     color: var(--muted-color);
 }
@@ -48,9 +55,17 @@ body.dark-theme{
     --this-color: #ff5473 !important;
     --this-bg: rgba(255, 84, 115, .1) !important;
 }
+.c-red-2 {
+    --this-color: #d6064c;
+    --this-bg: rgba(194, 41, 46, 0.1);
+}
 .c-green {
     --this-color: #18a52a !important;
     --this-bg: rgba(18, 185, 40, .1) !important;
+}
+.c-green-2 {
+    --this-color: #6a933e;
+    --this-bg: rgba(72, 135, 24, .1);
 }
 .c-blue {
     --this-color: #2997f7;
@@ -71,9 +86,17 @@ body.dark-theme{
     --this-color: #ff6f06;
     --this-bg: rgba(255, 111, 6, 0.1);
 }
+.c-yellow-2 {
+    --this-color: #c58516;
+    --this-bg: rgba(179, 103, 8, 0.1);
+}
 .c-purple {
     --this-color: #e434e1;
     --this-bg: rgba(213, 72, 245, 0.1);
+}
+.c-purple-2 {
+    --this-color: #8e4aff;
+    --this-bg: rgba(154, 72, 245, 0.1);
 }
 .c-blue, .c-blue-2, .c-cyan, .c-gray, .c-green, .c-green-2, .c-purple, .c-purple-2, .c-red, .c-red-2, .c-theme, .c-white, .c-yellow, .c-yellow-2 {
     color: var(--this-color);
