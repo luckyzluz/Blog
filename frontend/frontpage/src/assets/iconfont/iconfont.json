@@ -6,6 +6,48 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "16453339",
+      "name": "私信",
+      "font_class": "sixin",
+      "unicode": "e6ca",
+      "unicode_decimal": 59082
+    },
+    {
+      "icon_id": "836657",
+      "name": "heart-o",
+      "font_class": "hearto",
+      "unicode": "e737",
+      "unicode_decimal": 59191
+    },
+    {
+      "icon_id": "21457654",
+      "name": "private_block",
+      "font_class": "private_block",
+      "unicode": "e646",
+      "unicode_decimal": 58950
+    },
+    {
+      "icon_id": "27089377",
+      "name": "authenticate@3x",
+      "font_class": "a-authenticate3x",
+      "unicode": "e650",
+      "unicode_decimal": 58960
+    },
+    {
+      "icon_id": "348631",
+      "name": "map-marker",
+      "font_class": "mapmarker",
+      "unicode": "eb57",
+      "unicode_decimal": 60247
+    },
+    {
+      "icon_id": "1199321",
+      "name": "search",
+      "font_class": "search",
+      "unicode": "e645",
+      "unicode_decimal": 58949
+    },
+    {
       "icon_id": "836440",
       "name": "clock-o",
       "font_class": "clocko",
