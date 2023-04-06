@@ -1,4 +1,5 @@
 <template>
+    <!-- 广告图片模块 -->
     <div class="lz-widget widget_media_image">
         <a :href="data.href">
             <img class="" :src="data.img" style="max-width: 100%;height: auto;" alt="">

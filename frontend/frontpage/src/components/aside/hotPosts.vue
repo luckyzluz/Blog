@@ -1,4 +1,5 @@
 <template>
+    <!-- 热门文章模块 -->
     <div class="lz-widget hot-posts">
         <div class="relative">
             <a :href="data[0].href">

@@ -1,4 +1,5 @@
 <template>
+    <!-- mini文章列表模块 -->
     <div class="theme-box box-body posts-mini-lists lz-widget">
         <ul class="list-inline scroll-x mini-scrollbar tab-nav-theme">
             <li v-for="(v,i) in data" :class="[activeIndex==i?'active':'']"><a @click="changeActive(i)">{{ v.name }}</a></li>
@@ -135,7 +136,14 @@ const changeActive=(index)=>{
         vertical-align: middle;
     }
 }
+.posts-mini .item-heading {
+    margin: 0;
+}
 .posts-mini-lists .tab-nav-theme {
     padding: 0 5px 2px;
+}
+.posts-mini-con {
+    flex: auto;
+    overflow: hidden;
 }
 </style>

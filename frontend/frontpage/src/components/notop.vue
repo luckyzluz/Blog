@@ -3,7 +3,7 @@
     <div class="notop">
             <div class="notop-title">
                 {{ props.data.title }}
-                <small>{{ props.data.intro }}</small>
+                <small v-if="props.data.intro">{{ props.data.intro }}</small>
                 <div class="pull-right" v-if="props.data.info">
                     <a class="muted-2-color">
                         <i class="iconfont icon-arrowright"></i>
