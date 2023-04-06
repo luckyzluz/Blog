@@ -10,6 +10,15 @@ const routes = [
         },
         component: () => import('../views/home.vue')
     },
+    ,
+    {
+        path: '/article',
+        name: 'article',
+        meta:{
+            title: 'article'
+        },
+        component: () => import('../views/article.vue')
+    },
     {
         path: '/test',
         name: 'test',
