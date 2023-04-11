@@ -136,6 +136,19 @@ const changeActive=(index)=>{
         vertical-align: middle;
     }
 }
+.tab-content>.tab-pane {
+    display: none;
+}
+.fade {
+    opacity: 0;
+    transition: opacity .15s linear;
+}
+.tab-content>.active {
+    display: block;
+}
+.fade.in {
+    opacity: 1;
+}
 .posts-mini .item-heading {
     margin: 0;
 }
