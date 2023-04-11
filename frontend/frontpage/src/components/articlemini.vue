@@ -1,6 +1,6 @@
 <template>
     <!-- 文章mini模块 -->
-    <div class="posts-mini">
+    <div class="theme-box">
         <Notop :data="notop" />
         <!-- 模块内容 -->
         <div class="posts-mini-lists widget">

@@ -1,6 +1,6 @@
 <template>
-    <!-- 小工具图形封面 :sm="2"-->
-    <div class="container widget-graphic-cover mb10">
+    <!-- 小工具图形封面 container:sm="2"-->
+    <div class="widget-graphic-cover mb10">
         <el-row :gutter="10" style="--font-size:18px;">
             <el-col v-for="(v,i) in data"  :span="4">
                 <a :href="v.href">
