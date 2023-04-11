@@ -6,6 +6,139 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "21736548",
+      "name": "fas fa-exclamation-triangle",
+      "font_class": "fasfa-exclamation-triangle",
+      "unicode": "e64d",
+      "unicode_decimal": 58957
+    },
+    {
+      "icon_id": "19266301",
+      "name": "menu_2",
+      "font_class": "menu_2",
+      "unicode": "e6a3",
+      "unicode_decimal": 59043
+    },
+    {
+      "icon_id": "406828",
+      "name": "fa-smile-o",
+      "font_class": "fasmileo",
+      "unicode": "e64b",
+      "unicode_decimal": 58955
+    },
+    {
+      "icon_id": "3152646",
+      "name": "fa-code",
+      "font_class": "fa-code",
+      "unicode": "e8cf",
+      "unicode_decimal": 59599
+    },
+    {
+      "icon_id": "28245258",
+      "name": "fa-image",
+      "font_class": "fa-image",
+      "unicode": "e64c",
+      "unicode_decimal": 58956
+    },
+    {
+      "icon_id": "499121",
+      "name": "angle-left",
+      "font_class": "angleleft",
+      "unicode": "e8ec",
+      "unicode_decimal": 59628
+    },
+    {
+      "icon_id": "6151390",
+      "name": "angle- double-down",
+      "font_class": "angle-double-down",
+      "unicode": "e848",
+      "unicode_decimal": 59464
+    },
+    {
+      "icon_id": "6151391",
+      "name": "angle-double-up",
+      "font_class": "angle-double-up",
+      "unicode": "e849",
+      "unicode_decimal": 59465
+    },
+    {
+      "icon_id": "6151392",
+      "name": "angle-double-right",
+      "font_class": "angle-double-right",
+      "unicode": "e84a",
+      "unicode_decimal": 59466
+    },
+    {
+      "icon_id": "6151393",
+      "name": "angle-double-left",
+      "font_class": "angle-double-left",
+      "unicode": "e84b",
+      "unicode_decimal": 59467
+    },
+    {
+      "icon_id": "6151394",
+      "name": "angle-down",
+      "font_class": "angle-down",
+      "unicode": "e84c",
+      "unicode_decimal": 59468
+    },
+    {
+      "icon_id": "6151395",
+      "name": "angle-up",
+      "font_class": "angle-up",
+      "unicode": "e84d",
+      "unicode_decimal": 59469
+    },
+    {
+      "icon_id": "6151396",
+      "name": "angle-right",
+      "font_class": "angle-right",
+      "unicode": "e84e",
+      "unicode_decimal": 59470
+    },
+    {
+      "icon_id": "6151456",
+      "name": "angle-left",
+      "font_class": "angle-left",
+      "unicode": "e84f",
+      "unicode_decimal": 59471
+    },
+    {
+      "icon_id": "1134258",
+      "name": "money_bag",
+      "font_class": "moneybag",
+      "unicode": "e7d2",
+      "unicode_decimal": 59346
+    },
+    {
+      "icon_id": "5924795",
+      "name": "favorite",
+      "font_class": "favorite",
+      "unicode": "e649",
+      "unicode_decimal": 58953
+    },
+    {
+      "icon_id": "14553259",
+      "name": "share",
+      "font_class": "share1",
+      "unicode": "e64a",
+      "unicode_decimal": 58954
+    },
+    {
+      "icon_id": "929702",
+      "name": "quote-left",
+      "font_class": "quoteleft",
+      "unicode": "e7d1",
+      "unicode_decimal": 59345
+    },
+    {
+      "icon_id": "9641151",
+      "name": "comment",
+      "font_class": "comment",
+      "unicode": "e648",
+      "unicode_decimal": 58952
+    },
+    {
       "icon_id": "16453339",
       "name": "私信",
       "font_class": "sixin",

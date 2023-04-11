@@ -1,8 +1,8 @@
 @font-face {
   font-family: "iconfont"; /* Project id 2851110 */
-  src: url('iconfont.woff2?t=1680778455181') format('woff2'),
-       url('iconfont.woff?t=1680778455181') format('woff'),
-       url('iconfont.ttf?t=1680778455181') format('truetype');
+  src: url('iconfont.woff2?t=1681200004514') format('woff2'),
+       url('iconfont.woff?t=1681200004514') format('woff'),
+       url('iconfont.ttf?t=1681200004514') format('truetype');
 }
 
 .iconfont {
@@ -11,6 +11,82 @@
   font-style: normal;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+.icon-fasfa-exclamation-triangle:before {
+  content: "\e64d";
+}
+
+.icon-menu_2:before {
+  content: "\e6a3";
+}
+
+.icon-fasmileo:before {
+  content: "\e64b";
+}
+
+.icon-fa-code:before {
+  content: "\e8cf";
+}
+
+.icon-fa-image:before {
+  content: "\e64c";
+}
+
+.icon-angleleft:before {
+  content: "\e8ec";
+}
+
+.icon-angle-double-down:before {
+  content: "\e848";
+}
+
+.icon-angle-double-up:before {
+  content: "\e849";
+}
+
+.icon-angle-double-right:before {
+  content: "\e84a";
+}
+
+.icon-angle-double-left:before {
+  content: "\e84b";
+}
+
+.icon-angle-down:before {
+  content: "\e84c";
+}
+
+.icon-angle-up:before {
+  content: "\e84d";
+}
+
+.icon-angle-right:before {
+  content: "\e84e";
+}
+
+.icon-angle-left:before {
+  content: "\e84f";
+}
+
+.icon-moneybag:before {
+  content: "\e7d2";
+}
+
+.icon-favorite:before {
+  content: "\e649";
+}
+
+.icon-share1:before {
+  content: "\e64a";
+}
+
+.icon-quoteleft:before {
+  content: "\e7d1";
+}
+
+.icon-comment:before {
+  content: "\e648";
 }
 
 .icon-sixin:before {
