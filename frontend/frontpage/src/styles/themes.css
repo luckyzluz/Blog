@@ -5,6 +5,7 @@
     --main-shadow:rgba(116, 116, 116, 0.08);
     --main-bg-color: #fff;
     --main-border-color: rgba(50, 50, 50, 0.06);
+    --body-bg-color: #f5f6f7;
     --muted-color: #777;
     --muted-2-color: #999;
     --muted-3-color: #b1b1b1;
@@ -17,6 +18,7 @@ body.dark-theme{
     --main-shadow:rgba(24, 24, 24, 0.1);
     --main-bg-color: #323335;
     --main-border-color: rgba(114, 114, 114, 0.1);
+    --body-bg-color: #292a2d;
     --muted-color: #b4b6bb;
     --muted-2-color: #888a8f;
     --muted-3-color: #636469;
@@ -38,6 +40,9 @@ body.dark-theme{
 .main-shadow {
     box-shadow: 0 0 10px var(--main-shadow);
     transition: box-shadow .3s;
+}
+.avatar-lg {
+    --this-size: 80px;
 }
 .main-bg {
     background: var(--main-bg-color);

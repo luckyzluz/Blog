@@ -5,9 +5,34 @@
 *, :after, :before {
     outline: 0!important;
 }
+*, :after, :before {
+    outline: 0!important;
+}
+b, strong {
+    font-weight: 700;
+}
 dd, dl, dt, ol, ul {
     margin: 0;
     padding: 0;
+}
+textarea[autoheight] {
+    resize: none;
+    line-height: 1.4;
+    overflow: hidden;
+}
+hr {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 0;
+    box-sizing: content-box;
+    border-top: 1px solid #eee;
+    border-color: var(--main-border-color);
+}
+p {
+    margin: 0 0 10px;
+}
+article, aside, details, figcaption, figure, footer, header, hgroup, main, menu, nav, section, summary {
+    display: block;
 }
 svg:not(:root) {
     overflow: hidden;
