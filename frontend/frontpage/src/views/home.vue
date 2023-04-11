@@ -6,6 +6,9 @@
     <Articlemini />
     <Aggregation />
     <HomeTabCon />
+    <singleCard />
+    <graphicCover />
+    <graphicCover2 />
     <!-- <Test /> -->
 </template>
 <script setup>
@@ -13,6 +16,9 @@ import Slider from 'c/Slider.vue'
 import Articlemini from 'c/articlemini.vue'
 import Aggregation from 'c/aggregation.vue'
 import HomeTabCon from 'c/homeTabCon.vue'
+import singleCard from 'c/singleCard.vue';
+import graphicCover from 'c/graphicCover.vue'
+import graphicCover2 from 'c/graphicCover2.vue'
 
 
 // import Test from '@/views/test.vue'
