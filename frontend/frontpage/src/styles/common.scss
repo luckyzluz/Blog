@@ -27,6 +27,10 @@ a:hover {
 .show {
     display: block!important;
 }
+.commentlist .no-more, .theme-pagination.pagenav {
+    margin: 0;
+    padding-bottom: 10px;
+}
 .font-bold {
     font-weight: 700;
 }
