@@ -1,5 +1,5 @@
 <script setup>
-import { ref, reactive, toRefs,onMounted, watchEffect, watch, getCurrentInstance } from 'vue'
+import { ref, reactive, toRefs,onMounted, watchEffect,onUnmounted, watch, getCurrentInstance } from 'vue'
 import Header from 'c/Header.vue'
 import FluidWidget from 'c/FluidWidget.vue'
 import userCard from 'c/aside/userCard.vue'
@@ -16,6 +16,7 @@ import newComment from './components/aside/newComment.vue'
 import tagCloud from 'c/aside/tagCloud.vue'
 import search from 'c/aside/search.vue'
 import Video from './components/aside/video.vue'
+import articleCatalogue from 'c/aside/articleCatalogue.vue'
 const {proxy} = getCurrentInstance();
 let {state,getters, dispatch,commit} = useStore();
 const data=[]
@@ -56,9 +57,34 @@ onMounted(()=>{
   if(true){
     dispatch("user/getUser");
   }
-  
+  // window.addEventListener("scroll", getDistanceToViewportTop)
   // console.log(state.web.WebData.slider)
 })
+onUnmounted(()=>{
+  // window.removeEventListener("scroll", getDistanceToViewportTop)
+})
+const cc=(value)=>{
+  // console.log(value)
+  // 5505
+  let uu=document.querySelector('.artlist.el-affix .el-affix--fixed')
+  // console.log(uu)
+  if(uu&&value.scrollTop>=2759){
+    uu.style.setProperty("opacity", "1")
+    uu.style.setProperty("z-index", "100")
+  }else if(uu){
+    uu.style.setProperty("opacity", "0")
+    uu.style.setProperty("z-index", "-999")
+  }
+  if(uu&&value.scrollTop>=5505){
+    uu.style.removeProperty("top");
+    // uu.style.setProperty("bottom", "171px")
+    uu.style.bottom='510px'
+  }else if(uu){
+    uu.style.removeProperty("bottom");
+    // uu.style.setProperty("bottom", "171px")
+    uu.style.top='68px'
+  }
+}
 </script>
 <template>
 
@@ -74,6 +100,10 @@ onMounted(()=>{
       </div>
     </div>
     <aside class="sidebar">
+      <el-affix class="artlist" @scroll="cc" :offset="68">
+        <articleCatalogue />
+      </el-affix>
+      <articleCatalogue />
       <userCard :UserData="state.user.UserData" />
       <hotPosts />
       <mediaImage />
