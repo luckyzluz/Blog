@@ -6,6 +6,20 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "928933",
+      "name": "angle-down",
+      "font_class": "angledown",
+      "unicode": "e651",
+      "unicode_decimal": 58961
+    },
+    {
+      "icon_id": "7988796",
+      "name": "angle-down",
+      "font_class": "angle-down1",
+      "unicode": "e64e",
+      "unicode_decimal": 58958
+    },
+    {
       "icon_id": "21736548",
       "name": "fas fa-exclamation-triangle",
       "font_class": "fasfa-exclamation-triangle",
