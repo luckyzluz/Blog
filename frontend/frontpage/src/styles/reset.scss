@@ -52,12 +52,12 @@ img {
     line-height: 1.1;
     color: inherit;
 }
-a[href] {
-    transition: color .2s,background .3s,opacity .3s,box-shadow .3s,transform .3s;
-}
 a {
     text-decoration: none;
     cursor: pointer
+    &[href] {
+        transition: color .2s,background .3s,opacity .3s,box-shadow .3s,transform .3s;
+    }
 }
 :after, :before {
     box-sizing: border-box;

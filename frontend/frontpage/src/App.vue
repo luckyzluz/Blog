@@ -87,7 +87,6 @@ const cc=(value)=>{
 }
 </script>
 <template>
-
   <!-- header -->
   <Header />
   <!-- 公告 -->
@@ -100,10 +99,10 @@ const cc=(value)=>{
       </div>
     </div>
     <aside class="sidebar">
-      <el-affix class="artlist" @scroll="cc" :offset="68">
+      <!-- <el-affix class="artlist" @scroll="cc" :offset="68">
         <articleCatalogue />
-      </el-affix>
-      <articleCatalogue />
+      </el-affix> -->
+      <!-- <articleCatalogue /> -->
       <userCard :UserData="state.user.UserData" />
       <hotPosts />
       <mediaImage />
@@ -128,6 +127,27 @@ const cc=(value)=>{
 
 </template>
 <style lang="scss">
+html{
+  -webkit-tap-highlight-color: transparent;
+}
+body{
+    background-color: var(--body-bg-color);
+    color: var(--main-color);
+    &.nav-fixed{
+        padding-top: 88px;
+        // &:not(.body-scroll) .header.show-slide {
+        //   --header-bg: linear-gradient(0, rgba(0, 0, 0, 0) 5%, rgba(0, 0, 0, .1) 80%);
+        //   --header-color: #fff;
+        //   -webkit-backdrop-filter: unset;
+        //   backdrop-filter: unset;
+      // }
+    }
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    font-size: 14px;
+    display: block;
+    line-height: 1.42857143;
+}
+
 .container {
     max-width: 1200px;//var(--mian-max-width)
     width: auto;

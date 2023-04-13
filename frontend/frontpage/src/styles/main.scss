@@ -1,4 +1,12 @@
-
+// .nav>li {
+//     position: relative;
+//     display: block;
+//     &>a {
+//         position: relative;
+//         display: block;
+//         padding: 10px 15px;
+//     }
+// }
 a {
     color: var(--main-color);
 }
@@ -211,3 +219,13 @@ button.close {
 }
 @keyframes lazy_fade{0%{opacity:0}100%{opacity:1}}
 @keyframes lazy_fade{0%{opacity:0}100%{opacity:1}}
+.navbar-top li.current-menu-item:before, .navbar-top li.current-menu-item>a:before, .navbar-top li:hover:before, .navbar-top li:hover>a:before {
+    opacity: 1;
+}
+.navbar-top li.current-menu-item>a, .navbar-top li:hover>a {
+    color: var(--focus-color);
+}
+.current-menu-item>a, .navbar-top .nav li a:focus, .navbar-top .nav li a:hover {
+    background-color: transparent;
+    color: var(--focus-color);
+}

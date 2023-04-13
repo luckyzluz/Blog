@@ -1,10 +1,8 @@
 <template>
-  <div id="header">
-    <!-- 导航 -->
-    <nav class="navbar center">
-      <!-- 导航内容 -->
-      <div class="container-header">
-        <!-- 导航头部 -->
+  <!-- 网站头部导航 -->
+  <div id="header" class="header show-slide">
+    <nav class="navbar navbar-top center">
+      <div class="container-header container-fluid">
         <div class="navbar-header">
           <!-- logo -->
           <div class="navbar-brand">
@@ -18,47 +16,9 @@
               />
             </a>
           </div>
-          <!-- 移动端菜单 -->
-          <!-- <button type="button" data-toggle-class="" data-target=".mobile-navbar" class="navbar-toggle"><svg class="icon em12" aria-hidden="true" data-viewbox="0 0 1024 1024" viewBox="0 0 1024 1024"><use xlink:href="#icon-menu"></use></svg></button> -->
-          <!-- 移动端搜索 -->
-          <!-- <a class="main-search-btn navbar-toggle" href="javascript:;"><svg class="icon" aria-hidden="true"><use xlink:href="#icon-search"></use></svg></a> -->
         </div>
-        <div class="navbar-collapse">
-          <!-- 导航菜单列表 -->
-          <ul class="navbar-nav">
-             <!-- class="current-menu-item" data-->
-            <li v-for="(item, i) in state.web.WebData.pageList" :key="i">
-              <a href="" v-if="item.color !== ''">
-                <span :class="item.color">{{ item.name }}</span>
-                <span class="badge" :class="item.badge.color " v-if="item.badge.name !== ''">{{ item.badge.name }}</span>
-                <svg v-if="item.submenu.length !== 0" class="icon collapse-symbol" aria-hidden="true">
-                  <use xlink:href="#icon-arrowdown"></use>
-                </svg>
-              </a>
-              <a href="" v-else>
-                {{item.name}}
-                <span class="badge" :class="item.badge.color" v-if="item.badge.name !== ''">{{item.badge.name}}</span>
-                <svg v-if="item.submenu.length !== 0" class="icon collapse-symbol" aria-hidden="true">
-                  <use xlink:href="#icon-arrowdown"></use>
-                </svg>
-              </a>
-              <ul v-if="item.submenu.length !== 0" class="sub-menu">
-                <li v-for="(subm, isubm) in item.submenu" :key="isubm">
-                  <a href="" v-if="subm.color !== ''">
-                    <span class="badge" :class="subm.color">{{ subm.name }}</span>
-                    <span :class="subm.badge.color" v-if="subm.badge.name !== ''">{{ subm.badge.name }}</span>
-                  </a>
-                  <a href="" v-else>
-                    {{subm.name}}
-                    <span class="badge" :class="subm.badge.color" v-if="subm.badge.name !== ''">{{subm.badge.name}}</span>
-                    <svg v-if="subm.submenu && subm.submenu.length !== 0" class="icon collapse-symbol" aria-hidden="true">
-                      <use xlink:href="#icon-arrowdown"></use>
-                    </svg>
-                  </a>
-                </li>
-              </ul>
-            </li>
-          </ul>
+        <div class="collapse navbar-collapse">
+          <menuList v-if="config.menu.place=='left'" />
           <!-- user&search -->
           <div class="navbar-form navbar-right">
             <ul class="list-inline">
@@ -284,6 +244,9 @@
               </li>
             </ul>
           </div>
+          <div v-if="config.menu.place=='right'" class="navbar-right">
+            <menuList />
+          </div>
         </div>
       </div>
     </nav>
@@ -291,228 +254,260 @@
 </template>
 <script setup>
 import { useStore } from "vuex";
-
+import menuList from "c/header/menuList.vue"
 import { reactive,watch, watchEffect,onMounted,ref } from 'vue'
 let {state,getters, dispatch,commit} = useStore();
-// import { defineComponent } from 'vue'
-// 
-// export default defineComponent({
-  // () {
-    let data = [
+let data = [
+  {
+    name: '购买主题',
+    color:'c-blue',
+    badge:{
+      name: '优惠',
+      color: 'jb-yellow'
+    },
+    submenu:[]
+  },
+  {
+    name: '社区',
+    color:'',
+    badge:{
+      name: 'NEW',
+      color: 'jb-blue'
+    },
+    submenu:[]
+  },
+  {
+    name: '官方演示',
+    color:'',
+    badge:{
+      name: '',
+      color: ''
+    },
+    submenu:[]
+  },
+  {
+    name: '需求提交',
+    color:'',
+    badge:{
+      name: '',
+      color: ''
+    },
+    submenu:[]
+  },
+  {
+    name: 'BUG反馈',
+    color:'',
+    badge:{
+      name: '',
+      color: ''
+    },
+    submenu:[]
+  },
+  {
+    name: '主题教程',
+    color:'',
+    badge:{
+      name: '',
+      color: ''
+    },
+    submenu:[
       {
-        name: '购买主题',
-        color:'c-blue',
-        badge:{
-          name: '优惠',
-          color: 'jb-yellow'
-        },
-        submenu:[]
-      },
-      {
-        name: '社区',
-        color:'',
-        badge:{
+        name: '视频教程',
+        color: '',
+        badge: {
           name: 'NEW',
           color: 'jb-blue'
-        },
-        submenu:[]
+        }
       },
       {
-        name: '官方演示',
-        color:'',
-        badge:{
+        name: '文档检索',
+        color: '',
+        badge: {
           name: '',
           color: ''
-        },
-        submenu:[]
+        }
       },
       {
-        name: '需求提交',
-        color:'',
-        badge:{
+        name: '主题功能',
+        color: '',
+        badge: {
           name: '',
           color: ''
-        },
-        submenu:[]
+        }
       },
       {
-        name: 'BUG反馈',
-        color:'',
-        badge:{
+        name: '配置教程',
+        color: '',
+        badge: {
           name: '',
           color: ''
-        },
-        submenu:[]
-      },
-      {
-        name: '主题教程',
-        color:'',
-        badge:{
-          name: '',
-          color: ''
-        },
-        submenu:[
-          {
-            name: '视频教程',
-            color: '',
-            badge: {
-              name: 'NEW',
-              color: 'jb-blue'
-            }
-          },
-          {
-            name: '文档检索',
-            color: '',
-            badge: {
-              name: '',
-              color: ''
-            }
-          },
-          {
-            name: '主题功能',
-            color: '',
-            badge: {
-              name: '',
-              color: ''
-            }
-          },
-          {
-            name: '配置教程',
-            color: '',
-            badge: {
-              name: '',
-              color: ''
-            }
-          }
-        ]
+        }
       }
     ]
-    let isLogin=true;
-
-  //   return {
-  //     data,
-  //     isLogin
-  //   }
-  // },
-// })
+  }
+]
+let isLogin=true;
 const openSign = () => {
   dispatch("user/isShowSign");
+}
+let config={
+  menu:{
+    place:'left'
+  }
 }
 </script>
 
 <style lang="scss">
-// @import "@/styles/_handle.scss";
 @import "@/styles/common.scss";
-#header {
-  position: fixed;
-  z-index: 999;
-  width: 100%;
-  top: 0;
-  padding: 8px 20px;
-  @include background_color('header-bg');
-  margin-bottom: 20px;
-  transition: .3s;
-  backdrop-filter: saturate(5) blur(20px);
-  background-color: #666161;
-  .navbar{
+.nav-fixed .header {
+    position: fixed;
+    z-index: 999;
+    width: 100%;
+    top: 0;
+    -webkit-backdrop-filter: saturate(5) blur(20px);
+    backdrop-filter: saturate(5) blur(20px);
+}
+.header {
+    padding: 8px 20px;
+    background: var(--header-bg);
+    margin-bottom: 20px;
+    transition: .3s;
+    a:not(.but),  svg {
+      color: var(--header-color);
+  }
+}
+.navbar {
     position: relative;
     min-height: 50px;
+    margin-bottom: 20px;
     border: 1px solid transparent;
+}
+.navbar-top {
+  margin: 0;
+  border-radius: 0!important;
+  font-size: 15px;
+  .navbar-brand {
+    padding: 7px 10px;
+  }
+  .navbar-nav {
+    margin-left: 20px;
+    padding-left: 0;
+  }
+  .nav>li>a {
+    padding-left: 10px;
+    padding-right: 10px;
+    border-radius: 4px;
+    display: inline-block!important;
+    overflow: hidden;
+  }
+  .iconfont {
+    transition: .2s;
+  }
+}
+.container-fluid {
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+.container-header{
+  max-width: 1380px;
+  max-width: calc(var(--mian-max-width) + 180px);
+}
+.navbar-brand {
+  float: left;
+  height: 50px;
+  padding: 15px 15px;
+  font-size: 18px;
+  line-height: 20px;
+}
+.navbar-collapse {
+  padding-right: 15px;
+  padding-left: 15px;
+  overflow-x: visible;
+  border-top: 1px solid transparent;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
+  -webkit-overflow-scrolling: touch;
+}
+.navbar-logo>img {
+  height: 36px;
+  padding: 0 30px;
+}
+.navbar-nav {
+  li, li a {
+    max-height: 50px;
+    position: relative;
+  }
+  &>li:before {
+    content: " ";
+    position: absolute;
+    width: 100%;
+    top: -10px;
+    background: var(--focus-color);
+    height: 5px;
+    border-radius: 0 0 15px 15px;
+    opacity: 0;
+  }
+  &>li>a {
+    padding-top: 10px;
+    padding-bottom: 10px;
+    line-height: 20px;
+  }
+  li:hover>a .icon-angledown {
+    transform: rotate(-90deg);
+  }
+}
+.navbar-top .badge, .badge.top {
+    transform: translate(-5px,-10px) scale(.85);
+    margin-right: -10px;
+}
+nav .icon-angledown {
+    float: right;
+    margin-top: 2px;
+    margin-left: 6px;
+}
+@media (min-width: 768px){
+  .container-fluid>.navbar-collapse, .container-fluid>.navbar-header, .container>.navbar-collapse, .container>.navbar-header {
+    margin-right: 0;
+    margin-left: 0;
+  }
+  .navbar-header {
+    float: left;
+  }
+  .navbar>.container .navbar-brand, .navbar>.container-fluid .navbar-brand {
+    margin-left: -15px;
+  }
+  .navbar-collapse {
+    width: auto;
+    border-top: 0;
+    box-shadow: none;
+    &.collapse {
+      display: block!important;
+      height: auto!important;
+      padding-bottom: 0;
+      overflow: visible!important;
+    }
+  }
+  .navbar-nav {
+    float: left;
     margin: 0;
-    border-radius: 0!important;
-    font-size: 15px;
-    .container-header {
-      max-width: 1380px;
-      max-width: calc($main-max-width + 180px);
-      padding-right: 15px;
-      padding-left: 15px;
-      margin-right: auto;
-      margin-left: auto;
-      .navbar-header {
-        float: left;
-        margin-right: 0;
-        margin-left: 0;
-        .navbar-brand {
-          float: left;
-          height: 50px;
-          margin-left: -15px;
-          padding: 7px 10px;
-          font-size: 18px;
-          line-height: 20px;
-          .navbar-logo>img {
-            height: 36px;
-            padding: 0 30px;
-          }
-        }
+    &>li {
+      float: left;
+      &>a {
+        padding-top: 15px;
+        padding-bottom: 15px;
       }
+    }
+  }
+}
+
+#header {
+  .navbar{
+    .container-header {
       .navbar-collapse{
-        margin-right: 0;
-        margin-left: 0;
-        display: block!important;
-        height: auto!important;
-        padding-bottom: 0;
-        overflow: visible!important;
-        width: auto;
-        border-top: 0;
-        box-shadow: none;
-        padding-right: 15px;
-        padding-left: 15px;
         .navbar-nav {
-          float: left;
-          margin: 0;
-          margin-left: 20px;
-          padding-left: 0;
           &>li {
-            float: left;
-            display: block;
-            max-height: 50px;
-            position: relative;
-            &:before {
-              content: " ";
-              position: absolute;
-              width: 100%;
-              top: -10px;
-              background: $focus-color;
-              height: 5px;
-              border-radius: 0 0 15px 15px;
-              opacity: 0;
-              transition: .3s;
-            }
-            &.current-menu-item{
-              &:before{
-                opacity: 1;
-              }
-              &>a{
-                color: $focus-color;
-              }
-            }
-            a{
-              padding-left: 10px;
-              padding-right: 10px;
-              border-radius: 4px;
-              display: inline-block!important;
-              overflow: hidden;
-              max-height: 50px;
-              position: relative;
-              padding-top: 15px;
-              padding-bottom: 15px;
-              line-height: 20px;
-              &:hover {
-                background-color: transparent;
-                color: $focus-color;
-              }
-            }
-            a .collapse-symbol{
-              float: right;
-              margin-top: 2px;
-              transition: .2s;
-              margin-left: 6px;
-              transform: scale(0.8, 0.8);
-            }
             &:hover{
-              &>a .collapse-symbol {
-                transform: rotate(-90deg) scale(0.8, 0.8);
-              }
               &>.sub-menu {
                 visibility: unset;
                 opacity: 1;
@@ -552,10 +547,7 @@ const openSign = () => {
               }
             }
           }
-          .badge, .badge.top {
-              transform: translate(-5px,-10px) scale(.85);
-              margin-right: -10px;
-          }
+
         }
         .navbar-right {
           float: right!important;
@@ -981,15 +973,7 @@ const openSign = () => {
         }
       }
     }
-    li:hover>a {
-      color: $focus-color;
-    }
-    li:hover:before, .navbar-top li:hover>a:before {
-      opacity: 1 !important;
-    }
-  }
-  a:not(.but), svg {
-    @include font_color("header-color")
+
   }
 
 }

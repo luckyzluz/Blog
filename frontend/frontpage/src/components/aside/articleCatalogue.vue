@@ -109,15 +109,7 @@ let data=[
         }
     }
 }
-.nav>li {
-    position: relative;
-    display: block;
-    &>a {
-        position: relative;
-        display: block;
-        padding: 10px 15px;
-    }
-}
+
 .artlist.el-affix {
     transition: opacity .3s;
     &>div{

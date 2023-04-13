@@ -70,6 +70,8 @@ button, html input[type=button], input[type=reset], input[type=submit] {
 .hover-zoom-img:hover img, .hover-zoom:hover, .social_loginbar .social-login-item:hover, .social_loginbar .xh-social-item:hover {
     transform: scale(1.05);
 }
+
+
 .absolute, .fixed, .progress {
     position: absolute;
     left: 0;
@@ -104,9 +106,16 @@ img.lazyloaded {
          url('../assets/iconfont/iconfont.ttf?t=1676630814321') format('truetype');
   }
   .iconfont {
-    // font-family: "iconfont" !important;
+    font-family: "iconfont" !important;
+    font-variant-ligatures: normal;
+    font-variant-caps: normal;
+    font-variant-numeric: normal;
+    font-variant-east-asian: normal;
+    font-weight: normal;
+    font-stretch: normal;
+    line-height: 1;
     // font: normal normal normal 14px/1;
-    font: normal normal normal 14px/1 "iconfont";
+    // font: normal normal normal 14px/1 "iconfont";
     font-size: inherit;//14px
     font-style: normal;
     display: inline-block;
@@ -117,6 +126,14 @@ img.lazyloaded {
 .iconfont-fw {
     width: 1.28571429em;
     text-align: center;
+}
+// 共用
+.container-fluid:before,.navbar-header:before,.navbar:before,.navbar-collapse:before,.nav:before{
+    display: table;
+    content: " ";
+}
+.but:focus, .but:hover, .navbar-nav>li:before, .progress {
+    transition: .3s;
 }
 .btn-group-vertical>.btn-group:after, .btn-group-vertical>.btn-group:before, .btn-toolbar:after, .btn-toolbar:before, .clearfix:after, .clearfix:before, .container-fluid:after, .container-fluid:before, .container:after, .container:before, .dl-horizontal dd:after, .dl-horizontal dd:before, .form-horizontal .form-group:after, .form-horizontal .form-group:before, .modal-footer:after, .modal-footer:before, .modal-header:after, .modal-header:before, .nav:after, .nav:before, .navbar-collapse:after, .navbar-collapse:before, .navbar-header:after, .navbar-header:before, .navbar:after, .navbar:before, .pager:after, .pager:before, .panel-body:after, .panel-body:before, .row:after, .row:before {
     display: table;
@@ -131,6 +148,7 @@ article, aside, details, figcaption, figure, footer, header, hgroup, main, menu,
 .box-img, .drop-btn, .passw, .pointer, [href], a.but, botton {
     cursor: pointer;
 }
+// 徽章
 .badge {
     font-size: .8em;
     line-height: 1.2;
@@ -147,9 +165,9 @@ article, aside, details, figcaption, figure, footer, header, hgroup, main, menu,
     text-align: center;
     --this-bg: #fe3459;
     z-index: 1;
-}
-.badge.b-black {
-    --this-bg: rgba(0, 0, 0, .2);
+    &.b-black {
+        --this-bg: rgba(0, 0, 0, .2);
+    }
 }
 .badg.badg-sm, .but.badg-sm {
     font-size: .8em;
@@ -201,20 +219,7 @@ article, aside, details, figcaption, figure, footer, header, hgroup, main, menu,
     user-select: none;
 }
 
-body{
-    @include font_color("main-color");
-    @include background_color("body-bg-color");
-    &.nav-fixed{
-        padding-top: 88px;
-    }
 
-    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
-    font-size: 14px;
-    line-height: 1.42857143;
-    color: #333;
-    background-color: #fff;
-
-}
 
 .navbar-header:after, .navbar-header:before, .navbar:after, .navbar:before, .pager:after, .pager:before, .panel-body:after, .panel-body:before, .row:after, .row:before {
     display: table;
