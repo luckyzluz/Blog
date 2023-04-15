@@ -34,8 +34,15 @@ p {
 article, aside, details, figcaption, figure, footer, header, hgroup, main, menu, nav, section, summary {
     display: block;
 }
-svg:not(:root) {
+svg {
+    width: 1em;
+    height: 1em;
+    vertical-align: -.15em;
+    fill: currentColor;
     overflow: hidden;
+    &:not(:root) {
+        overflow: hidden;
+    }
 }
 ul {
     list-style: none;

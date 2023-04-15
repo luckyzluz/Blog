@@ -7,16 +7,247 @@
 //         padding: 10px 15px;
 //     }
 // }
+
 a {
     color: var(--main-color);
 }
-a[href] {
-    transition: color .2s,background .3s,opacity .3s,box-shadow .3s,transform .3s;
+
+.line-form, .relative {
+    position: relative;
+}
+.list-inline>li {
+    vertical-align: middle;
 }
 
-p {
-    margin: 0 0 10px;
+.more-posts a>span, .relates-thumb li a>.post-info, a[href] {
+    transition: color .2s,background .3s,opacity .3s,box-shadow .3s,transform .3s;
 }
+// 分割条
+.splitters-this-l, .splitters-this-r:before, .splitters>li+li:before {
+    content: "";
+    width: 1px;
+    height: 1.1em;
+    position: absolute;
+    display: inline-block;
+    background: var(--main-color);
+    left: -1px;
+    top: 50%;
+    opacity: .2!important;
+    transform: translateY(-50%);
+}
+.padding-10 {
+    padding: 10px;
+}
+.badg, .but, .post-page-numbers {
+    border-radius: 4px;
+    display: inline-block;
+    border-radius: 4px;
+    transition: .15s;
+    border: 1px solid transparent;
+    vertical-align: middle;
+    padding: .3em .6em;
+    text-align: center;
+    font-weight: 400;
+    box-shadow: var(--this-shadow);
+    background: var(--this-bg);
+    color: var(--this-color);
+    color: #888;
+    --main-color: var(--this-color);
+    --this-bg: rgba(136, 136, 136, .1);
+    --this-border: transparent;
+    --this-shadow: none;
+    --this-color: #888;
+    text-shadow: 0 0 0;
+    line-height: 1.44;
+}
+.but{
+    &.pw-1em {
+        padding-right: 1em;
+        padding-left: 1em;
+    }
+    &>.iconfont, &>.icon {
+        margin-right: .25em;
+    }
+    &:focus, &:hover {
+        opacity: .8;
+        color: var(--this-color);
+    }
+}
+.muted-box {
+    background: var(--muted-border-color);
+    border-radius: var(--main-radius);
+    padding: 15px;
+}
+.but[disabled], .but[disabled]:hover, .opacity5 {
+    opacity: .5;
+}
+.payvip-icon {
+    background: linear-gradient(300deg,#4c4d51,#2a2a31 15%,#85858a 40%,#393a3c 60%,#393838 80%,#5e5f62 100%);
+    text-shadow: none;
+    font-weight: 400;
+    position: relative;
+    color: #ece0e0;
+    border: none;
+    --this-color: #ece0e0;
+    overflow: hidden;
+    &:before {
+        content: "\eb70";
+        font: normal normal normal 14px/1 iconfont;
+        font-size: 3.5em;
+        right: -.2em!important;
+        top: 80%!important;
+        opacity: .06;
+    }
+}
+.toggle-radius {
+    background: var(--this-bg);
+    width: 29px;
+    height: 29px;
+    display: inline-block;
+    text-align: center;
+    border-radius: 100%;
+    position: relative;
+    vertical-align: text-top;
+    --this-bg: var(--main-border-color);
+    .iconfont, .icon {
+        right: 0!important;
+        left: 0!important;
+        margin: auto;
+    }
+}
+// 分割线
+.separator {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    &::after, &::before {
+        content: "";
+        background: var(--main-border-color);
+        max-width: 20%;
+        height: 1px;
+        margin: 0 1em;
+        flex: 1;
+    }
+}
+.social-separator {
+    padding: 10px 0;
+}
+// 社交图标
+.social_loginbar .social-login-item, .social_loginbar .xh-social-item {
+    float: none;
+    display: inline-block;
+    width: 32px!important;
+    height: 32px!important;
+    line-height: 32px;
+    cursor: pointer;
+    border-radius: 50px;
+    margin: 3px 5px;
+}
+.social_loginbar {
+    text-align: center;
+    .social-login-item{
+        &.qq {
+        background: #1296db;
+        }
+        &.weixingzh,&.weixin {
+        background: #24b76a;
+        }
+        &.github {
+        background: #505050;
+        }
+        .icon{
+        color: #fff;
+        }
+        &:hover{
+            transform: scale(1.05);
+        }
+    }
+}
+.social-login-item.toggle-radius {
+    font-size: 16px;
+}
+.social-login-item, .social-login-item svg{
+    color: #fff !important;
+}
+.dosc-nav .iconfont, .item-thumbnail img, .social_loginbar a {
+    transition: .2s ease-out;
+}
+.hover-zoom-img:hover img, .hover-zoom:hover, .social_loginbar .social-login-item:hover, .social_loginbar .xh-social-item:hover {
+    transform: scale(1.05);
+}
+
+.abs-center, .abs-left, .abs-right, .form-select::before, .line-form-label, .payvip-icon:before, .toggle-radius .iconfont, .toggle-radius .icon {
+    position: absolute;
+    top: 50%;
+    right: .7em;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.mt6 {
+    margin-top: 6px;
+}
+.mt10 {
+    margin-top: 10px;
+}
+.mb6 {
+    margin-bottom: 6px;
+}
+.mb10 {
+    margin-bottom: 10px;
+}
+.mb20, .theme-box {
+    margin-bottom: 20px;
+}
+.ml3 {
+    margin-left: 3px;
+}
+.ml6 {
+    margin-left: 6px;
+}
+.ml10 {
+    margin-left: 10px;
+}
+.mr6 {
+    margin-right: 6px;
+}
+.mr10 {
+    margin-right: 10px;
+}
+.em09 {
+    font-size: .9em;
+}
+.em12 {
+    font-size: 1.2em;
+}
+.em14 {
+    font-size: 1.4em;
+}
+.px12 {
+    font-size: 12px;
+}
+.col-ml6>*+* {
+    margin-left: 6px;
+}
+.padding-6 {
+    padding: 6px;
+}
+.text-center {
+    text-align: center;
+}
+.hide {
+    display: none!important;
+}
+.show {
+    display: block!important;
+}
+.block {
+    display: block;
+}
+
+
+
 input:-internal-autofill-previewed, input:-internal-autofill-selected {
     box-shadow: 0 0 0 1000px var(--main-bg-color) inset!important;
     -webkit-text-fill-color: var(--main-color)!important;
@@ -24,6 +255,21 @@ input:-internal-autofill-previewed, input:-internal-autofill-selected {
 button{
     cursor: pointer;
 }
+.line-form-line:before {
+    content: '';
+    width: 0;
+    background: var(--focus-color);
+}
+.line-form-line, .line-form-line:before {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    width: 100%;
+    transition: .8s;
+    background: var(--main-border-color);
+}
+
 .line-form-input:focus~.line-form-line:before, .line-form-input:hover~.line-form-line:before {
     width: 100% !important;
 }
@@ -88,52 +334,9 @@ label {
     overflow: hidden;
 }
 
-.separator {
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-.separator::after, .separator::before {
-    content: "";
-    background: var(--main-border-color);
-    max-width: 20%;
-    height: 1px;
-    margin: 0 1em;
-    flex: 1;
-}
 
-// 社交图标
-.social_loginbar {
-    text-align: center;
-    .social-login-item{
-        color: #fff;
-        font-size: 16px;
-        float: none;
-        display: inline-block;
-        width: 32px!important;
-        height: 32px!important;
-        line-height: 32px;
-        cursor: pointer;
-        border-radius: 50px;
-        margin: 3px 5px;
-        &.qq {
-        background: #1296db;
-        }
-        &.weixingzh {
-        background: #24b76a;
-        }
-        &.github {
-        background: #505050;
-        }
-        .icon{
-        color: #fff;
-        }
-        &:hover{
-            transform: scale(1.05);
-        }
-    }
-}
+
+
 .close {
     transition: .2s;
     opacity: .4;
@@ -174,30 +377,8 @@ button.close {
 }
 
 
-// 社交分割线
-.social-separator{
-    padding: 10px 0;
-    text-align: center;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: .9em;
-    // @include font_color('muted-3-color');
-    color: var(--muted-3-color);
-    margin: 10 0 10px;
-    &::after, &::before {
-      content: "";
-    //   @include background_color('main-border-color');
-      background: var(--main-border-color);
-      max-width: 20%;
-      height: 1px;
-      margin: 0 1em;
-      flex: 1;
-    }
-  }
-  .social-login-item, .social-login-item svg{
-    color: #fff !important;
-  }
+
+  
 
 /*自定义动画类----顺时针旋转（使用这个动画的时候才设置动画执行时间）*/
 @keyframes changeright{       
@@ -228,4 +409,52 @@ button.close {
 .current-menu-item>a, .navbar-top .nav li a:focus, .navbar-top .nav li a:hover {
     background-color: transparent;
     color: var(--focus-color);
+}
+
+.c-red {
+    --this-color: #ff5473 !important;
+    --this-bg: rgba(255, 84, 115, .1) !important;
+}
+.c-red-2 {
+    --this-color: #d6064c;
+    --this-bg: rgba(194, 41, 46, 0.1);
+}
+.c-green {
+    --this-color: #18a52a !important;
+    --this-bg: rgba(18, 185, 40, .1) !important;
+}
+.c-green-2 {
+    --this-color: #6a933e;
+    --this-bg: rgba(72, 135, 24, .1);
+}
+.c-blue {
+    --this-color: #2997f7;
+    --this-bg: rgba(41, 151, 247, .1);
+}
+.c-blue-2 {
+    --this-color: #5c7cff !important;
+    --this-bg: rgba(77, 130, 249, .1) !important;
+}
+.c-white {
+    --this-color: #fff;
+    --this-bg: rgba(255, 255, 255, 0.1);
+}
+.c-yellow {
+    --this-color: #ff6f06;
+    --this-bg: rgba(255, 111, 6, 0.1);
+}
+.c-yellow-2 {
+    --this-color: #c58516;
+    --this-bg: rgba(179, 103, 8, 0.1);
+}
+.c-purple {
+    --this-color: #e434e1;
+    --this-bg: rgba(213, 72, 245, 0.1);
+}
+.c-purple-2 {
+    --this-color: #8e4aff;
+    --this-bg: rgba(154, 72, 245, 0.1);
+}
+.c-blue, .c-blue-2, .c-cyan, .c-gray, .c-green, .c-green-2, .c-purple, .c-purple-2, .c-red, .c-red-2, .c-theme, .c-white, .c-yellow, .c-yellow-2 {
+    color: var(--this-color);
 }

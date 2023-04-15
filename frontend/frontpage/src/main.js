@@ -23,10 +23,11 @@ import './assets/iconfont/iconfont.js';
 
 // 引入自定义css样式（放在最后确保覆盖原有样式）
 import './styles/reset.scss'
-import './styles/common.scss'
 
-import './styles/main.scss'
+import './styles/common.scss'
 import './styles/themes.css'
+import './styles/main.scss'
+
 
 const app = createApp(App);
 app.component('SvgIcon', SvgIcon);
