@@ -25,8 +25,9 @@ import './assets/iconfont/iconfont.js';
 import './styles/reset.scss'
 
 import './styles/common.scss'
-import './styles/themes.css'
+
 import './styles/main.scss'
+import './styles/themes.css'
 
 
 const app = createApp(App);

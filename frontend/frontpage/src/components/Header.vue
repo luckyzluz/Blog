@@ -19,6 +19,30 @@
         </div>
         <div class="collapse navbar-collapse">
           <menuList v-if="config.menu.place=='left'" />
+          <div v-if="true" class="navbar-form navbar-right">
+            <div class="dropdown pull-right hover-show msg-news-dropdown msg-center-nav">
+              <a href="" class="msg-news-icon ml10">
+                  <span class="toggle-radius msg-icon">
+                    <i class="iconfont icon-xiaoxi"></i>
+                  </span>
+                  <span class="badge top">1</span>
+                </a>
+                <div class=" lazyloaded dropdown-menu hover-show-con right">
+                  <li>
+                    <a href="">
+                      <img class="fit-cover" src="src/assets/image/msg-news.svg" alt="">未读消息
+                      <span class="badge">1</span>
+                    </a>
+                  </li>
+                  <li>
+                    <a href="">
+                      <img class="fit-cover" src="src/assets/image/msg-system.svg" alt="">系统通知
+                      <span class="badge">1</span>
+                    </a>
+                  </li>
+                </div>
+              </div>
+          </div>
           <!-- user&search -->
           <div class="navbar-form navbar-right">
             <ul class="list-inline splitters relative">
@@ -35,7 +59,7 @@
                     <use xlink:href="#icon-user"></use>
                   </svg>
                 </a>
-                <ul v-if="isLogin" class="sub-menu">
+                <ul v-if="!isLogin" class="sub-menu">
                   <div class="padding-10">
                     <div class="sub-user-box">
                       <div class="text-center">
@@ -230,44 +254,41 @@
                       <div class="relative opacity5">
                         <i class="line-form-line"></i>
                       </div>
-                      
-                      <!-- <el-divider /> -->
-                      <div class="sub-user-box-center">
-                        <div class="header-user-href">
-                          <a href="" class="user-loader">
-                            <div class="icon-radius">
+                      <div class="mt10 text-center">
+                        <div class="flex jsa header-user-href">
+                          <a href="javascript:;">
+                            <div class="badg mb6 toggle-radius c-blue">
                               <svg class="icon" aria-hidden="true">
                                 <use xlink:href="#icon-user"></use>
                               </svg>
                             </div>
-                            <div>用户中心</div>
+                            <div class="c-blue">用户中心</div>
                           </a>
-                          <a href="" class="start-new-posts">
-                            <div class="icon-radius">
+                          <a href="javascript:;" class="newadd-btns start-new-posts btn-newadd">
+                            <div class="badg mb6 toggle-radius c-green">
                               <svg class="icon" aria-hidden="true">
                                 <use xlink:href="#icon-editor"></use>
                               </svg>
                             </div>
-                            <div>发布文章</div>
+                            <div class="c-green">发布文章</div>
                           </a>
-                          <a href="" class="signout">
-                            <div class="icon-radius">
+                          <a href="javascript:;">
+                            <div class="badg mb6 toggle-radius c-red">
                               <svg class="icon" aria-hidden="true">
                                 <use xlink:href="#icon-tuichudenglu"></use>
                               </svg>
                             </div>
-                            <div>退出登录</div>
+                            <div class="c-red">退出登录</div>
                           </a>
                         </div>
                       </div>
-                      
                     </ul>
                   </div>
                 </ul>
               </li>
             </ul>
           </div>
-          <div v-if="config.menu.place=='right'" class="navbar-form navbar-right">
+          <div v-if="config.menu.place=='right'" class="navbar-right">
             <menuList />
           </div>
         </div>
@@ -369,7 +390,7 @@ let data = [
     ]
   }
 ]
-let isLogin=false;
+let isLogin=true;
 const openSign = () => {
   dispatch("user/isShowSign");
 }
@@ -377,6 +398,9 @@ let config={
   menu:{
     place:'left'
   }
+}
+const handleNews=(command)=>{
+  console.log(command)
 }
 </script>
 
@@ -449,6 +473,9 @@ let config={
   }
   .navbar-right {
     padding-right: 0;
+  }
+  .newadd-btns {
+    opacity: 1!important;
   }
 }
 
@@ -594,7 +621,31 @@ nav .icon-angledown {
     margin-right: -10px;
   }
 }
-
+.msg-news-dropdown {
+  .dropdown-menu.right {
+    right: -5px; 
+  }
+  li>a {
+    padding: 12px 14px !important;
+    width: 150px;
+    position: relative;
+    display: flex !important;
+    align-items: center;
+    &>img {
+      width: 22px;
+      height: 22px;
+      border-radius: 100px;
+      margin-right: 10px;
+    }
+    &>.badge {
+      transform: none;
+      right: 10px;
+      position: absolute;
+      top: 15px;
+      margin: 0;
+    }
+  }
+}
 @media (min-width: 768px){
   .container-fluid>.navbar-collapse, .container-fluid>.navbar-header, .container>.navbar-collapse, .container>.navbar-header {
     margin-right: 0;
@@ -633,49 +684,4 @@ nav .icon-angledown {
       margin-right: 0;
     }
 }
-
-#header {
-  .navbar{
-    .container-header {
-      .navbar-collapse{
-        .navbar-right {
-          .list-inline {
-            .sub-user-box{
-              .user-loader{
-                color: $c-blue-color;
-                .icon-radius{
-                  background: $c-blue-background;
-                  .icon{
-                    color: $c-blue-color;
-                  }
-                }
-              }
-              .start-new-posts{
-                color: $c-green-color;
-                .icon-radius{
-                  background: $c-green-background;
-                  .icon{
-                    color: $c-green-color;
-                  }
-                }
-              }
-              .signout{
-                color: $c-red-color;
-                .icon-radius{
-                  background: $c-red-background;
-                  .icon{
-                    color: $c-red-color;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-  }
-
-}
-
 </style>

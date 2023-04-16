@@ -1,6 +1,7 @@
 <script setup>
 import { ref, reactive, toRefs,onMounted, watchEffect,onUnmounted, watch, getCurrentInstance } from 'vue'
 import Header from 'c/Header.vue'
+import headerSliderCon from 'c/headerSliderCon.vue';
 import FluidWidget from 'c/FluidWidget.vue'
 import userCard from 'c/aside/userCard.vue'
 import Footer from 'c/Footer.vue'
@@ -42,6 +43,16 @@ let UserData = {
   view:33
 }
 let WebData=reactive({});
+// 实时滚动条高度
+const scrollTop = () => {
+      let scroll = document.documentElement.scrollTop || document.body.scrollTop;
+      let bodyClass=document.querySelector('body').classList;
+      if(scroll>0&&!bodyClass.contains('body-scroll')){
+        bodyClass.add('body-scroll')
+      }else{
+        bodyClass.remove('body-scroll');
+      }
+}
 // 统一监听
 watchEffect(() => {
   if(state.isShowModalBackdrop){
@@ -57,8 +68,12 @@ onMounted(()=>{
   if(true){
     dispatch("user/getUser");
   }
+  // let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+  // console.log(scrollTop)
   // window.addEventListener("scroll", getDistanceToViewportTop)
   // console.log(state.web.WebData.slider)
+  // 监听滚动条位置
+  window.addEventListener('scroll', scrollTop, true);
 })
 onUnmounted(()=>{
   // window.removeEventListener("scroll", getDistanceToViewportTop)
@@ -89,6 +104,7 @@ const cc=(value)=>{
 <template>
   <!-- header -->
   <Header />
+  <headerSliderCon />
   <!-- 公告 -->
   <FluidWidget/>
   <!-- main -->
@@ -135,27 +151,20 @@ body{
     color: var(--main-color);
     &.nav-fixed{
         padding-top: 88px;
-        // &:not(.body-scroll) .header.show-slide {
-        //   --header-bg: linear-gradient(0, rgba(0, 0, 0, 0) 5%, rgba(0, 0, 0, .1) 80%);
-        //   --header-color: #fff;
-        //   -webkit-backdrop-filter: unset;
-        //   backdrop-filter: unset;
-      // }
+        &:not(.body-scroll) .header.show-slide {
+          --header-bg: linear-gradient(0, rgba(0, 0, 0, 0) 5%, rgba(0, 0, 0, .1) 80%);
+          --header-color: #fff;
+          -webkit-backdrop-filter: unset;
+          backdrop-filter: unset;
+      }
+      .slide-header {
+          margin-top: -90px;
+      }
     }
     font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
     font-size: 14px;
     display: block;
     line-height: 1.42857143;
-}
-
-.container {
-    max-width: 1200px;//var(--mian-max-width)
-    width: auto;
-    position: relative;
-    padding-right: 15px;
-    padding-left: 15px;
-    margin-right: auto;
-    margin-left: auto;
 }
 .content{
   float: left;

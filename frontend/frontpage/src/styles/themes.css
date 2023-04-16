@@ -71,6 +71,9 @@ body.dark-theme{
 .jb-blue, .order-type-7 .pay-tag {
     --this-bg: linear-gradient(135deg, #59c3fb 10%, #268df7 100%);
 }
+.jb-cyan {
+    --this-bg: linear-gradient(140deg, #039ab3 10%, #58dbcf 90%);
+}
 .jb-pink, .order-type-2 .pay-tag {
     --this-bg: linear-gradient(135deg, #ff5e7f 30%, #ff967e 100%);
 }

@@ -10,7 +10,12 @@ const store = {
         isShowSign: true, //登录注册弹窗
         isLogin: false, // 是否已登录
         WebData:{
-            webConfig:{},
+            webConfig:{
+                slider:{
+                    home:'',
+                    header:true
+                }
+            },
             slider:[],
             pageList:[]
         } // 网站数据
