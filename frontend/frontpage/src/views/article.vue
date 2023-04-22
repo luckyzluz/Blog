@@ -124,7 +124,9 @@
             </div>
         </div>
         <div class="article-content">
-            <div class="theme-box lz-posts-content">
+            <div  v-html="ooppq"  @click="showCode($event)" class="theme-box lz-posts-content">
+            </div>
+            <!--v-highlight <div class="theme-box lz-posts-content">
                 <p>使用WordPress建站，那么第三方登录肯定是必不可少的，子比主题支持丰富的社交帐号登录，当然少不了现在最常用的微信登录了，但是大家都知道，使用微信公众号登录需要认证的服务号，认证需要花费300元每年，而部分站长并没有服务号的需求，所以这个功能就不能使用了！</p>
                 <p>但是！现在子比主题已支持订阅号、未认证的公众号进行扫码登录了！</p>
                 <h2 id="wznav_0">效果预览</h2>
@@ -219,7 +221,7 @@
                 <p>2.点击配置<span style="color:#1F91F3;background:undefined">IP白名单</span>，将网站服务器的IP地址加入到白名单</p>
                 <div class="lz-block-image">
                     <figure class="aligncenter size-large is-resized">
-                        <img alt="图片[2]-WordPress接入未认证微信公众号订阅号使用微信扫码登录教程-Wordpress主题模板-zibll子比主题" decoding="async" src="https://mimg.127.net/vip/newindex/img/bg/vip188/bg1.jpg" class="wp-image-2210" width="500" sizes="(max-width: 1706px) 100vw, 1706px">
+                        <img alt="图片[2]-WordPress接入未认证微信公众号订阅号使用微信扫码登录教程-Wordpress主题模板-zibll子比主题" decoding="async" src="https://mimg.127.net/vip/newindex/img/bg/vip188/bg1.jpg" class="lz-image-2210" width="500" sizes="(max-width: 1706px) 100vw, 1706px">
                     </figure>
                 </div>
                 <h3 id="wznav_3">微信公众号的服务器URL配置</h3>
@@ -234,7 +236,7 @@
                         <a href="https://www.zibll.com/zibll_word/user-function">查看更多登录教程</a>
                     </span>
                 </div>
-            </div>
+            </div> -->
             <!-- 版权 -->
             <div class="muted-3-color" style="font-size: .9em;">
                 <div>
@@ -268,11 +270,15 @@
     <Comments />
 </template>
 <script setup>
+import {ref,computed,onMounted} from 'vue'
 import Interact from 'c/article/interact.vue'
 import fuserInfo from 'c/article/fuserInfo.vue'
 import farticleNav from 'c/article/farticleNav.vue'
 import frelatedCon from 'c/article/frelatedCon.vue'
 import Comments from 'c/article/comments.vue'
+import  {marked}  from 'marked'
+import hljs from 'highlight.js';
+import 'highlight.js/styles/base16/dracula.css' //样式
 let data={
     id:'12365',
     title:'第三方登录-网站接入未认证的微信公众号或订阅号扫码登录教程',
@@ -294,8 +300,282 @@ let data={
         }
     }
 }
+let cont= ref("## 1.测试标题\n### 1.1测试标题\n### 1.2测试标题\n```javascript\nfunction $initHighlight(block, cls) {\ntry {\nif (cls.search(/\/bno\/-highlight\/b/) != -1)\nreturn process(block, true, 0x0F) +\n` class='${cls}''`;\n} catch (e) {\n/* handle exception */\n}\nfor (var i = 0 / 2; i < classes.length; i++) {\nif (checkCondition(classes[i]) === undefined)\nconsole.log('undefined');\n}\nreturn (\n<div>\n<web-component>{block}</web-component>\n</div>\n)\n}\nexport  $initHighlight;\n```\n## 2.测试标题\n### 2.1测试标题\n```javascript\nvar xx={\nxx:123,\ngg:6369\n}\n```\n#### 2.11你好\n#### 2.12你好")
+onMounted(()=>{
+    console.log(toTree(getCatalog()))
+})
+const showCode=(e)=>{
+    // console.log(e.target.parentElement.nextElementSibling)
+    if(Array.from(e.target.classList).includes('expand')){
+        if(Array.from(e.target.classList).includes('closed')){
+            e.target.classList.remove('closed');
+            e.target.parentElement.nextElementSibling.style="display:block;"
+        }else{
+            e.target.classList.add('closed');
+            e.target.parentElement.nextElementSibling.style="display:none;"
+        }
+    }
+}
+class MyRenderer extends marked.Renderer {
+  code(code, language) {
+    const validLang=!!(language && hljs.getLanguage(language));
+    let codeStr=`<figure class="highlight ${language}"><div class="highlight-tools mac_style"><i class="iconfont icon-arrowdown expand"></i><div class="code-lang">${language}</div><div class="copy-notice"></div><i class="iconfont icon-paper copy-button"></i></div><table><tbody><tr>`;
+        let lineNum=`<td class="gutter"><pre>`;
+        let codestr=`<td class="code"><pre>`;
+            let codess=code.split("\n");
+    for(let i=0;i<codess.length;i++){
+        lineNum+=`<span class="line">${i+1}</span><br />`
+        codestr+=`<span class="line">${validLang?hljs.highlight(codess[i].replace(/</g,"&lt;").replace(/>/g,"&gt;"),{language,ignoreIllegals: true,tabReplace: '  ',useBR: true}).value:codess[i].replace(/</g,"&lt;").replace(/>/g,"&gt;")}</span><br />`
+    }
+    // ${validLang?hljs.highlight(language,codess[i].replace(/</g,"&lt;").replace(/>/g,"&gt;")).value:codess[i].replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+    lineNum+='</pre></td>';
+    codestr+=`</pre></td>`
+    codeStr+=lineNum;
+    codeStr+=codestr;
+    codeStr+='</tr></tbody></table></figure>';
+    
+    return codeStr;
+    
+  }
+}
+const renderer = new MyRenderer()
+marked.setOptions({
+  renderer: renderer, // 这是必填项
+  gfm: true,	// 启动类似于Github样式的Markdown语法
+  pedantic: false, // 只解析符合Markdwon定义的，不修正Markdown的错误
+  sanitize: false, // 原始输出，忽略HTML标签（关闭后，可直接渲染HTML标签）
+	// 高亮的语法规范
+//   highlight: (code, lang) =>{console.log(code); return hljs.highlight(code, { language: lang }).value;},
+})
+let ooppq = computed(()=>{
+    return marked(cont.value);
+})
+const getCatalog=()=>{
+    // const h = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
+    let xx=document.querySelector('.lz-posts-content').querySelectorAll("h1,h2,h3,h4,h5,h6");
+    // console.log(typeof(xx))
+    let hEles = []
+    xx.forEach((v,i)=>{
+        // console.log(v.nodeName.slice(-1));
+        hEles.push({hLevel:v.nodeName.slice(-1)});
+    })
+    // console.log(hEles)
+    return hEles;
+}
+const toTree=(flatArr)=>{
+    var tree = [];
+  var copyArr = flatArr.map(function (item) { return item; });
+
+  // 根据指定级别查找该级别的子孙级，并删除掉已经查找到的子孙级
+  var getChildrenByLevel = function (currentLevelItem, arr, level) {
+    // 这里做一个判断，不存在一级标题，则直接返回
+    if(!currentLevelItem){
+      return;
+    }
+    // 将level值转成负数，再进行比较
+    var minusCurrentLevel = -currentLevelItem.hLevel;
+    var children = []; // 一级标题下的子集
+    for(var i = 0; i < arr.length; i++){
+      var levelItem = arr[i];
+      if(-levelItem.hLevel < minusCurrentLevel){ // 将小于hlevelnum的标题插入数组
+        children.push(levelItem);
+      }else { // 只找那些子孙级（同级或上一级放过）
+        break;
+      }
+    }
+    // 从数组中删除已经找到的那些子孙级，以免影响到其他子孙级的查找
+    if(children.length > 0){
+        // 因为我们是按照顺序获取的文档节点，所以按顺序删
+      arr.splice(0, children.length);
+    }
+    return children;
+  }
+
+  var getTree = function (result, arr, level) {
+    // 首先将数组第一位移除掉，并添加到结果集中
+    var currentItem = arr.shift();
+    currentItem.level = level; // 设置当前层级
+    result.push(currentItem); // 插入数组
+    // console.log('arr',arr)
+    // 开始循环目标数组
+    while (arr.length > 0){
+        // 这里做一个判断，不存在一级标题，则直接返回
+      if(!currentItem){
+        return;
+      }
+      // 根据当前级别获取它的子孙级
+      var children = getChildrenByLevel(currentItem, arr, level);
+      // 如果当前级别没有子孙级则开始下一个
+      if(children.length == 0){
+        currentItem = arr.shift();  //删除当前级别数据
+        currentItem.level = level;  // 设置级别
+        if(currentItem){
+          result.push(currentItem); // 数据存在插入结果集
+        }
+        continue; // 跳过当次循环,就不会执行下面的空数组了
+      }
+    //   console.log('33223',children)
+      currentItem.children = [];
+      // 查找到的子孙级继续查找子孙级
+      getTree(currentItem.children, children, level + 1);
+    }
+  }
+  getTree(tree, copyArr, 1);
+
+  return tree;
+
+}
 </script>
 <style lang="scss">
+figure.highlight .highlight-tools.mac_style {
+    .expand {
+        right: 0;
+        ~ .copy-button {
+            right: 2.1em;
+        }
+    }
+    .code-lang {
+        left: 75px;
+    }
+    &:after {
+        position: absolute;
+        left: 14px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: #fc625d;
+        -webkit-box-shadow: 20px 0 #fdbc40, 40px 0 #35cd4b;
+        box-shadow: 20px 0 #fdbc40, 40px 0 #35cd4b;
+        content: ' ';
+    }
+}
+.lz-posts-content{
+    figure.highlight {
+        box-shadow: 0 5px 10px 0 rgb(255 255 255 / 40%);
+        position: relative;
+        border-radius: 10px;
+        table {
+            display: block;
+            overflow: auto;
+            border: none;
+            td {
+                padding: 0;
+                border: none;
+                &:first-child{
+                    user-select: none;
+                }
+            }
+        }
+        pre {
+            margin: 0;
+            padding: 8px 0;
+            border: none;
+        }
+        pre,  code {
+            font-size: 14px;
+            font-family: consolas, Menlo, "PingFang SC", "Microsoft JhengHei", "Microsoft YaHei", sans-serif !important;
+        }
+        .gutter pre {
+            padding-right: 10px;
+            padding-left: 10px;
+            background-color: var(--hlnumber-bg);
+            color: var(--hlnumber-color);
+            text-align: right;
+        }
+    }
+    pre, figure.highlight {
+        overflow: auto;
+        margin: 0 0 1rem;
+        padding: 0;
+        background: var(--hl-bg);
+        color: var(--hl-color);
+        line-height: 1.6;
+    }
+    .highlight-tools {
+        position: relative;
+        display: -webkit-box;
+        display: -moz-box;
+        display: -webkit-flex;
+        display: -ms-flexbox;
+        display: box;
+        display: flex;
+        -webkit-box-align: center;
+        -moz-box-align: center;
+        -o-box-align: center;
+        -ms-flex-align: center;
+        -webkit-align-items: center;
+        align-items: center;
+        overflow: hidden;
+        min-height: 1.2rem;
+        height: 2.15em;
+        background: var(--hltools-bg);
+        color: var(--hltools-color);
+        font-size: 14px;
+        i{
+            font-weight: 900;
+        }
+        .expand{
+            position: absolute;
+            padding: 0.4rem 0.7rem;
+            cursor: pointer;
+            -webkit-transition: -webkit-transform 0.3s;
+            -moz-transition: -moz-transform 0.3s;
+            -o-transition: -o-transform 0.3s;
+            -ms-transition: -ms-transform 0.3s;
+            transition: transform 0.3s;
+            &.closed {
+                -webkit-transition: all 0.3s;
+                -moz-transition: all 0.3s;
+                -o-transition: all 0.3s;
+                -ms-transition: all 0.3s;
+                transition: all 0.3s;
+                -webkit-transform: rotate(
+            -90deg) !important;
+                -moz-transform: rotate(-90deg) !important;
+                -o-transform: rotate(-90deg) !important;
+                -ms-transform: rotate(-90deg) !important;
+                transform: rotate(
+            -90deg) !important;
+            }
+            &+ .code-lang {
+                left: 1.7rem;
+            }
+        }
+        .code-lang {
+            position: absolute;
+            left: 0.7rem;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 1.15em;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        .copy-notice {
+            position: absolute;
+            right: 1.7rem;
+            opacity: 0;
+            -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=0)";
+            filter: alpha(opacity=0);
+            -webkit-transition: opacity 0.4s;
+            -moz-transition: opacity 0.4s;
+            -o-transition: opacity 0.4s;
+            -ms-transition: opacity 0.4s;
+            transition: opacity 0.4s;
+        }
+        .copy-button {
+            position: absolute;
+            right: 0.7rem;
+            cursor: pointer;
+            -webkit-transition: color 0.2s;
+            -moz-transition: color 0.2s;
+            -o-transition: color 0.2s;
+            -ms-transition: color 0.2s;
+            transition: color 0.2s;
+        }
+    }
+}
 .breadcrumb {
     background: 0 0;
     padding: 0 8px;
@@ -426,11 +706,11 @@ let data={
         margin: 2px;
     }
 }
-.wp-posts-content h1, .lz-posts-content h2, .lz-posts-content h3, .wp-posts-content h4, .wp-posts-content h5 {
+.lz-posts-content h1, .lz-posts-content h2, .lz-posts-content h3, .lz-posts-content h4, .lz-posts-content h5 {
     margin: 20px 0;
     font-weight: 700;
 }
-.tab-nav-theme li:before, .title-h-center:before, .title-h-left:before, .title-theme:before, .wp-posts-content>h1.has-text-align-center:before, .wp-posts-content>h1.wp-block-heading:before, .wp-posts-content>h1:not([class]):before, .wp-posts-content>h2.has-text-align-center:before, .wp-posts-content>h2.wp-block-heading:before, .lz-posts-content>h2:not([class]):before, .wp-posts-content>h3.has-text-align-center:before, .wp-posts-content>h3.wp-block-heading:before, .lz-posts-content>h3:not([class]):before, .wp-posts-content>h4.has-text-align-center:before, .wp-posts-content>h4.wp-block-heading:before, .wp-posts-content>h4:not([class]):before, .zib-widget>h3:before {
+.tab-nav-theme li:before, .title-h-center:before, .title-h-left:before, .title-theme:before, .lz-posts-content>h1.has-text-align-center:before, .lz-posts-content>h1.lz-block-heading:before, .lz-posts-content>h1:not([class]):before, .lz-posts-content>h2.has-text-align-center:before, .lz-posts-content>h2.lz-block-heading:before, .lz-posts-content>h2:not([class]):before, .lz-posts-content>h3.has-text-align-center:before, .lz-posts-content>h3.lz-block-heading:before, .lz-posts-content>h3:not([class]):before, .lz-posts-content>h4.has-text-align-center:before, .lz-posts-content>h4.lz-block-heading:before, .lz-posts-content>h4:not([class]):before, .zib-widget>h3:before {
     position: absolute;
     content: '';
     width: 4px;
@@ -441,7 +721,7 @@ let data={
     border-radius: 5px;
     box-shadow: 1px 1px 3px -1px var(--theme-color);
 }
-.tab-nav-theme li:before, .title-h-center:before, .title-h-left:before, .wp-posts-content>h1.has-text-align-center:before, .wp-posts-content>h1.wp-block-heading:before, .wp-posts-content>h1:not([class]):before, .wp-posts-content>h2.has-text-align-center:before, .wp-posts-content>h2.wp-block-heading:before, .lz-posts-content>h2:not([class]):before, .wp-posts-content>h3.has-text-align-center:before, .wp-posts-content>h3.wp-block-heading:before, .lz-posts-content>h3:not([class]):before, .wp-posts-content>h4.has-text-align-center:before, .wp-posts-content>h4.wp-block-heading:before, .wp-posts-content>h4:not([class]):before, .zib-widget>h3:before {
+.tab-nav-theme li:before, .title-h-center:before, .title-h-left:before, .lz-posts-content>h1.has-text-align-center:before, .lz-posts-content>h1.lz-block-heading:before, .lz-posts-content>h1:not([class]):before, .lz-posts-content>h2.has-text-align-center:before, .lz-posts-content>h2.lz-block-heading:before, .lz-posts-content>h2:not([class]):before, .lz-posts-content>h3.has-text-align-center:before, .lz-posts-content>h3.lz-block-heading:before, .lz-posts-content>h3:not([class]):before, .lz-posts-content>h4.has-text-align-center:before, .lz-posts-content>h4.lz-block-heading:before, .lz-posts-content>h4:not([class]):before, .zib-widget>h3:before {
     width: 40px;
     height: 3px;
     top: auto;
@@ -449,15 +729,15 @@ let data={
     bottom: 3px;
     transition: .4s;
 }
-.tab-nav-theme li, .title-h-center, .title-h-left, .wp-posts-content>h1.has-text-align-center, .wp-posts-content>h1.wp-block-heading, .wp-posts-content>h1:not([class]), .wp-posts-content>h2.has-text-align-center, .wp-posts-content>h2.wp-block-heading, .wp-posts-content>h2:not([class]), .wp-posts-content>h3.has-text-align-center, .wp-posts-content>h3.wp-block-heading, .lz-posts-content>h3:not([class]), .wp-posts-content>h4.has-text-align-center, .wp-posts-content>h4.wp-block-heading, .wp-posts-content>h4:not([class]), .zib-widget>h3 {
+.tab-nav-theme li, .title-h-center, .title-h-left, .lz-posts-content>h1.has-text-align-center, .lz-posts-content>h1.lz-block-heading, .lz-posts-content>h1:not([class]), .lz-posts-content>h2.has-text-align-center, .lz-posts-content>h2.lz-block-heading, .lz-posts-content>h2:not([class]), .lz-posts-content>h3.has-text-align-center, .lz-posts-content>h3.lz-block-heading, .lz-posts-content>h3:not([class]), .lz-posts-content>h4.has-text-align-center, .lz-posts-content>h4.lz-block-heading, .lz-posts-content>h4:not([class]), .zib-widget>h3 {
     position: relative;
     padding-bottom: 8px;
 }
-.wp-posts-content>h3.has-text-align-center:before, .lz-posts-content>h3:not([class]):before, .wp-posts-content>h4.has-text-align-center:before, .lz-posts-content>h4:not([class]):before {
+.lz-posts-content>h3.has-text-align-center:before, .lz-posts-content>h3:not([class]):before, .lz-posts-content>h4.has-text-align-center:before, .lz-posts-content>h4:not([class]):before {
     width: 25px!important;
     height: 2px!important;
 }
-.post-dplayer, .wp-block-gallery, .lz-block-image {
+.post-dplayer, .lz-block-gallery, .lz-block-image {
     margin-bottom: 20px;
 }
 .lz-block-image {
