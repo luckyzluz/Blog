@@ -1,11 +1,15 @@
 <script setup>
 import { ref, reactive, toRefs,onMounted, watchEffect,onUnmounted, watch, getCurrentInstance } from 'vue'
+import { useRouter } from "vue-router";
 import Header from 'c/Header.vue'
-import headerSliderCon from 'c/headerSliderCon.vue';
+import headerSliderTop from 'c/headerSliderTop.vue';
 import FluidWidget from 'c/FluidWidget.vue'
 import userCard from 'c/aside/userCard.vue'
 import Footer from 'c/Footer.vue'
 import Sign from 'c/Sign.vue'
+import singleCard from 'c/singleCard.vue';
+import graphicCover from 'c/graphicCover.vue'
+import graphicCover2 from 'c/graphicCover2.vue'
 import Fixedtool from 'c/Fixedtool.vue'
 import MusicPlayer from './components/MusicPlayer.vue'
 import { useStore } from "vuex";
@@ -18,8 +22,11 @@ import tagCloud from 'c/aside/tagCloud.vue'
 import search from 'c/aside/search.vue'
 import Video from './components/aside/video.vue'
 import articleCatalogue from 'c/aside/articleCatalogue.vue'
+import {debounce, throttle} from 'u/utils.js'
 const {proxy} = getCurrentInstance();
 let {state,getters, dispatch,commit} = useStore();
+const router = useRouter();
+console.log(router.currentRoute)
 const data=[]
 const notice=[
           {
@@ -43,16 +50,46 @@ let UserData = {
   view:33
 }
 let WebData=reactive({});
+let oldScrollTop= ref(0); //记录上一次滚动结束后的滚动距离
+let scrollTop= ref(0); // 记录当前的滚动距离
+// 定义一个变量来保存滚动状态
+let isScrolling =false;
+let timer = ref(null);
+
 // 实时滚动条高度
-const scrollTop = () => {
-      let scroll = document.documentElement.scrollTop || document.body.scrollTop;
-      let bodyClass=document.querySelector('body').classList;
-      if(scroll>0&&!bodyClass.contains('body-scroll')){
-        bodyClass.add('body-scroll')
-      }else{
-        bodyClass.remove('body-scroll');
-      }
-}
+const scrollTopFunc = throttle(() => {
+  // 获取滚动条高度
+  let currentScrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+  scrollTop.value = currentScrollTop;
+  // console.log(scrollTop,window.scrollY)
+  // 获取body class
+  let bodyClass=document.body.classList;
+      // console.log(scroll,bodyClass.contains('body-scroll'))
+  if(currentScrollTop>10 && (!bodyClass.contains('body-scroll'))){
+    // 发送滚动，且不含有类名
+    bodyClass.add('body-scroll')
+  }else if(currentScrollTop<=10 && bodyClass.contains('body-scroll')){
+    bodyClass.remove('body-scroll');
+  }  
+  if(timer.value==null){
+    // console.log('鼠标滚动开始')
+    bodyClass.add('scroll-ing');
+    timer.value = setInterval(()=>{
+      if(document.documentElement.scrollTop == scrollTop.value) {
+        bodyClass.remove('scroll-ing');
+        // console.log('鼠标滚动停止')
+			  clearInterval(timer.value);
+        timer.value = null;
+		  }
+    }, 1800);
+    
+    scrollTop.value = document.documentElement.scrollTop;
+  }
+}, 100)
+
+watch(scrollTop, (newValue, oldValue) => {
+
+});
 // 统一监听
 watchEffect(() => {
   if(state.isShowModalBackdrop){
@@ -61,23 +98,20 @@ watchEffect(() => {
       document.body.classList.remove('modal-open');
     }
 })
-
-
 onMounted(()=>{
   dispatch("web/getBlog");
   if(true){
     dispatch("user/getUser");
   }
-  // let scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-  // console.log(scrollTop)
-  // window.addEventListener("scroll", getDistanceToViewportTop)
-  // console.log(state.web.WebData.slider)
   // 监听滚动条位置
-  window.addEventListener('scroll', scrollTop, true);
+  window.addEventListener('scroll', scrollTopFunc, true);
+  // window.addEventListener('scroll', test);
 })
 onUnmounted(()=>{
-  // window.removeEventListener("scroll", getDistanceToViewportTop)
+  window.removeEventListener("scroll", scrollTopFunc)
+  // window.removeEventListener("scroll", test)
 })
+
 const cc=(value)=>{
   // console.log(value)
   // 5505
@@ -100,11 +134,12 @@ const cc=(value)=>{
     uu.style.top='68px'
   }
 }
+// console.log('99866',state.web.webConfig.slider.headerSliderTop.isShow)
 </script>
 <template>
   <!-- header -->
   <Header />
-  <headerSliderCon />
+  <headerSliderTop v-if="state.web.webConfig.slider.headerSliderTop.isShow&&(router.currentRoute.value.fullPath == '/')" />
   <!-- 公告 -->
   <FluidWidget/>
   <!-- main -->
@@ -114,7 +149,7 @@ const cc=(value)=>{
         <router-view></router-view>
       </div>
     </div>
-    <aside class="sidebar">
+    <aside v-if="true" class="sidebar">
       <!-- <el-affix class="artlist" @scroll="cc" :offset="68">
         <articleCatalogue />
       </el-affix> -->
@@ -126,11 +161,12 @@ const cc=(value)=>{
       <newComment />
       <tagCloud />
       <search />
-      <Video />
+      <!-- <Video /> -->
     </aside>
   </main>
-
-
+  <singleCard />
+  <graphicCover />
+  <graphicCover2 />
   <Footer />
   <!-- 窗格容器 -->
   <div v-show="state.isShowModalBackdrop" class="modal-dialog">
@@ -171,7 +207,7 @@ body{
   width: 100%;
   // background-color: yellow;
 }
-.content-layout{
+.site-layout-2 .content-layout{
   margin-right: calc(311px + 15px);
 }
 .sidebar {

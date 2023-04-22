@@ -21,6 +21,7 @@ import './assets/iconfont/iconfont.css'
 import './assets/iconfont/iconfont.js';
 // import '//at.alicdn.com/t/c/font_2851110_621gzdpa1j6.js'
 
+
 // 引入自定义css样式（放在最后确保覆盖原有样式）
 import './styles/reset.scss'
 
@@ -32,7 +33,13 @@ import './styles/themes.css'
 
 const app = createApp(App);
 app.component('SvgIcon', SvgIcon);
-
+//创建v-highlight全局指令
+app.directive('highlight',function (el) {
+    let blocks = el.querySelectorAll('pre code');
+    blocks.forEach((block)=>{
+      hljs.highlightBlock(block)
+    })
+})
 // 全局挂载请求封装方法
 import request from './utils/request'
 app.config.globalProperties.$request = request;
