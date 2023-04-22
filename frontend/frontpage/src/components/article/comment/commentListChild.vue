@@ -147,7 +147,7 @@ if(props.Key&&props.Key=='child'){
 const openEdit=(i)=>{
     commentEditActive.value=i;
 }
-console.log(props.Data)
+// console.log(props.Data)
 // console.log(2233)
 </script>
 <style lang="scss">

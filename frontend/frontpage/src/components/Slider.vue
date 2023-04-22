@@ -37,7 +37,7 @@
     :modules="modules"
     class="mySwiper"
   >
-    <swiper-slide v-for="(item, i) in state.web.WebData.slider" :key=i>
+    <swiper-slide v-for="(item, i) in state.web.webConfig.slider.homeSliderCon.list" :key=i>
       <!-- props.Data -->
       <a target="_blank" :href="item.url">
         <img :src="typeof item.imgUrl == 'string'?item.imgUrl:item.imgUrl.bg" loading="lazy"/>

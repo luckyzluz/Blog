@@ -2,7 +2,7 @@
     <!-- 菜单导航 -->
     <ul class="nav navbar-nav">
         <!-- class="current-menu-item" data-->
-        <li class="current-menu-item3" v-for="(item, i) in state.web.WebData.pageList" :key="i">
+        <li class="current-menu-item3" v-for="(item, i) in state.web.webConfig.pageList" :key="i">
             <a href="" v-if="item.color !== ''">
                 <span :class="item.color">{{ item.name }}</span>
                 <span class="badge" :class="item.badge.color " v-if="item.badge.name !== ''">{{ item.badge.name }}</span>

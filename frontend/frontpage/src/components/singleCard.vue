@@ -1,6 +1,6 @@
 <template>
     <!-- 一个单行显示的卡片文章模块container -->
-    <div class="fluid-widget">
+    <div class="container fluid-widget">
         <notop :data="datax" />
         <swiper 
         :style="{

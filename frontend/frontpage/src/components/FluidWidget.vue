@@ -19,7 +19,7 @@
     :modules="modules"
     class="mySwiper"
   >
-    <swiper-slide v-for="(item, i) in state.web.WebData.webConfig.notice" :key=i>
+    <swiper-slide v-for="(item, i) in state.web.webConfig.notice" :key=i>
       <a class="text-ellipsis">
         <div class="relative bulletin-icon mr6">
           <i :class='["iconfont","abs-center",item.icon]'></i>

@@ -1,6 +1,6 @@
 <template>
   <!-- 网站头部导航 -->
-  <div id="header" class="header show-slide">
+  <div id="header" :class="['header',state.web.webConfig.slider.headerSliderTop.isShow&&(router.currentRoute.value.fullPath == '/')?'show-slide':'']">
     <nav class="navbar navbar-top center">
       <div class="container-header container-fluid">
         <div class="navbar-header">
@@ -8,9 +8,8 @@
           <div class="navbar-brand">
             <a class="navbar-logo" href="">
               <img
-                :src="state.web.WebData.webConfig.Logo"
-                switch-src="static/picture/ZIBLL-LOGO-精简-白天.svg"
-                alt="更优雅的Wordpress主题模板_WP中文主题_zibll主题_子比主题官方演示"
+                :src="state.web.webConfig.Logo"
+                alt="官方演示"
                 data-src=""
                 class="ls-is-cached lazyloaded"
               />
@@ -298,9 +297,11 @@
 </template>
 <script setup>
 import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 import menuList from "c/header/menuList.vue"
 import { reactive,watch, watchEffect,onMounted,ref } from 'vue'
 let {state,getters, dispatch,commit} = useStore();
+const router = useRouter();
 let data = [
   {
     name: '购买主题',
@@ -390,6 +391,7 @@ let data = [
     ]
   }
 ]
+// console.log(state.web.WebData,336666)
 let isLogin=true;
 const openSign = () => {
   dispatch("user/isShowSign");

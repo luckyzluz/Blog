@@ -1,7 +1,7 @@
 <template>
     <div class="theme-box">
         <noTop :data="nooTopData" />
-        <div class="lz-widget widget-tag-cloud author-tag">
+        <div class="lz-widget widget-tag-cloud author-tag fixed-width">
             <a v-for="(v,i) in data" :key="i" :href="'tag/'+v.name" :class="['text-ellipsis but', 'c-green-2']">{{ v.name }}
                 <span class="em09 tag-count">({{ v.sum }})</span>
             </a>
@@ -107,5 +107,8 @@ let data=[
     a span{
         font-size: .9em;
     }
+}
+.widget-tag-cloud.fixed-width .but {
+    width: 89px;
 }
 </style>

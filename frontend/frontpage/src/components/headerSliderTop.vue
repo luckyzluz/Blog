@@ -15,7 +15,7 @@
                 >
                         <swiper-slide>
                             <span>
-                                <video autoplay="" loop="" muted="" class="fit-cover lazyloading" src="src/assets/video/唯美视频背景.webm"></video>
+                                <video autoplay="" loop="" muted="" class="fit-cover lazyloading" :src="state.web.webConfig.slider.headerSliderTop.list[0].url"></video>
                             </span>
                         </swiper-slide>
                 </swiper>
@@ -54,7 +54,6 @@
         </div>
         <div class="header-slider-card container">
             <div class="flex jse flex-row gutters-5 flex-col-sm-2">
-
             </div>
             <el-row :gutter="10">
                 <el-col v-for="(v,i) in data" :key="i" :span="24/data.length">
@@ -85,7 +84,7 @@ import { Swiper, SwiperSlide } from 'swiper/vue';
 import 'swiper/css';
 import {useStore} from 'vuex'
 let {state,getters, dispatch,commit} = useStore();
-console.log(state.web.WebData)
+// console.log(state.web.WebData)
 let data=[
     {
         title:'测试标题A',

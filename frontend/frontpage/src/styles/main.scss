@@ -274,6 +274,36 @@ a {
         right: 20px;
     }
 }
+.float-right {
+    position: fixed;
+    bottom: 60px;
+    right: 20px;
+    z-index: 1030;
+    text-align: center;
+    padding-bottom: constant(safe-area-inset-bottom);
+    padding-bottom: env(safe-area-inset-bottom);
+    transition: .3s;
+    &.position-center {
+        bottom: auto;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    .float-btn {
+        width: 40px;
+        line-height: 40px;
+        display: block;
+        font-size: 1.4em;
+        --this-color: var(--muted-2-color);
+        --this-bg: var(--float-btn-bg);
+        background: var(--this-bg);
+        position: relative;
+        color: var(--this-color)!important;
+    }
+    &.round .float-btn {
+        margin-top: 6px;
+        border-radius: 8px;
+    }
+}
 // 轮播图
 .slide-header .s-desc, .slide-header img, .slide-header video, .wp-block-carousel figcaption {
     border-radius: 0!important;

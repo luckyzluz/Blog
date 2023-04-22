@@ -715,7 +715,10 @@ const changeTab=(index)=>{
         }
     }
 }
-
+.tab-content .posts-item:not(article):hover {
+    transform: translateY(-10px);
+    box-shadow: 0 8px 10px rgb(255 112 173 / 35%);
+}
 
 
 
