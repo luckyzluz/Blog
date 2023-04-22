@@ -1,9 +1,8 @@
 <template>
   <!-- 右侧悬浮工具 -->
-  <div id="fixed-tool">
+  <!-- <div id="fixed-tool">
     <div class="fixed-tool">
       <a class="tool-btn service-qq" @click="modelBrn">
-        <!-- <svg-icon class="btn" iconName='icon-taiyang'></svg-icon> -->
         <i
           :class="[
             'btn',
@@ -15,17 +14,57 @@
       </a>
       <a class="tool-btn service-qq">
         <i class="iconfont icon-QQ"></i>
-        <!-- <svg-icon iconName="icon-QQ"></svg-icon> -->
       </a>
       <a class="tool-btn service-qq" @click="muisLogin">
         <i class="iconfont icon-menu21"></i>
-        <!-- <svg-icon iconName="icon-menu21"></svg-icon> -->
       </a>
       <a v-show="arrowup" class="tool-btn service-qq" @click="goTop">
         <i class="iconfont icon-arrowup"></i>
-        <!-- <svg-icon iconName="icon-arrowup"></svg-icon> -->
       </a>
     </div>
+  </div> -->
+  <div class="float-right round position-center scrolling-hide">
+    <el-tooltip
+        class="box-item"
+        effect="dark"
+        content="主题切换"
+        placement="left"
+      >
+        <a @click="modelBrn" class="float-btn more-btn">
+          <i :class="['iconfont',dark?'icon-taiyang':'icon-yueliang']"></i>
+        </a>
+    </el-tooltip>
+    <el-tooltip
+        class="box-item"
+        effect="dark"
+        content="主题切换"
+        placement="left"
+      >
+        <a class="float-btn more-btn">
+          <i :class="['iconfont','icon-qr-code']"></i>
+        </a>
+    </el-tooltip>
+    <el-tooltip
+        class="box-item"
+        effect="dark"
+        content="返回顶部"
+        placement="left"
+      >
+        <a v-show="arrowup" class="float-btn more-btn" @click="goTop">
+          <i :class="['iconfont','icon-arrowup']"></i>
+        </a>
+    </el-tooltip>
+    <!-- <el-tooltip
+        class="box-item"
+        effect="dark"
+        :content="v.title"
+        placement="left" v-for="(v,i) in xx"
+      >
+        <a v-if="v.href!==''" :href="v.href" class="float-btn more-btn">{{ v.title }}</a>
+        <a v-else class="float-btn more-btn">
+          <i :class="['iconfont',v.icon]"></i>
+        </a>
+    </el-tooltip> -->
   </div>
 </template>
 <script>
@@ -59,9 +98,20 @@ export default {
     return {
       dark: false,
       arrowup: false,
+      xx:[
+        {
+          title:'主题切换',
+          style:{
+            color:'#fff',
+            bg:'rgba(255,75,125,0.9)'
+          },
+          href:'',
+          icon:'icon-yueliang'
+        }
+      ]
     };
   },
-  created() {},
+  created() {console.log(this.xx)},
   methods: {
     fun() {
       this.$store.commit("moduleBlog/set_IsLogin");
@@ -97,7 +147,7 @@ export default {
         document.documentElement.scrollTop ||
         window.pageYOffset ||
         document.body.scrollTop;
-      if (dis > 120) {
+      if (dis > 600) {
         this.arrowup = true;
       } else {
         this.arrowup = false;
@@ -116,6 +166,9 @@ export default {
 };
 </script>
 <style lang="scss">
+.scroll-ing .scrolling-hide.float-right.position-center {
+    transform: translate(200%, -50%);
+}
 // @import "/@/assets/style/scss/common/common";
 .fixed-tool {
   position: fixed;
