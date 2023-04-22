@@ -9,22 +9,22 @@ const store = {
         name: 'web',
         isShowSign: true, //登录注册弹窗
         isLogin: false, // 是否已登录
-        WebData:{
-            webConfig:{
-                slider:{
-                    home:'',
-                    header:true
-                }
+        webConfig:{
+            slider:{
+                homeCon:{
+                    isShow:'',
+                    list:[]
+                },
+                headerSliderTop:{}
             },
-            slider:[],
             pageList:[]
-        } // 网站数据
+        }
     },
     mutations,
     actions,
     getters: {
         getWebData(state){
-            return state.WebData;
+            // return state.WebData;
             // state.WebData = storage.getItem('WebData');
         }
     }
