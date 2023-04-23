@@ -124,7 +124,7 @@
             </div>
         </div>
         <div class="article-content">
-            <div  v-html="ooppq"  @click="showCode($event)" class="theme-box lz-posts-content">
+            <div  v-html="ooppq"  @click="operateCode($event)" class="theme-box lz-posts-content">
             </div>
             <!--v-highlight <div class="theme-box lz-posts-content">
                 <p>使用WordPress建站，那么第三方登录肯定是必不可少的，子比主题支持丰富的社交帐号登录，当然少不了现在最常用的微信登录了，但是大家都知道，使用微信公众号登录需要认证的服务号，认证需要花费300元每年，而部分站长并没有服务号的需求，所以这个功能就不能使用了！</p>
@@ -300,12 +300,13 @@ let data={
         }
     }
 }
-let cont= ref("## 1.测试标题\n### 1.1测试标题\n### 1.2测试标题\n```javascript\nfunction $initHighlight(block, cls) {\ntry {\nif (cls.search(/\/bno\/-highlight\/b/) != -1)\nreturn process(block, true, 0x0F) +\n` class='${cls}''`;\n} catch (e) {\n/* handle exception */\n}\nfor (var i = 0 / 2; i < classes.length; i++) {\nif (checkCondition(classes[i]) === undefined)\nconsole.log('undefined');\n}\nreturn (\n<div>\n<web-component>{block}</web-component>\n</div>\n)\n}\nexport  $initHighlight;\n```\n## 2.测试标题\n### 2.1测试标题\n```javascript\nvar xx={\nxx:123,\ngg:6369\n}\n```\n#### 2.11你好\n#### 2.12你好")
+let cont= ref("## 1.测试标题\n### 1.1测试标题\n你好你好你好啊\n### 1.2测试标题\n你好你好你好啊\n```javascript\nfunction $initHighlight(block, cls) {\ntry {\n  if (cls.search(/\/bno\/-highlight\/b/) != -1)\nreturn process(block, true, 0x0F) +\n` class='${cls}''`;\n} catch (e) {\n/* handle exception */\n}\nfor (var i = 0 / 2; i < classes.length; i++) {\nif (checkCondition(classes[i]) === undefined)\nconsole.log('undefined');\n}\nreturn (\n<div>\n<web-component>{block}</web-component>\n</div>\n)\n}\nexport  $initHighlight;\n```\n## 2.测试标题\n### 2.1测试标题\n```javascript\nvar xx={\nxx:123,\ngg:6369\n}\n```\n#### 2.11你好\n你好你好你好啊\n#### 2.12你好\n**你好**你好你好啊\n")
 onMounted(()=>{
     console.log(toTree(getCatalog()))
 })
-const showCode=(e)=>{
-    // console.log(e.target.parentElement.nextElementSibling)
+
+const operateCode=(e)=>{
+    // console.log(e.target) // .parentElement.nextElementSibling
     if(Array.from(e.target.classList).includes('expand')){
         if(Array.from(e.target.classList).includes('closed')){
             e.target.classList.remove('closed');
@@ -314,8 +315,55 @@ const showCode=(e)=>{
             e.target.classList.add('closed');
             e.target.parentElement.nextElementSibling.style="display:none;"
         }
-    }
+    }else if(Array.from(e.target.classList).includes('copy-button')){
+        if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard
+            .writeText(e.target.parentElement.nextElementSibling.querySelector('.code pre').innerText)
+            .then(() => {
+                ElNotification.success({
+                    title: '温馨提示：',
+                    message: '代码复制成功',
+                    showClose: false,
+                })
+            })
+            .catch(() => {
+                ElNotification.success({
+                    title: '温馨提示：',
+                    message: '代码复制失败',
+                    showClose: false,
+                })
+            })
+    }else {
+        // 创建text area
+        const textArea = document.createElement('textarea');
+        textArea.value = e.target.parentElement.nextElementSibling.querySelector('.code pre').innerText;
+        // 使text area不在viewport，同时设置不可见
+        document.body.appendChild(textArea)
+        textArea.focus()
+        textArea.select()
+        return new Promise((resolve, reject) => {
+            // 执行复制命令并移除文本框
+            document.execCommand('copy') ? resolve() : reject(new Error('出错了'))
+            textArea.remove()
+        }).then(
+            () => {
+                ElNotification.success({
+                    title: '温馨提示：',
+                    message: '代码复制成功',
+                    showClose: false,
+                })
+            },
+            () => {
+                ElNotification.success({
+                    title: '温馨提示：',
+                    message: '代码复制失败',
+                    showClose: false,
+                })
+            }
+        )
+    }}
 }
+
 class MyRenderer extends marked.Renderer {
   code(code, language) {
     const validLang=!!(language && hljs.getLanguage(language));
@@ -353,11 +401,11 @@ let ooppq = computed(()=>{
 const getCatalog=()=>{
     // const h = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']
     let xx=document.querySelector('.lz-posts-content').querySelectorAll("h1,h2,h3,h4,h5,h6");
-    // console.log(typeof(xx))
+    // console.log(xx[0].innerText)
     let hEles = []
     xx.forEach((v,i)=>{
         // console.log(v.nodeName.slice(-1));
-        hEles.push({hLevel:v.nodeName.slice(-1)});
+        hEles.push({hLevel:v.nodeName.slice(-1),title:v.innerText});
     })
     // console.log(hEles)
     return hEles;
@@ -412,7 +460,7 @@ const toTree=(flatArr)=>{
         if(currentItem){
           result.push(currentItem); // 数据存在插入结果集
         }
-        continue; // 跳过当次循环,就不会执行下面的空数组了
+        continue; // 跳过当次循环,就不会执行下面的空数组赋值了
       }
     //   console.log('33223',children)
       currentItem.children = [];
@@ -423,7 +471,104 @@ const toTree=(flatArr)=>{
   getTree(tree, copyArr, 1);
 
   return tree;
+}
+const toTree1=(flatArr)=>{
+    var resultArr = []; // 结果集数组
+    var stack = []; // 栈数组
+    flatArr.forEach((levelItem, index) => {
+      levelItem.children = [];
+      if (resultArr.length == 0) { // 第一次循环时没有任何内容，则默认将第一个元素入栈
+        levelItem.parentCollector = resultArr; // 存储父级
 
+        stack.push(levelItem);
+        resultArr.push(levelItem);
+      } else {
+        let lastestLeveInStack = stack[stack.length - 1]; // 获取栈顶的元素，即最近如入栈的元素
+
+        if (lastestLeveInStack.hLevel < levelItem.hLevel) { // 遇到子级节点
+          levelItem.parentCollector = lastestLeveInStack.children;
+
+          stack.push(levelItem);
+          lastestLeveInStack.children.push(levelItem);
+        } else if (lastestLeveInStack.hLevel == levelItem.hLevel) {// 遇到同级节点
+          levelItem.parentCollector = lastestLeveInStack.parentCollector;
+
+          stack.push(levelItem); // 将当前元素入栈
+          lastestLeveInStack.parentCollector.push(levelItem);
+        } else {
+          let lastestLeveParentCollector = lastestLeveInStack.parentCollector;
+          let lastestLeveParentIndex = stack.findIndex(function (leveItem) {
+            return leveItem.children === lastestLeveParentCollector;
+          });
+
+          if (lastestLeveParentIndex > -1) {
+            // 栈顶节点的父级节点
+            let lastestLeveParent = stack[lastestLeveParentIndex];
+
+            if (lastestLeveParent.level < levelItem.level) { // 当前节点为栈顶节点父节点的子级
+              levelItem.parentCollector = lastestLeveParent.children;
+
+              lastestLeveParent.children.push(levelItem);
+              stack.push(levelItem);
+              return;
+            }
+
+            // 移除栈顶节点父级节点及其以后的所有节点
+            stack.splice(lastestLeveParentIndex);
+
+            if (stack.length == 0) { // 如果栈空了则该节点为顶层节点
+              levelItem.parentCollector = resultArr;
+
+              stack.push(levelItem);
+              resultArr.push(levelItem);
+              return;
+            }
+
+            lastestLeveInStack = stack[stack.length - 1];
+            lastestLeveParent = lastestLeveInStack.parentCollector;
+
+            if (lastestLeveInStack.level < levelItem.level) { // 当前节点为栈顶节点的子节点
+              levelItem.parentCollector = lastestLeveInStack.children;
+              stack.push(levelItem);
+              lastestLeveInStack.children.push(levelItem);
+            } else { // 当前节点为栈顶节点的兄弟节点
+              let lastestLeveParentCollector = lastestLeveInStack.parentCollector;
+              let collector = stack.find(function (leveItem) {
+                return leveItem.children === lastestLeveParentCollector;
+              });
+              // 如果栈顶节点的父级节点的级别比当前节点级别大，则继续往上查找
+              while (collector && collector.level >= levelItem.level) {
+                lastestLeveParentCollector = collector.parentCollector;
+                collector = stack.find(function (leveItem) {
+                  return leveItem.children === lastestLeveParentCollector;
+                });
+              }
+              if (!collector) {
+                levelItem.parentCollector = resultArr;
+                stack.push(levelItem);
+                resultArr.push(levelItem);
+              } else {
+                levelItem.parentCollector = collector.children;
+                collector.children.push(levelItem);
+                stack.push(levelItem);
+              }
+            }
+          } else {
+            console.log('kkkkkkkkkkkkkkk');
+          }
+        }
+      }
+    });
+    // 移除元素的parentCollector属性
+    flatArr.forEach(levelItem => {
+      if (levelItem.parentCollector) {
+        delete levelItem.parentCollector;
+      }
+      if (levelItem.children.length == 0) {
+        delete levelItem.children;
+      }
+    });
+    return resultArr;
 }
 </script>
 <style lang="scss">

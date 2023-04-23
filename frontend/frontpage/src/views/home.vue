@@ -14,9 +14,6 @@ import Articlemini from 'c/articlemini.vue'
 import Aggregation from 'c/aggregation.vue'
 import HomeTabCon from 'c/homeTabCon.vue'
 
-
-
-
 // import Test from '@/views/test.vue'
 import { reactive,watch, watchEffect,onMounted,getCurrentInstance } from 'vue'
 import { useStore } from "vuex";

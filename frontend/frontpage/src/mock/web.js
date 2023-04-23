@@ -58,7 +58,7 @@ export default[
             code: 20000,
             success: true,
             data: {
-              Logo: 'src/assets/image/web/ZIBLL-LOGO-精简-白天.svg',
+              Logo: 'src/assets/image/web/logo_夜间.png',
               notice:[
                 {
                   icon:'icon-point',
