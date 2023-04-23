@@ -10,7 +10,7 @@ import store from './store'
 import 'swiper/css';
 
 import SvgIcon from 'c/SvgIcon.vue'
-
+import Loading from './components/loading.vue';
 // 引入ElementPlus
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
@@ -40,6 +40,7 @@ app.directive('highlight',function (el) {
       hljs.highlightBlock(block)
     })
 })
+app.component('loading', Loading); // 注册全局loading组件
 // 全局挂载请求封装方法
 import request from './utils/request'
 app.config.globalProperties.$request = request;
