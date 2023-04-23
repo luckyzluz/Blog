@@ -92,7 +92,7 @@ watch(scrollTop, (newValue, oldValue) => {
 });
 // 统一监听
 watchEffect(() => {
-  if(state.isShowModalBackdrop){
+  if(state.isShowModalBackdrop||state.isLoading){
         document.body.classList.add('modal-open');
     }else{
       document.body.classList.remove('modal-open');
@@ -142,11 +142,13 @@ const cc=(value)=>{
   <headerSliderTop v-if="state.web.webConfig.slider.headerSliderTop.isShow&&(router.currentRoute.value.fullPath == '/')" />
   <!-- 公告 -->
   <FluidWidget/>
+  <loading v-show="state.isLoading"></loading>
   <!-- main -->
   <main class="container">
     <div class="content">
       <div class="content-layout">
-        <router-view></router-view>
+        <router-view>
+        </router-view>
       </div>
     </div>
     <aside v-if="true" class="sidebar">
