@@ -30,6 +30,7 @@ const store = createStore({
         name: 'allen',
         isShowModalBackdrop: false, //模态背景
         modulesKey:storage.getItem('modulesKey') || modulesKey,
+        isLoading:false
     },
     mutations,
     actions,
